@@ -3,12 +3,22 @@
 import React from 'react';
 import { Play, Check, Sparkles } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
+
+interface ExamData {
+  id: string;
+  title: string;
+  type: string;
+  durationMinutes: number;
+}
 
 interface EnglishTestHeroProps {
   title?: string;
+  examData?: ExamData | null;
 }
 
-const EnglishTestHero = ({ title = 'TOEFL' }: EnglishTestHeroProps) => {
+const EnglishTestHero = ({ title = 'TOEFL', examData }: EnglishTestHeroProps) => {
+  const duration = examData ? `${examData.durationMinutes} mins` : '120 mins';
   return (
     <section className="relative min-h-[600px] w-full bg-[#f8fbff] overflow-hidden py-20">
       {/* Background Decor (Sky & Clouds effect) */}
@@ -77,9 +87,11 @@ const EnglishTestHero = ({ title = 'TOEFL' }: EnglishTestHeroProps) => {
               <button className="flex items-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95">
                 Get Access <Sparkles size={18} fill="currentColor" />
               </button>
-              <button className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded-2xl border border-gray-100 shadow-sm transition-all active:scale-95">
-                Try Now
-              </button>
+              <Link href="/english-test/toefl/introduction">
+                <button className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded-2xl border border-gray-100 shadow-sm transition-all active:scale-95">
+                  Try Now
+                </button>
+              </Link>
             </div>
           </div>
 
@@ -97,9 +109,9 @@ const EnglishTestHero = ({ title = 'TOEFL' }: EnglishTestHeroProps) => {
 
               {/* Skills Icons */}
               <div className="flex justify-center gap-8 mb-12">
-                <SkillIcon label="Listening" duration="15 mins" color="bg-blue-500" />
-                <SkillIcon label="Structure" duration="15 mins" color="bg-blue-400" active />
-                <SkillIcon label="Reading" duration="15 mins" color="bg-blue-500" />
+                <SkillIcon label="Listening" duration={duration} color="bg-blue-500" />
+                <SkillIcon label="Structure" duration={duration} color="bg-blue-400" active />
+                <SkillIcon label="Reading" duration={duration} color="bg-blue-500" />
               </div>
 
               {/* Play Button */}

@@ -9,8 +9,7 @@ const navLinks = [
     hasDropdown: true,
     submenus: [
       { name: 'TOEFL', href: '/english-test/toefl' },
-      { name: 'IELTS', href: '/english-test/ielts' },
-      { name: 'Practice', href: '/english-test/practice' }
+      { name: 'IELTS', href: '/english-test/ielts' }
     ]
   },
   { 
@@ -48,10 +47,10 @@ const Navbar = () => {
       {/* Logo Section */}
       <Link href="/">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+        <div className="w-10 h-10 flex items-center justify-center">
           {/* Ganti dengan Logo SVG Elobright Anda */}
           <Image
-            src="/logo/logo.png"
+            src="/logo/logo-fixx.png"
             alt="Logo"
             width={60}
             height={60}

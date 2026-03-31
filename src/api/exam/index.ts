@@ -12,7 +12,12 @@ export const exam = {
   },
   
   sectionByExamId  : async (id: string) => {
-    const response = await api.get(`/exams/${id}`);
+    const response = await api.get(`exam-sections/exam/${id}`);
+    return response.data;
+  },
+
+  questionBySectionId: async (id: string) => {
+    const response = await api.get(`questions/section/${id}`);
     return response.data;
   }
 };
