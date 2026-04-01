@@ -31,69 +31,50 @@ const EnglishTestHero = ({ title = 'TOEFL', examData }: EnglishTestHeroProps) =>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-
-          {/* Left Content */}
-          <div className="space-y-8">
-            <div className="relative ps-[60px] inline-flex items-center gap-2 px-3 py-2 mb-8 bg-[#111] rounded-full border border-gray-800 shadow-2xl">
-              <div className="absolute left-0 -bottom-[1px] flex items-center justify-center">
-                <Image
-                  src="/logo/maskot.png"
-                  alt="Logo"
-                  width={60}
-                  height={60}
-                  className="object-contain"
-                />
-              </div>
-              <span className="text-white text-[11px] font-bold tracking-wide uppercase pr-1">
-                Advanced English Test
-              </span>
-            </div>
-
-            {/* Heading */}
-            <h1 className="text-6xl md:text-7xl font-extrabold text-slate-900 leading-[1.1] tracking-tight">
-              Free <span className="relative inline-block">
-                <span className="absolute inset-x-[-10px] inset-y-2 bg-blue-100 rounded-2xl -z-10" />
-                {title} English
-                {/* Eloo Tag */}
-                <span className="absolute -right-8 -top-4 bg-blue-500 text-[10px] text-white px-2 py-0.5 rounded-md font-black shadow-sm">
-                  Eloo
+          <div>
+            <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+              <div className="relative ps-[60px] inline-flex items-center gap-2 px-3 py-2 mb-8 bg-[#111] rounded-full border border-gray-800 shadow-2xl">
+                <div className="absolute left-0 -bottom-[1px] flex items-center justify-center">
+                  <Image
+                    src="/logo/maskot.png"
+                    alt="Logo"
+                    width={60}
+                    height={60}
+                    className="object-contain"
+                  />
+                </div>
+                <span className="text-white text-[11px] font-bold tracking-wide uppercase pr-1">
+                  Advanced English Test
                 </span>
-              </span> <br />
-              certification test
-            </h1>
-
-            <p className="text-xl text-slate-600 font-medium max-w-lg leading-relaxed">
-              Certify all your English skills at once: speaking, writing, listening and reading
-            </p>
-
-            {/* Features List */}
-            <div className="flex flex-wrap gap-6 text-slate-700 font-bold">
-              <div className="flex items-center gap-2">
-                <Check size={18} className="text-slate-400" strokeWidth={3} />
-                <span>It's Reliable</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Check size={18} className="text-slate-400" strokeWidth={3} />
-                <span>It's Accessible</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check size={18} className="text-slate-400" strokeWidth={3} />
-                <span>It's Free</span>
-              </div>
-            </div>
 
-            {/* CTA Buttons */}
-            <div className="flex items-center gap-4 pt-4">
-              <button className="flex items-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95">
-                Get Access <Sparkles size={18} fill="currentColor" />
-              </button>
-              <Link href="/english-test/toefl/introduction">
-                <button className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded-2xl border border-gray-100 shadow-sm transition-all active:scale-95">
-                  Try Now
+              {/* Heading */}
+              <h1 className="text-4xl md:text-7xl font-extrabold text-slate-900 leading-[1.1] tracking-tight text-center">
+                Free <span className="relative inline-block">
+                  <span className="text-3xl md:text-7xl absolute inset-x-[-10px] inset-y-2 bg-blue-100 rounded -z-10" />
+                  {title} English
+                  {/* Eloo Tag */}
+                  <span className="absolute -right-8 -top-4 bg-blue-500 text-[10px] text-white px-2 py-0.5 rounded-md font-black shadow-sm">
+                    Eloo
+                  </span>
+                </span> <br />
+                certification test
+              </h1>
+
+              {/* Sub-description */}
+              <p className="text-slate-700 md:text-xl font-semibold max-w-2xl mx-auto leading-relaxed mt-5">
+                Certify all your English skills at once: speaking, writing, listening and reading
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex items-center justify-center mt-10">
+                <button className="flex items-center justify-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95">
+                  Try Now <Sparkles size={18} fill="currentColor" />
                 </button>
-              </Link>
+              </div>
             </div>
           </div>
+          
 
           {/* Right Content: Test Preview Card */}
           <div className="relative group">
