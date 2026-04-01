@@ -1,5 +1,6 @@
 import React from 'react';
 import { Check } from 'lucide-react';
+import Image from 'next/image';
 
 const EloClubSection = () => {
   const benefits = [
@@ -56,8 +57,9 @@ const EloClubSection = () => {
             <div className="bg-gray-50 rounded-[40px] p-4 shadow-xl border border-gray-100">
               {/* Main Gray Placeholder Area */}
               <div className="aspect-video bg-[#C4C4C4] rounded-[32px] flex items-center justify-center relative overflow-hidden">
+                <Image src="/assets/banner-youtube.png" alt="" width={500} height={500} className="w-full h-full object-cover" />
                 {/* Play Button Overlay (Optional) */}
-                <div className="w-16 h-16 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center">
+                <div className="absolute z-10 w-16 h-16 bg-blue-500/50 backdrop-blur-md rounded-full flex items-center justify-center">
                   <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-white border-b-[10px] border-b-transparent ml-1" />
                 </div>
               </div>

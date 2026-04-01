@@ -43,8 +43,8 @@ const HeroSection = () => {
           </h1>
           <div className="relative inline-block mt-2">
             {/* Blue Highlight Overlay */}
-            <div className="absolute inset-x-[-15px] inset-y-1 bg-blue-400 rounded -z-10" />
-            <h2 className="text-6xl md:text-8xl font-bold text-white tracking-tight leading-none px-2">
+            <div className="absolute inset-x-[-15px] inset-y-1 bg-blue-300 rounded -z-10" />
+            <h2 className="italic text-6xl md:text-8xl font-bold text-white tracking-tight leading-none px-2">
               Courses
             </h2>
             {/* Eloo Tag */}

@@ -41,7 +41,7 @@ export default function FeaturedSection() {
                 <div className="absolute left-1/2 translate-x-[10%] bottom-2 w-32 h-44 bg-white/60 rounded-2xl rotate-[8deg]" />
                 {/* Main Paper */}
                 <div className="relative z-10 w-40 h-56 bg-white rounded-2xl shadow-xl flex flex-col p-6 text-left">
-                  <span className="text-gray-100 font-black text-3xl mb-4 italic tracking-widest">
+                  <span className="text-blue-200 font-black text-3xl mb-4 italic tracking-widest">
                     {test.type}
                   </span>
                   <div className="space-y-3">

@@ -13,7 +13,7 @@ export default function InfoSection({url}: {url: string}) {
             <div className="relative aspect-square rounded-[40px] bg-gradient-to-br from-blue-400 to-blue-50 overflow-hidden shadow-2xl shadow-blue-100 flex items-center justify-center p-12">
               {/* Decorative Paper Elements */}
               <div className="relative w-full h-full bg-white/40 backdrop-blur-sm rounded-3xl border border-white/50 shadow-inner flex flex-col p-8 space-y-4">
-                <div className="text-blue-200 font-black text-6xl tracking-tighter opacity-50">TOEFL</div>
+                <div className="text-blue-300 italic font-black text-6xl tracking-tighter">TOEFL</div>
                 <div className="h-2 w-3/4 bg-blue-100/50 rounded-full" />
                 <div className="h-2 w-full bg-blue-100/50 rounded-full" />
                 <div className="h-2 w-5/6 bg-blue-100/50 rounded-full" />
