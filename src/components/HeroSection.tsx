@@ -5,7 +5,7 @@ import React from 'react'
 
 const HeroSection = () => {
   return (
-    <section className="relative pt-16 pb-24 px-4 overflow-hidden">
+    <section className="relative pt-16 pb-24 px-4 overflow-hidden bg-white">
       {/* Decorative Background Blurs */}
       <div className="absolute top-0 left-0 -translate-x-1/2 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-20 right-0 translate-x-1/3 w-[400px] h-[400px] bg-blue-50 rounded-full blur-[100px] pointer-events-none" />

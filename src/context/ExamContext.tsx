@@ -16,7 +16,7 @@ export interface Question {
 export interface Section {
   id: string;
   examId: string;
-  name: string;       // e.g. "Reading", "Listening"
+  name: string;
   type: string;
   order: number;
   durationMinutes: number;

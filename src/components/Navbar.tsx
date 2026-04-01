@@ -1,5 +1,8 @@
+"use client";
+
+import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown, ArrowRight } from 'lucide-react';
+import { ChevronDown, ArrowRight, Menu, X } from 'lucide-react';
 import Image from 'next/image';
 
 const navLinks = [
@@ -42,8 +45,23 @@ const navLinks = [
 ];
 
 const Navbar = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const toggleDropdown = (name: string) => {
+    if (openDropdown === name) {
+      setOpenDropdown(null);
+    } else {
+      setOpenDropdown(name);
+    }
+  };
+
   return (
-    <nav className="sticky top-0 z-50 flex items-center justify-between px-8 py-4 bg-white/90 backdrop-blur-md transition-all">
+    <nav className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 bg-white backdrop-blur-md transition-all">
       {/* Logo Section */}
       <Link href="/">
       <div className="flex items-center gap-2">
@@ -63,7 +81,7 @@ const Navbar = () => {
       </div>
       </Link>
 
-      {/* Navigation Links */}
+      {/* Desktop Navigation Links */}
       <ul className="hidden md:flex items-center gap-8">
         {navLinks.map((link) => (
           <li key={link.name} className="relative group">
@@ -97,8 +115,8 @@ const Navbar = () => {
         ))}
       </ul>
 
-      {/* Auth Buttons */}
-      <div className="flex items-center gap-4">
+      {/* Desktop Auth Buttons */}
+      <div className="hidden md:flex items-center gap-4">
         <Link href="/signin">
           <button className="px-6 py-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 border border-gray-200 rounded-xl transition-all">
             Login
@@ -108,6 +126,79 @@ const Navbar = () => {
           Get Access
           <ArrowRight size={18} />
         </button>
+      </div>
+
+      {/* Mobile Menu Button (Burger Icon) */}
+      <div className="md:hidden flex items-center">
+        <button 
+          onClick={toggleMobileMenu} 
+          className="text-slate-700 hover:text-blue-600 focus:outline-none p-2 bg-slate-50 rounded-lg transition-colors border border-slate-100"
+          aria-label="Toggle menu"
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      <div 
+        className={`absolute top-full left-0 w-full bg-white border-b border-gray-100 shadow-xl transition-all duration-300 md:hidden z-40
+          ${isMobileMenuOpen ? 'max-h-[85vh] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'}
+        `}
+      >
+        <div className="flex flex-col px-6 py-4 space-y-2">
+          {navLinks.map((link) => (
+            <div key={link.name} className="flex flex-col border-b border-slate-50 last:border-none">
+              {link.hasDropdown ? (
+                <button
+                  onClick={() => toggleDropdown(link.name)}
+                  className="flex items-center justify-between py-3 text-[15px] font-medium text-slate-700 hover:text-blue-600"
+                >
+                  {link.name}
+                  <ChevronDown size={18} className={`text-slate-400 transition-transform duration-200 ${openDropdown === link.name ? 'rotate-180' : ''}`} />
+                </button>
+              ) : (
+                <Link
+                  href={link.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block py-3 text-[15px] font-medium text-slate-700 hover:text-blue-600"
+                >
+                  {link.name}
+                </Link>
+              )}
+              
+              {/* Mobile Submenu */}
+              {link.hasDropdown && link.submenus && (
+                <div className={`overflow-hidden transition-all duration-300 ${openDropdown === link.name ? "max-h-[500px]" : "max-h-0"}`}>
+                  <div className="flex flex-col pl-4 pb-2 space-y-1">
+                    {link.submenus.map((submenu, index) => (
+                      <Link
+                        key={index}
+                        href={submenu.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block py-2 text-sm text-slate-600 hover:text-blue-600"
+                      >
+                        {submenu.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Mobile Auth Buttons */}
+          <div className="flex flex-col gap-3 pt-6 pb-4">
+            <Link href="/signin" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
+              <button className="w-full py-2.5 text-[15px] font-semibold text-slate-700 border border-gray-200 hover:bg-slate-50 rounded-xl transition-all shadow-sm">
+                Login
+              </button>
+            </Link>
+            <button className="w-full flex items-center justify-center gap-2 py-2.5 text-[15px] font-semibold text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 rounded-xl shadow-md shadow-blue-100 transition-all">
+              Get Access
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
       </div>
     </nav>
   );
