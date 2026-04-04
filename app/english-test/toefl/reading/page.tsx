@@ -1,21 +1,25 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BookOpen, Timer } from 'lucide-react';
+import Link from 'next/link';
 
-function IntroductionPage({ onStart }: { onStart: () => void }) {
+export default function Page({ onStart }: { onStart: () => void }) {
   return (
     <div className='flex justify-center items-center min-h-screen'>
       <div className="absolute inset-0 z-0 flex flex-col">
-        <div className="h-1/2 bg-gradient-to-b from-blue-50/50 to-white" />
-        <div className="relative h-1/2 w-full bg-gradient-to-t from-blue-400 to-transparent">
+        <div className="relative top-0 bottom-0 bg-gradient-to-b from-blue-50/50 to-white" />
+
+        <div className="relative h-full w-full bg-gradient-to-t from-blue-300 to-white">
           <div
             className="absolute inset-0 opacity-20"
             style={{
               backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
-              backgroundSize: '40px 40px',
+              backgroundSize: '40px 40px'
             }}
           />
+
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_transparent_0%,_rgba(147,197,253,0.3)_100%)]" />
         </div>
       </div>
 
@@ -47,12 +51,14 @@ function IntroductionPage({ onStart }: { onStart: () => void }) {
             ))}
           </ul>
 
-          <button
-            onClick={onStart}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] text-lg"
-          >
-            Start
-          </button>
+
+          <Link href="/english-test/toefl/reading/exam" className='w-full'>
+            <button
+              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] text-lg"
+            >
+              Start
+            </button>
+          </Link>
         </div>
       </div>
     </div>
@@ -88,7 +94,7 @@ function ReadingTest() {
       {/* Header */}
       <header className="relative z-10 bg-white border-b-[3px] border-[#0080FF] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          
+
           {/* Section info */}
           <div className="flex items-center gap-3 w-48">
             <div className="text-[#0080FF]">
@@ -102,7 +108,7 @@ function ReadingTest() {
             <div className="w-full max-w-xl h-2.5 bg-[#E5F0FF] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#4080FF] rounded-full transition-all duration-500"
-                style={{ width: `${(16/35)*100}%` }}
+                style={{ width: `${(16 / 35) * 100}%` }}
               />
             </div>
             <span className="text-sm font-bold text-slate-800 whitespace-nowrap">
@@ -126,7 +132,7 @@ function ReadingTest() {
       {/* Main Content */}
       <main className="relative z-10 flex-1 flex items-center justify-center p-6 mt-4">
         <div className="w-full max-w-[52rem] bg-white rounded-3xl shadow-2xl shadow-blue-200/50 p-12 md:px-14 md:py-12">
-          
+
           {/* Question Tag */}
           <div className="mb-6">
             <span className="text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider bg-[#E5F0FF] text-[#0080FF]">
@@ -141,42 +147,41 @@ function ReadingTest() {
 
           {/* Options */}
           <div className="space-y-4 mb-12">
-             {options.map((opt) => {
-               const isSelected = selected === opt.id;
-               return (
-                 <label 
-                   key={opt.id}
-                   className={`flex items-center gap-4 px-6 py-4 rounded-xl border-2 cursor-pointer transition-all ${
-                     isSelected
-                       ? 'border-[#4080FF] bg-[#4080FF] text-white shadow-md'
-                       : 'border-slate-100 bg-white text-slate-700 hover:border-blue-200 relative z-10'
-                   }`}
-                 >
-                   <input
-                     type="radio"
-                     name="question"
-                     className="hidden"
-                     checked={isSelected}
-                     onChange={() => setSelected(opt.id)}
-                   />
-                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                     isSelected ? 'border-white' : 'border-slate-400'
-                   }`}>
-                     {isSelected && <div className="w-3 h-3 bg-white rounded-full" />}
-                   </div>
-                   <span className="font-semibold text-[15px]">{opt.label}</span>
-                 </label>
-               );
-             })}
+            {options.map((opt) => {
+              const isSelected = selected === opt.id;
+              return (
+                <label
+                  key={opt.id}
+                  className={`flex items-center gap-4 px-6 py-4 rounded-xl border-2 cursor-pointer transition-all ${isSelected
+                    ? 'border-[#4080FF] bg-[#4080FF] text-white shadow-md'
+                    : 'border-slate-100 bg-white text-slate-700 hover:border-blue-200 relative z-10'
+                    }`}
+                >
+                  <input
+                    type="radio"
+                    name="question"
+                    className="hidden"
+                    checked={isSelected}
+                    onChange={() => setSelected(opt.id)}
+                  />
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'border-white' : 'border-slate-400'
+                    }`}>
+                    {isSelected && <div className="w-3 h-3 bg-white rounded-full" />}
+                  </div>
+                  <span className="font-semibold text-[15px]">{opt.label}</span>
+                </label>
+              );
+            })}
           </div>
 
-          {/* Action Button */}
-          <div className="flex justify-center mt-6">
-            <button className="px-24 py-3.5 bg-[#0088FF] hover:bg-blue-600 text-white font-medium text-[16px] rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]">
-              Continue
-            </button>
-          </div>
-          
+          <Link href="/english-test/toefl/reading/exam">
+            <div className="flex justify-center mt-6">
+              <button className="px-24 py-3.5 bg-[#0088FF] hover:bg-blue-600 text-white font-medium text-[16px] rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]">
+                Continue
+              </button>
+            </div>
+          </Link>
+
         </div>
       </main>
 
@@ -190,16 +195,16 @@ function ReadingTest() {
   );
 }
 
-export default function ReadingPage() {
-  const [isStarted, setIsStarted] = useState(false);
+// export default function ReadingPage() {
+//   const [isStarted, setIsStarted] = useState(false);
 
-  return (
-    <>
-      {!isStarted ? (
-        <IntroductionPage onStart={() => setIsStarted(true)} />
-      ) : (
-        <ReadingTest />
-      )}
-    </>
-  );
-}
+//   return (
+//     <>
+//       {!isStarted ? (
+//         <IntroductionPage onStart={() => setIsStarted(true)} />
+//       ) : (
+//         <ReadingTest />
+//       )}
+//     </>
+//   );
+// }

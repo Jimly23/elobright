@@ -3,10 +3,10 @@
 import { useParams } from 'next/navigation';
 import Navbar from '@/src/components/Navbar'
 import FooterSection from '@/src/components/FooterSection'
-import HeroSection from '@/src/components/About/HeroSection';
 import { ArrowRight } from 'lucide-react';
 import FeaturedSection from '@/src/components/FeaturedSection';
 import NeedMoreTimeSection from '../../src/components/EnglishTest/NeedMoreTimeSection';
+import HeroSection from '@/src/components/About/HeroSection';
 
 
 const Page = () => {

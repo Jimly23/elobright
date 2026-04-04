@@ -112,10 +112,14 @@ const EnglishTestHero = ({ title = 'TOEFL', examData }: EnglishTestHeroProps) =>
             </div>
 
             {/* Small Brand Tag Overlay */}
-            <div className="absolute -top-4 -left-4 w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-              <div className="w-5 h-5 border-2 border-white rounded-md flex items-center justify-center rotate-45">
-                <div className="w-1.5 h-1.5 bg-white rounded-full" />
-              </div>
+            <div className="absolute -top-4 -left-4 w-10 h-10 bg-white rounded-xl flex items-center justify-center ">
+              <Image
+                src="/logo/logo-fixx.png"
+                alt="Logo"
+                width={100}
+                height={100}
+                className="object-contain"
+              />
             </div>
           </div>
 

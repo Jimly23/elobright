@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function AuthLayout({
   children,
@@ -7,7 +8,13 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen bg-white flex flex-col font-sans p-5 lg:p-10 lg:overflow-hidden overflow-auto">
+    <div className="h-screen bg-white flex flex-col font-sans p-5 lg:p-10 lg:overflow-hidden overflow-auto relative">
+      <Link href={'/'}>
+        <div className='absolute left-10 top-10 flex items-center gap-x-2'>
+          <Image src={'/logo/logo-icon.jpg'} width={100} height={100} alt='logo' className='w-10' />
+          <h2 className='text-xl  font-medium text-slate-600'>Elobright</h2>
+        </div>
+      </Link>
       <main className="flex-1 flex flex-col lg:flex-row items-center justify-center px-6 md:px-20 gap-16 lg:gap-24">
         {/* Left Side: Form Content (from page) */}
         <div className="w-full max-w-md">
@@ -55,7 +62,7 @@ export default function AuthLayout({
         </div>
         <div className="flex items-center gap-1 cursor-pointer hover:text-slate-900 transition-colors">
           <span>English</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
         </div>
       </footer>
     </div>

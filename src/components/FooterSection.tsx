@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Facebook, Instagram, Linkedin } from 'lucide-react';
+import Image from 'next/image';
 
 // Custom X (Twitter) Icon Component
 const XIcon = ({ size = 20 }: { size?: number }) => (
@@ -16,15 +17,10 @@ export default function FooterSection() {
     <footer className="bg-white pt-20 pb-10 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-start gap-12">
-          
-          {/* Brand & Heading Section */}
           <div className="max-w-md space-y-6">
             <div className="flex items-center gap-2">
-              {/* Logo Icon */}
-              <div className="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 border-2 border-white rounded-sm rotate-45 flex items-center justify-center">
-                   <div className="w-1 h-1 bg-white rounded-full" />
-                </div>
+              <div className="w-9 h-9 flex items-center justify-center">
+                <Image src="/logo/logo-icon.jpg" alt="Logo" width={100} height={100} />
               </div>
               <span className="text-xl font-bold text-slate-900 tracking-tight">Elobright</span>
             </div>
@@ -32,7 +28,7 @@ export default function FooterSection() {
             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 leading-tight tracking-tight">
               English testing for <br />
               <span className="relative inline-block mt-2">
-                <span className="absolute inset-x-[-8px] inset-y-1 bg-blue-100 rounded-xl" />
+                <span className="absolute inset-x-[-8px] inset-y-1 bg-blue-100 rounded" />
                 <span className="relative">everyone</span>
                 {/* Eloo Tag */}
                 <span className="absolute -right-8 -top-3 bg-blue-500 text-[9px] text-white px-1.5 py-0.5 rounded-md font-black shadow-sm">
