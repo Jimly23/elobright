@@ -9,27 +9,31 @@ import TakeTestSection from '@/src/components/EnglishTest/TakeTestSection';
 import NeedMoreTimeSection from '@/src/components/EnglishTest/NeedMoreTimeSection';
 import { exam } from '@/src/api/exam';
 
-const TOEFL_ID = '11111111-0000-0000-0000-000000000001';
+const TOEFL_ID = '11111111-0000-4000-8000-000000000001';
 
 const Page = () => {
   const [examData, setExamData] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchExam = async () => {
-  //     try {
-  //       const data = await exam.examById(TOEFL_ID);
-  //       console.log('examById (TOEFL) response:', data);
-  //       setExamData(data);
+  useEffect(() => {
+    const fetchExam = async () => {
+      try {
+        // Mengambil token dari cookie
+        const tokenStr = document.cookie.split('; ').find(row => row.startsWith('token='));
+        const token = tokenStr ? tokenStr.split('=')[1] : undefined;
 
-  //       const sections = await exam.sectionByExamId(TOEFL_ID);
-  //       console.log('sectionByExamId (TOEFL) response:', sections);
-  //     } catch (error) {
-  //       console.error('examById (TOEFL) error:', error);
-  //     }
-  //   };
+        const data = await exam.examById(TOEFL_ID, token);
+        console.log('examById (TOEFL) response:', data);
+        setExamData(data);
 
-  //   fetchExam();
-  // }, []);
+        const sections = await exam.sectionByExamId(TOEFL_ID, token);
+        console.log('sectionByExamId (TOEFL) response:', sections);
+      } catch (error) {
+        console.error('examById (TOEFL) error:', error);
+      }
+    };
+
+    fetchExam();
+  }, []);
 
   return (
     <>

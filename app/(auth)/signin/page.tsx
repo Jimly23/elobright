@@ -25,8 +25,11 @@ export default function SignInPage() {
     try {
       const response = await authService.login(formData);
 
-      // Simpan token ke localStorage
+      // Simpan token ke cookie
       if (response.token) {
+        document.cookie = `token=${response.token}; path=/; max-age=86400; SameSite=Lax`;
+        
+        // Tetap simpan di localStorage jika aplikasi masih membutuhkan
         localStorage.setItem('token', response.token);
       }
 

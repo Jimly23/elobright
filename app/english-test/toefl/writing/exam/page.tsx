@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PenTool, Clock } from 'lucide-react';
+import EnglishTestNavbar from '@/src/components/EnglishTest/EnglishTestNavbar';
 
 export default function WritingTestPage() {
   const [text, setText] = useState("");
@@ -28,36 +29,7 @@ export default function WritingTestPage() {
       </div>
 
       {/* Header Navigation */}
-      <header className="relative z-10 bg-white border-b border-slate-100 px-6 py-4 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Section Info */}
-          <div className="flex items-center gap-3">
-            <div className="text-blue-600 bg-blue-50 p-2 rounded-lg">
-              <PenTool size={20} />
-            </div>
-            <span className="font-bold text-slate-800 text-lg">Writing</span>
-          </div>
-
-          {/* Progress Bar Group */}
-          <div className="flex-1 max-w-2xl mx-8 flex items-center gap-4">
-            <div className="flex-1 h-2.5 bg-blue-50 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 rounded-full w-[45.7%]" />
-            </div>
-            <span className="text-sm font-bold text-slate-500">16/35</span>
-          </div>
-
-          {/* Timer Group */}
-          <div className="flex items-center gap-3 border-l pl-6 border-slate-200">
-            <div className="text-blue-500">
-              <Clock size={24} />
-            </div>
-            <div className="flex flex-col items-start leading-none">
-              <span className="text-base font-black text-slate-800">16.43 min</span>
-              <span className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">time left</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <EnglishTestNavbar />
 
       {/* Main Content Area */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6">

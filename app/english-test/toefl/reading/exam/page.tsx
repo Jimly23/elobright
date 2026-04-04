@@ -1,21 +1,110 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BookOpen, Clock, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import EnglishTestNavbar from '@/src/components/EnglishTest/EnglishTestNavbar';
+import { exam } from '@/src/api/exam';
+
+const TOEFL_ID = '11111111-0000-4000-8000-000000000001';
 
 export default function Page() {
-  const [selectedOption, setSelectedOption] = useState<string | null>('stunning');
+  const router = useRouter();
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [options, setOptions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  const options = [
-    { id: 'suitable', label: 'suitable' },
-    { id: 'stunning', label: 'stunning' },
-    { id: 'marvelous', label: 'marvelous' },
-    { id: 'miraculous', label: 'miraculous' },
-  ];
+  const getCookie = (name: string) => {
+    if (typeof document === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift();
+    return null;
+  };
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const token = getCookie('token') || '';
+        const sections = await exam.sectionByExamId(TOEFL_ID, token);
+        const readingSection = sections.find((s: any) => s.title.toLowerCase().includes('reading')) || sections[0];
+        
+        if (readingSection) {
+          const qs = await exam.questionBySectionId(readingSection.id, token);
+          setQuestions(qs);
+        }
+      } catch(e) {
+        console.error('Failed to fetch reading questions', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuestions();
+  }, []);
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      if (questions.length === 0) return;
+      const q = questions[currentQuestionIndex];
+      if (q) {
+        if (q.options && q.options.length > 0) {
+          setOptions(q.options);
+        } else {
+          try {
+            const token = getCookie('token') || '';
+            const opts = await exam.getOptionsByQuestionIdAttempt(q.id, token);
+            setOptions(opts);
+          } catch(e) {
+            console.error('Failed to fetch options', e);
+          }
+        }
+      }
+    };
+    fetchOptions();
+  }, [currentQuestionIndex, questions]);
+
+  const handleContinue = async () => {
+    if (!selectedOption) return; // Cegah lanjut kalau belum milih jawaban
+    setSubmitting(true);
+    
+    try {
+      const sessionId = localStorage.getItem('currentExamSessionId');
+      const token = getCookie('token') || '';
+      
+      if (sessionId && questions[currentQuestionIndex]) {
+        await exam.recordAnswerMCQ(sessionId, {
+          questionId: questions[currentQuestionIndex].id,
+          selectedOptionId: selectedOption
+        }, token);
+      }
+      
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setSelectedOption(null);
+      } else {
+        // Kalau udah habis, ke listening
+        router.push('/english-test/toefl/listening');
+      }
+    } catch(e) {
+      console.error('Error submitting answer:', e);
+      // Fallback buat test
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setSelectedOption(null);
+      } else {
+        router.push('/english-test/toefl/listening');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen relative flex flex-col font-sans overflow-hidden bg-white">
-      {/* Background Layer: Gradient & Grid (Konsisten dengan desain Elobright) */}
+      {/* Background Layer: Gradient & Grid */}
       <div className="absolute inset-0 z-0 flex flex-col">
         <div className="h-1/2 bg-white" />
         <div className="relative h-1/2 w-full bg-gradient-to-t from-blue-400 to-transparent">
@@ -30,39 +119,7 @@ export default function Page() {
       </div>
 
       {/* Header / Test Navigation Bar */}
-      <header className="relative z-10 bg-white border-b border-slate-100 px-6 py-4 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Section Info */}
-          <div className="flex items-center gap-3">
-            <div className="text-blue-600 bg-blue-50 p-2 rounded-lg">
-              <BookOpen size={20} />
-            </div>
-            <span className="font-bold text-slate-800">Reading</span>
-          </div>
-
-          {/* Progress Bar Group */}
-          <div className="flex-1 max-w-2xl mx-8 flex items-center gap-4">
-            <div className="flex-1 h-2.5 bg-blue-50 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-blue-500 rounded-full transition-all duration-500" 
-                style={{ width: '45.7%' }} 
-              />
-            </div>
-            <span className="text-sm font-bold text-slate-500 whitespace-nowrap">16/35</span>
-          </div>
-
-          {/* Timer Group */}
-          <div className="flex items-center gap-3 border-l pl-6 border-slate-200">
-            <div className="text-blue-500">
-              <Clock size={24} />
-            </div>
-            <div className="flex flex-col items-start leading-none">
-              <span className="text-base font-black text-slate-800">16.43 min</span>
-              <span className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">time left</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <EnglishTestNavbar />
 
       {/* Main Content Area */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6">
@@ -71,18 +128,18 @@ export default function Page() {
           {/* Question Number Badge */}
           <div className="mb-10">
             <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-4 py-2 rounded-full uppercase tracking-[0.15em] border border-blue-100">
-              Question 01
+              Question {currentQuestionIndex + 1 < 10 ? `0${currentQuestionIndex + 1}` : currentQuestionIndex + 1}
             </span>
           </div>
 
           {/* Question Text */}
           <h2 className="text-xl md:text-2xl font-medium text-slate-700 leading-relaxed mb-12">
-            She is a ______ best grades of her class. student who always has the She is a best grades of her class. student who always has the
+            {loading ? 'Loading question...' : (questions[currentQuestionIndex]?.questionText || 'No question found.')}
           </h2>
 
           {/* Options Grid */}
           <div className="space-y-4 mb-12">
-            {options.map((option) => (
+            {!loading && options.map((option) => (
               <label
                 key={option.id}
                 className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
@@ -107,7 +164,7 @@ export default function Page() {
                 </div>
 
                 <span className={`text-lg font-bold ${selectedOption === option.id ? 'text-white' : 'text-slate-600'}`}>
-                  {option.label}
+                  {option.optionText || option.label}
                 </span>
               </label>
             ))}
@@ -115,8 +172,12 @@ export default function Page() {
 
           {/* Action Button */}
           <div className="flex justify-center">
-            <button className="px-16 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300">
-              Continue
+            <button 
+              onClick={handleContinue}
+              disabled={!selectedOption || submitting}
+              className="px-16 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100"
+            >
+              {submitting ? 'Submitting...' : 'Continue'}
             </button>
           </div>
         </div>
