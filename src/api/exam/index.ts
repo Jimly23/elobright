@@ -114,6 +114,10 @@ export const examService = {
     const response = await api.post(`/exam-sessions/${sessionId}/answers`, data, getConfig(token));
     return response.data;
   },
+  recordAnswerEssay: async (sessionId: string, data: { questionId: string; textResponse: string }, token?: string) => {
+    const response = await api.post(`/exam-sessions/${sessionId}/answers`, data, getConfig(token));
+    return response.data;
+  },
   recordAnswerSpeaking: async (sessionId: string, formData: FormData, token?: string) => {
     const response = await api.post(`/exam-sessions/${sessionId}/answers`, formData, getConfig(token, true));
     return response.data;

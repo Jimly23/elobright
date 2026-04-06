@@ -29,8 +29,16 @@ export default function SignInPage() {
       if (response.token) {
         document.cookie = `token=${response.token}; path=/; max-age=86400; SameSite=Lax`;
         
+        if (response.user && response.user.id) {
+          document.cookie = `userId=${response.user.id}; path=/; max-age=86400; SameSite=Lax`;
+        }
+
         // Tetap simpan di localStorage jika aplikasi masih membutuhkan
         localStorage.setItem('token', response.token);
+        
+        if (response.user && response.user.id) {
+          localStorage.setItem('userId', response.user.id.toString());
+        }
       }
 
       // Redirect ke halaman utama setelah login berhasil

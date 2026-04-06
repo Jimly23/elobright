@@ -34,7 +34,7 @@ export default function Page({ onStart }: { onStart: () => void }) {
           <div className={`w-20 h-20 bg-blue-500 text-white rounded-full flex items-center justify-center mb-4 shadow-xl shadow-blue-100`}>
             <BookOpen size={28} />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-800 mb-1">Reading</h2>
+          <h2 className="text-2xl font-extrabold text-slate-800 mb-1">Listening</h2>
           <p className="text-slate-400 text-sm mb-1">15 mins</p>
           <p className="text-slate-400 text-sm mb-10">10 questions</p>
 

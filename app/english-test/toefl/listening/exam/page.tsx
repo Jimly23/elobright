@@ -95,7 +95,7 @@ export default function Page() {
         setCurrentQuestionIndex(prev => prev + 1);
         setSelectedOption(null);
       } else {
-        router.push('/english-test/toefl/writing/exam');
+        router.push('/english-test/toefl/writing');
       }
     } catch(e) {
       console.error('Error submitting answer:', e);
@@ -104,7 +104,7 @@ export default function Page() {
         setCurrentQuestionIndex(prev => prev + 1);
         setSelectedOption(null);
       } else {
-        router.push('/english-test/toefl/writing/exam');
+        router.push('/english-test/toefl/writing');
       }
     } finally {
       setSubmitting(false);

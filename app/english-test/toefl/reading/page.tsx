@@ -23,11 +23,15 @@ export default function Page({ onStart }: { onStart: () => void }) {
     setLoading(true);
     try {
       const token = getCookie('token') || '';
-      let userId: string | number = 1;
-      if (token) {
+      const rawUserId = getCookie('userId') || localStorage.getItem('userId');
+      
+      let parsedUserId = rawUserId ? parseInt(rawUserId, 10) : 1;
+      let userId: string | number = (rawUserId && isNaN(parsedUserId)) ? rawUserId : parsedUserId;
+      
+      if (token && !rawUserId) {
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
-          userId = payload.userId;
+          if (payload.userId) userId = payload.userId;
         } catch (e) {}
       }
 
