@@ -113,10 +113,10 @@ export default function Page() {
 
   return (
     <div className="min-h-screen relative flex flex-col font-sans overflow-hidden bg-white">
-      {/* Background Layer */}
       <div className="absolute inset-0 z-0 flex flex-col">
-        <div className="h-1/2 bg-white" />
-        <div className="relative h-1/2 w-full bg-gradient-to-t from-blue-400 to-transparent">
+        <div className="relative top-0 bottom-0 bg-gradient-to-b from-blue-50/50 to-white" />
+
+        <div className="relative h-full w-full bg-gradient-to-t from-blue-300 to-white">
           <div
             className="absolute inset-0 opacity-20"
             style={{
@@ -124,6 +124,8 @@ export default function Page() {
               backgroundSize: '40px 40px'
             }}
           />
+
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_transparent_0%,_rgba(147,197,253,0.3)_100%)]" />
         </div>
       </div>
 
@@ -131,7 +133,7 @@ export default function Page() {
       <EnglishTestNavbar />
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 flex items-center justify-center p-6">
+      <main className="relative mt-20 z-10 flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-5xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 border border-slate-50 flex flex-col md:flex-row overflow-hidden min-h-[500px]">
 
           {/* Left Side: Audio Player & Instruction */}

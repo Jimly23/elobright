@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ChevronDown, ArrowRight, Menu, X } from 'lucide-react';
 import Image from 'next/image';
 
@@ -47,6 +48,29 @@ const navLinks = [
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    // Clear tokens
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    document.cookie = 'token=; path=/; max-age=0; SameSite=Lax';
+    document.cookie = 'userId=; path=/; max-age=0; SameSite=Lax';
+    setIsLoggedIn(false);
+    
+    // Redirect to home or refresh
+    router.push('/signin');
+    router.refresh();
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -117,15 +141,26 @@ const Navbar = () => {
 
       {/* Desktop Auth Buttons */}
       <div className="hidden md:flex items-center gap-4">
-        <Link href="/signin">
-          <button className="px-6 py-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 border border-gray-200 rounded-xl transition-all">
-            Login
+        {!isLoggedIn ? (
+          <>
+            <Link href="/signin">
+              <button className="px-6 py-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 border border-gray-200 rounded-xl transition-all">
+                Login
+              </button>
+            </Link>
+            <button className="flex items-center gap-2 px-6 py-2 text-[15px] font-semibold text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 rounded-xl shadow-md shadow-blue-100 transition-all">
+              Get Access
+              <ArrowRight size={18} />
+            </button>
+          </>
+        ) : (
+          <button 
+            onClick={handleLogout}
+            className="px-6 py-2 text-[15px] font-semibold text-red-600 hover:bg-red-50 border border-red-200 rounded-xl transition-all"
+          >
+            Logout
           </button>
-        </Link>
-        <button className="flex items-center gap-2 px-6 py-2 text-[15px] font-semibold text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 rounded-xl shadow-md shadow-blue-100 transition-all">
-          Get Access
-          <ArrowRight size={18} />
-        </button>
+        )}
       </div>
 
       {/* Mobile Menu Button (Burger Icon) */}
@@ -188,15 +223,29 @@ const Navbar = () => {
 
           {/* Mobile Auth Buttons */}
           <div className="flex flex-col gap-3 pt-6 pb-4">
-            <Link href="/signin" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
-              <button className="w-full py-2.5 text-[15px] font-semibold text-slate-700 border border-gray-200 hover:bg-slate-50 rounded-xl transition-all shadow-sm">
-                Login
+            {!isLoggedIn ? (
+              <>
+                <Link href="/signin" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
+                  <button className="w-full py-2.5 text-[15px] font-semibold text-slate-700 border border-gray-200 hover:bg-slate-50 rounded-xl transition-all shadow-sm">
+                    Login
+                  </button>
+                </Link>
+                <button className="w-full flex items-center justify-center gap-2 py-2.5 text-[15px] font-semibold text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 rounded-xl shadow-md shadow-blue-100 transition-all">
+                  Get Access
+                  <ArrowRight size={18} />
+                </button>
+              </>
+            ) : (
+              <button 
+                onClick={() => {
+                  handleLogout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full py-2.5 text-[15px] font-semibold text-red-600 border border-red-200 hover:bg-red-50 rounded-xl transition-all shadow-sm"
+              >
+                Logout
               </button>
-            </Link>
-            <button className="w-full flex items-center justify-center gap-2 py-2.5 text-[15px] font-semibold text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 rounded-xl shadow-md shadow-blue-100 transition-all">
-              Get Access
-              <ArrowRight size={18} />
-            </button>
+            )}
           </div>
         </div>
       </div>

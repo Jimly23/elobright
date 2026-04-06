@@ -41,6 +41,8 @@ export default function Page({ onStart }: { onStart: () => void }) {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
       }, token);
 
+      console.log(res);
+
       if (res && res.id) {
         localStorage.setItem('currentExamSessionId', res.id);
       }

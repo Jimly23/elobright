@@ -4,7 +4,7 @@ import { BookOpen, Timer } from "lucide-react";
 
 export default function EnglishTestNavbar() {
     return (
-        <header className="relative z-10 bg-white border-b border-slate-100 px-6 py-4">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 px-6 py-4">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
 
                 {/* Section info */}

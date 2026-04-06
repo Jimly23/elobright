@@ -104,10 +104,10 @@ export default function Page() {
 
   return (
     <div className="min-h-screen relative flex flex-col font-sans overflow-hidden bg-white">
-      {/* Background Layer: Gradient & Grid */}
       <div className="absolute inset-0 z-0 flex flex-col">
-        <div className="h-1/2 bg-white" />
-        <div className="relative h-1/2 w-full bg-gradient-to-t from-blue-400 to-transparent">
+        <div className="relative top-0 bottom-0 bg-gradient-to-b from-blue-50/50 to-white" />
+
+        <div className="relative h-full w-full bg-gradient-to-t from-blue-300 to-white">
           <div
             className="absolute inset-0 opacity-20"
             style={{
@@ -115,6 +115,8 @@ export default function Page() {
               backgroundSize: '40px 40px'
             }}
           />
+
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_transparent_0%,_rgba(147,197,253,0.3)_100%)]" />
         </div>
       </div>
 
@@ -122,27 +124,27 @@ export default function Page() {
       <EnglishTestNavbar />
 
       {/* Main Content Area */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-50">
+      <main className="relative z-10 mt-20 flex-1 flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-2xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-50">
           
           {/* Question Number Badge */}
-          <div className="mb-10">
+          <div className="mb-5">
             <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-4 py-2 rounded-full uppercase tracking-[0.15em] border border-blue-100">
               Question {currentQuestionIndex + 1 < 10 ? `0${currentQuestionIndex + 1}` : currentQuestionIndex + 1}
             </span>
           </div>
 
           {/* Question Text */}
-          <h2 className="text-xl md:text-2xl font-medium text-slate-700 leading-relaxed mb-12">
+          <h2 className="text-xl md:text-2xl font-medium text-slate-700 leading-relaxed mb-5">
             {loading ? 'Loading question...' : (questions[currentQuestionIndex]?.questionText || 'No question found.')}
           </h2>
 
           {/* Options Grid */}
-          <div className="space-y-4 mb-12">
+          <div className="space-y-4 mb-5">
             {!loading && options.map((option) => (
               <label
                 key={option.id}
-                className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
+                className={`flex items-center gap-4 py-3 px-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
                   selectedOption === option.id
                     ? 'border-blue-500 bg-blue-500 text-white shadow-lg shadow-blue-100'
                     : 'border-slate-100 bg-white text-slate-600 hover:border-blue-200 hover:bg-slate-50'
@@ -163,7 +165,7 @@ export default function Page() {
                   {selectedOption === option.id && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />}
                 </div>
 
-                <span className={`text-lg font-bold ${selectedOption === option.id ? 'text-white' : 'text-slate-600'}`}>
+                <span className={`font-bold ${selectedOption === option.id ? 'text-white' : 'text-slate-600'}`}>
                   {option.optionText || option.label}
                 </span>
               </label>
