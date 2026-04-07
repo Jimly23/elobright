@@ -13,7 +13,8 @@ const navLinks = [
     hasDropdown: true,
     submenus: [
       { name: 'TOEFL', href: '/english-test/toefl' },
-      { name: 'IELTS', href: '/english-test/ielts' }
+      { name: 'IELTS', href: '/english-test/ielts' },
+      { name: 'Essay Practice', href: '/english-test/essay-practice' }
     ]
   },
   { 
