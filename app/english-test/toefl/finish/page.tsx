@@ -11,6 +11,7 @@ export default function FinishTestPage() {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
+  const effectRan = React.useRef(false);
 
   const getCookie = (name: string) => {
     if (typeof document === 'undefined') return null;
@@ -21,9 +22,12 @@ export default function FinishTestPage() {
   };
 
   useEffect(() => {
+    if (effectRan.current) return;
+    
     const finishExamAndGetResult = async () => {
       try {
         const sessionId = localStorage.getItem('currentExamSessionId');
+        console.log("Session ID:", sessionId);
         const token = getCookie('token') || '';
 
         if (!sessionId) {
@@ -32,9 +36,11 @@ export default function FinishTestPage() {
           return;
         }
 
+        effectRan.current = true;
+
         // Call the finish API
         const response = await exam.finishExam(sessionId, token);
-        setResult(response.session);
+        setResult(response.session || response.data || response);
         
         // Bersihkan session ID dari localStorage
         localStorage.removeItem('currentExamSessionId');

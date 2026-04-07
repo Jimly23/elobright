@@ -23,34 +23,31 @@ export default function Page({ onStart }: { onStart: () => void }) {
     setLoading(true);
     try {
       const token = getCookie('token') || '';
-      const rawUserId = getCookie('userId') || localStorage.getItem('userId');
+      const cookieUserId = getCookie('userId');
       
-      let parsedUserId = rawUserId ? parseInt(rawUserId, 10) : 1;
-      let userId: string | number = (rawUserId && isNaN(parsedUserId)) ? rawUserId : parsedUserId;
-      
-      if (token && !rawUserId) {
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          if (payload.userId) userId = payload.userId;
-        } catch (e) {}
-      }
+      const userId = cookieUserId ? parseInt(cookieUserId, 10) : 2;
 
       const res = await exam.startExam({
-        userId,
+        userId: userId,
         examId: TOEFL_ID,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
+        timezone: 'Asia/Jakarta'
       }, token);
 
-      console.log(res);
-
-      if (res && res.id) {
-        localStorage.setItem('currentExamSessionId', res.id);
+      if (res && res.session) {
+        if (res.session.id) localStorage.setItem('currentExamSessionId', res.session.id);
+        if (res.session.endTimeLimit) localStorage.setItem('currentExamEndTimeLimit', res.session.endTimeLimit);
+        if (res.session.endTimeLocale) localStorage.setItem('currentExamEndTimeLocale', res.session.endTimeLocale);
       }
 
       router.push('/english-test/toefl/reading/exam');
-    } catch (e) {
-      console.error('Failed to start exam:', e);
-      router.push('/english-test/toefl/reading/exam');
+    } catch (e: any) {
+      console.error('Failed to start exam:', e.response?.data || e);
+      if (e.response?.data) {
+        alert('Gagal memulai exam: ' + JSON.stringify(e.response.data));
+      } else {
+        alert('Gagal memulai exam: ' + e.message);
+      }
+      // router.push('/english-test/toefl/reading/exam'); // we can comment this out so it doesn't navigate if there's an error
     } finally {
       setLoading(false);
     }

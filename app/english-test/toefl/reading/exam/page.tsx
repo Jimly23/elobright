@@ -120,26 +120,24 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Header / Test Navigation Bar */}
-      <EnglishTestNavbar />
+      <EnglishTestNavbar 
+        sectionName="Reading" 
+        currentQuestion={currentQuestionIndex + 1} 
+        totalQuestions={questions.length} 
+      />
 
-      {/* Main Content Area */}
       <main className="relative z-10 mt-20 flex-1 flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-2xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-50">
           
-          {/* Question Number Badge */}
           <div className="mb-5">
             <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-4 py-2 rounded-full uppercase tracking-[0.15em] border border-blue-100">
               Question {currentQuestionIndex + 1 < 10 ? `0${currentQuestionIndex + 1}` : currentQuestionIndex + 1}
             </span>
           </div>
 
-          {/* Question Text */}
           <h2 className="text-xl md:text-2xl font-medium text-slate-700 leading-relaxed mb-5">
             {loading ? 'Loading question...' : (questions[currentQuestionIndex]?.questionText || 'No question found.')}
           </h2>
-
-          {/* Options Grid */}
           <div className="space-y-4 mb-5">
             {!loading && options.map((option) => (
               <label
@@ -158,7 +156,6 @@ export default function Page() {
                   onChange={() => setSelectedOption(option.id)}
                 />
                 
-                {/* Custom Radio Circle */}
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                    selectedOption === option.id ? 'border-white bg-white text-blue-500' : 'border-slate-300 bg-white'
                 }`}>
@@ -172,7 +169,6 @@ export default function Page() {
             ))}
           </div>
 
-          {/* Action Button */}
           <div className="flex justify-center">
             <button 
               onClick={handleContinue}
