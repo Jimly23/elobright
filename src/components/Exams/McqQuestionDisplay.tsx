@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { exam } from '@/src/api/exam';
+import QuestionFeaturedResources from '@/src/components/Exams/QuestionFeaturedResources';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -71,13 +72,15 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext }: M
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 mt-20 relative z-10 w-full">
-      <div className="w-full max-w-2xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-50">
+      <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-50">
         
         <div className="mb-5">
           <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-4 py-2 rounded-full uppercase tracking-[0.15em] border border-blue-100">
             Question {currentIndex + 1 < 10 ? `0${currentIndex + 1}` : currentIndex + 1}
           </span>
         </div>
+
+        <QuestionFeaturedResources imageUrl={question.imageUrl} narrativeText={question.narrativeText} />
 
         <h2 className="text-xl md:text-2xl font-medium text-slate-700 leading-relaxed mb-5">
           {question.questionText || 'No question found.'}

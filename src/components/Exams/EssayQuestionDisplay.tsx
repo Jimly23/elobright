@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { exam } from '@/src/api/exam';
+import QuestionFeaturedResources from '@/src/components/Exams/QuestionFeaturedResources';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -58,6 +59,8 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext }:
             Question {currentIndex + 1 < 10 ? `0${currentIndex + 1}` : currentIndex + 1}
           </span>
         </div>
+
+        <QuestionFeaturedResources imageUrl={question.imageUrl} narrativeText={question.narrativeText} />
 
         {/* Question Text */}
         <h2 className="text-xl md:text-2xl font-medium text-slate-700 text-center leading-relaxed mb-12">

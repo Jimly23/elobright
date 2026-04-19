@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { Mic, Upload, StopCircle, Trash2, Send, Volume2 } from 'lucide-react';
 import { exam } from '@/src/api/exam';
+import QuestionFeaturedResources from '@/src/components/Exams/QuestionFeaturedResources';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -87,12 +88,16 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 mt-8 relative z-10 w-full">
-      <div className="w-full max-w-3xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-12 border border-slate-50 text-center">
+      <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-12 border border-slate-50 text-center">
         
-        <div className="mb-6">
+        <div className="mb-6 flex justify-center">
           <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-5 py-2 rounded-full uppercase tracking-[0.2em] border border-blue-100">
             Question {currentIndex + 1 < 10 ? `0${currentIndex + 1}` : currentIndex + 1}
           </span>
+        </div>
+
+        <div className="text-left w-full">
+          <QuestionFeaturedResources imageUrl={question.imageUrl} narrativeText={question.narrativeText} />
         </div>
 
         <h2 className="text-2xl font-medium text-slate-700 leading-relaxed max-w-lg mx-auto mb-10">

@@ -5,6 +5,7 @@ import { Play, Pause, Volume2, AlertCircle } from 'lucide-react';
 import { exam } from '@/src/api/exam';
 import { useAudioPlayback } from '@/src/hooks/useAudioPlayback';
 import { DirectAudioElement, HLSAudioElement } from '@/src/components/Exams/AudioElements';
+import QuestionFeaturedResources from './QuestionFeaturedResources';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -177,6 +178,8 @@ export default function ListeningQuestionDisplay({ question, currentIndex, onNex
                 Question {currentIndex + 1}
               </span>
             </div>
+
+            <QuestionFeaturedResources imageUrl={question.imageUrl} narrativeText={question.narrativeText} />
 
             {/* Question Text */}
             <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-tight mb-6">
