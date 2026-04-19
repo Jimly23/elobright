@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Pause, Volume2, AlertCircle } from 'lucide-react';
 import { exam } from '@/src/api/exam';
+import { useAudioPlayback } from '@/src/hooks/useAudioPlayback';
+import { DirectAudioElement, HLSAudioElement } from '@/src/components/Exams/AudioElements';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -18,7 +20,7 @@ const resolveMediaUrl = (url: string | null) => {
   if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:')) return url;
 
   // Get API URL from env, default to local if not set
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const baseUrl = (url.includes('cdn') ? process.env.NEXT_PUBLIC_API_URL_CDN : process.env.NEXT_PUBLIC_API_URL) || 'http://localhost:3001';
   // Remove trailing slash and append leading slash if needed
   return `${baseUrl.replace(/\/$/, '')}/${url.replace(/^\//, '')}`;
 };
@@ -29,25 +31,51 @@ interface ListeningQuestionDisplayProps {
   onNext: () => void;
 }
 
+const AudioPlayer = ({ src, state, togglePlay, audioRef, handlers, label }: any) => {
+  const isHLS = src.endsWith('.m3u8');
+
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds) || !isFinite(seconds)) return "00:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className={`flex items-center gap-6 p-6 rounded-3xl border transition-colors ${state.error ? 'bg-red-50 border-red-100' : 'bg-blue-50/50 border-blue-100'}`}>
+      {isHLS ? (
+        <HLSAudioElement src={src} audioRef={audioRef} handlers={handlers} />
+      ) : (
+        <DirectAudioElement src={src} audioRef={audioRef} handlers={handlers} />
+      )}
+      <button
+        onClick={togglePlay}
+        disabled={state.error}
+        className={`w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-lg ${state.error ? 'bg-slate-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 shadow-blue-200'}`}
+      >
+        {state.error ? <AlertCircle /> : state.isPlaying ? <Pause fill="currentColor" /> : <Play fill="currentColor" className="ml-1" />}
+      </button>
+      <div>
+        <p className={`${state.error ? 'text-red-500' : 'text-blue-600'} text-xs font-black uppercase tracking-wider mb-1`}>
+          {state.error ? 'Playback Error' : label}
+        </p>
+        <p className="text-slate-800 font-black text-xl tabular-nums">
+          {state.error ? '--:--' : `${formatTime(state.progress)} / ${formatTime(state.duration)}`}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 export default function ListeningQuestionDisplay({ question, currentIndex, onNext }: ListeningQuestionDisplayProps) {
   const [options, setOptions] = useState<any[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Audio Playback states
-  const [leftIsPlaying, setLeftIsPlaying] = useState(false);
-  const [leftProgress, setLeftProgress] = useState(0);
-  const [leftDuration, setLeftDuration] = useState(0);
-  const [leftError, setLeftError] = useState(false);
-
-  const [rightIsPlaying, setRightIsPlaying] = useState(false);
-  const [rightProgress, setRightProgress] = useState(0);
-  const [rightDuration, setRightDuration] = useState(0);
-  const [rightError, setRightError] = useState(false);
-
-  const leftAudioRef = useRef<HTMLAudioElement | null>(null);
-  const rightAudioRef = useRef<HTMLAudioElement | null>(null);
+  // Use the new custom hook
+  const leftAudio = useAudioPlayback();
+  const rightAudio = useAudioPlayback();
 
   const formatTime = (seconds: number) => {
     if (isNaN(seconds) || !isFinite(seconds)) return "00:00";
@@ -76,39 +104,9 @@ export default function ListeningQuestionDisplay({ question, currentIndex, onNex
     };
     fetchOptions();
     setSelectedOption(null);
-    setLeftIsPlaying(false);
-    setRightIsPlaying(false);
-    setLeftProgress(0);
-    setRightProgress(0);
-    setLeftError(false);
-    setRightError(false);
+    leftAudio.reset();
+    rightAudio.reset();
   }, [question.id]);
-
-  const toggleLeftAudio = () => {
-    if (!leftAudioRef.current || leftError) return;
-    if (leftIsPlaying) {
-      leftAudioRef.current.pause();
-    } else {
-      leftAudioRef.current.play().catch(e => {
-        console.error("Left audio play failed:", e);
-        setLeftError(true);
-      });
-    }
-    setLeftIsPlaying(!leftIsPlaying);
-  };
-
-  const toggleRightAudio = () => {
-    if (!rightAudioRef.current || rightError) return;
-    if (rightIsPlaying) {
-      rightAudioRef.current.pause();
-    } else {
-      rightAudioRef.current.play().catch(e => {
-        console.error("Right audio play failed:", e);
-        setRightError(true);
-      });
-    }
-    setRightIsPlaying(!rightIsPlaying);
-  };
 
   const handleSubmit = async () => {
     if (!selectedOption) return;
@@ -155,38 +153,14 @@ export default function ListeningQuestionDisplay({ question, currentIndex, onNex
           </p>
 
           {question.audioUrl ? (
-            <div className={`flex items-center gap-6 p-6 rounded-3xl border transition-colors ${leftError ? 'bg-red-50 border-red-100' : 'bg-blue-50/50 border-blue-100'}`}>
-              <audio
-                key={leftSrc}
-                ref={leftAudioRef}
-                src={leftSrc}
-                onTimeUpdate={() => setLeftProgress(leftAudioRef.current?.currentTime || 0)}
-                onLoadedMetadata={() => {
-                  setLeftDuration(leftAudioRef.current?.duration || 0);
-                  setLeftError(false);
-                }}
-                onEnded={() => setLeftIsPlaying(false)}
-                onError={() => setLeftError(true)}
-                className="hidden"
-                autoPlay={false}
-                preload="metadata"
-              />
-              <button
-                onClick={toggleLeftAudio}
-                disabled={leftError}
-                className={`w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-lg ${leftError ? 'bg-slate-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 shadow-blue-200'}`}
-              >
-                {leftError ? <AlertCircle /> : leftIsPlaying ? <Pause fill="currentColor" /> : <Play fill="currentColor" className="ml-1" />}
-              </button>
-              <div>
-                <p className={`${leftError ? 'text-red-500' : 'text-blue-600'} text-xs font-black uppercase tracking-wider mb-1`}>
-                  {leftError ? 'Playback Error' : 'Context Player'}
-                </p>
-                <p className="text-slate-800 font-black text-xl tabular-nums">
-                  {leftError ? '--:--' : `${formatTime(leftProgress)} / ${formatTime(leftDuration)}`}
-                </p>
-              </div>
-            </div>
+            <AudioPlayer
+              src={leftSrc}
+              state={leftAudio.state}
+              togglePlay={leftAudio.togglePlay}
+              audioRef={leftAudio.audioRef}
+              handlers={leftAudio.handlers}
+              label="Context Player"
+            />
           ) : (
             <div className="p-10 border-2 border-dashed border-slate-100 rounded-3xl flex flex-col items-center justify-center text-slate-400">
               <Volume2 size={48} className="mb-4 opacity-20" />
@@ -211,31 +185,21 @@ export default function ListeningQuestionDisplay({ question, currentIndex, onNex
 
             {/* Question Audio Player (if exists) */}
             {question.questionAudioUrl && (
-              <div className={`mb-10 flex items-center gap-4 p-4 rounded-2xl border shadow-sm w-fit transition-colors ${rightError ? 'bg-red-50 border-red-100' : 'bg-white border-slate-100'}`}>
-                <audio
-                  key={rightSrc}
-                  ref={rightAudioRef}
-                  src={rightSrc}
-                  onTimeUpdate={() => setRightProgress(rightAudioRef.current?.currentTime || 0)}
-                  onLoadedMetadata={() => {
-                    setRightDuration(rightAudioRef.current?.duration || 0);
-                    setRightError(false);
-                  }}
-                  onEnded={() => setRightIsPlaying(false)}
-                  onError={() => setRightError(true)}
-                  className="hidden"
-                  autoPlay={false}
-                  preload="metadata"
-                />
+              <div className={`mb-10 flex items-center gap-4 p-4 rounded-2xl border shadow-sm w-fit transition-colors ${rightAudio.state.error ? 'bg-red-50 border-red-100' : 'bg-white border-slate-100'}`}>
+                {rightSrc.endsWith('.m3u8') ? (
+                  <HLSAudioElement src={rightSrc} audioRef={rightAudio.audioRef} handlers={rightAudio.handlers} />
+                ) : (
+                  <DirectAudioElement src={rightSrc} audioRef={rightAudio.audioRef} handlers={rightAudio.handlers} />
+                )}
                 <button
-                  onClick={toggleRightAudio}
-                  disabled={rightError}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${rightError ? 'bg-red-100 text-red-500 cursor-not-allowed' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}
+                  onClick={rightAudio.togglePlay}
+                  disabled={rightAudio.state.error}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${rightAudio.state.error ? 'bg-red-100 text-red-500 cursor-not-allowed' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}
                 >
-                  {rightError ? <AlertCircle size={14} /> : rightIsPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
+                  {rightAudio.state.error ? <AlertCircle size={14} /> : rightAudio.state.isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
                 </button>
-                <div className={`text-xs font-black tabular-nums ${rightError ? 'text-red-400' : 'text-slate-500'}`}>
-                  {rightError ? 'Error' : `${formatTime(rightProgress)} / ${formatTime(rightDuration)}`}
+                <div className={`text-xs font-black tabular-nums ${rightAudio.state.error ? 'text-red-400' : 'text-slate-500'}`}>
+                  {rightAudio.state.error ? 'Error' : `${formatTime(rightAudio.state.progress)} / ${formatTime(rightAudio.state.duration)}`}
                 </div>
               </div>
             )}
