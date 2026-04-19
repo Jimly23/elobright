@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 
 export interface AudioPlaybackState {
   isPlaying: boolean;
@@ -73,18 +73,20 @@ export function useAudioPlayback() {
     });
   }, []);
 
+  const handlers = useMemo(() => ({
+    onTimeUpdate: handleTimeUpdate,
+    onLoadedMetadata: handleLoadedMetadata,
+    onEnded: handleEnded,
+    onError: handleError,
+    onPlay: handlePlay,
+    onPause: handlePause,
+  }), [handleTimeUpdate, handleLoadedMetadata, handleEnded, handleError, handlePlay, handlePause]);
+
   return {
     state,
     audioRef,
     togglePlay,
-    handlers: {
-      onTimeUpdate: handleTimeUpdate,
-      onLoadedMetadata: handleLoadedMetadata,
-      onEnded: handleEnded,
-      onError: handleError,
-      onPlay: handlePlay,
-      onPause: handlePause,
-    },
+    handlers,
     reset,
   };
 }
