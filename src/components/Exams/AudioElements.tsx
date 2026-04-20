@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect } from 'react';
-import Hls from 'hls.js';
-import { useAudioTelemetry } from '@/src/hooks/useAudioTelemetry';
+import React, { useEffect } from "react";
+import Hls from "hls.js";
+import { useAudioTelemetry } from "@/src/hooks/useAudioTelemetry";
+import { audioTelemetryService } from "@/src/api/telemetry";
 
 interface AudioElementProps {
   src: string;
@@ -17,12 +18,17 @@ interface AudioElementProps {
   };
 }
 
-export const DirectAudioElement = ({ src, audioRef, handlers }: AudioElementProps) => {
+export const DirectAudioElement = ({
+  src,
+  audioRef,
+  handlers,
+}: AudioElementProps) => {
   const { getFinalPayload } = useAudioTelemetry(src);
 
   // For research: Log payload when audio ends
   const onEndedWithTelemetry = () => {
-    console.log('Direct Research Payload:', getFinalPayload());
+    const telePayload = getFinalPayload();
+    audioTelemetryService.store(telePayload);
     handlers.onEnded();
   };
 
@@ -38,7 +44,11 @@ export const DirectAudioElement = ({ src, audioRef, handlers }: AudioElementProp
   );
 };
 
-export const HLSAudioElement = ({ src, audioRef, handlers }: AudioElementProps) => {
+export const HLSAudioElement = ({
+  src,
+  audioRef,
+  handlers,
+}: AudioElementProps) => {
   const { getFinalPayload } = useAudioTelemetry(src);
 
   useEffect(() => {
@@ -54,7 +64,7 @@ export const HLSAudioElement = ({ src, audioRef, handlers }: AudioElementProps) 
       hls.on(Hls.Events.ERROR, (_, data) => {
         if (data.fatal) handlers.onError();
       });
-    } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+    } else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
       audio.src = src;
     } else {
       handlers.onError();
@@ -66,7 +76,8 @@ export const HLSAudioElement = ({ src, audioRef, handlers }: AudioElementProps) 
   }, [src, audioRef, handlers]);
 
   const onEndedWithTelemetry = () => {
-    console.log('HLS Research Payload:', getFinalPayload());
+    const telePayload = getFinalPayload();
+    audioTelemetryService.store(telePayload);
     handlers.onEnded();
   };
 

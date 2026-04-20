@@ -1,66 +1,102 @@
-import { useState, useEffect, useRef } from "react";
-
-export interface AudioMetric {
-  value: number;
-  timestamp: number;
-  bytes: number;
-}
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export const useAudioTelemetry = (src: string) => {
-  const [metrics, setMetrics] = useState<AudioMetric[]>([]);
+  const [metrics, setMetrics] = useState<any[]>([]);
   const observerRef = useRef<PerformanceObserver | null>(null);
+  const processedUrls = useRef<Set<string>>(new Set()); // Prevent duplicate logs
 
-  // Derive configuration from URL
-  const isCDN = src.includes("oranged");
+  const userId = localStorage.getItem("userId");
+  const examSessionId = localStorage.getItem("currentExamSessionId");
+
+  const isCDN = src.includes("cdn"); // Changed from 'oranged' to match your previous config logic
   const isHLS = src.endsWith(".m3u8");
   const config = `${isHLS ? "hls" : "direct"}_${isCDN ? "cdn" : "nocdn"}`;
+
+  const processEntry = useCallback(
+    (entry: any) => {
+      // Unique ID for each request to prevent double-counting between manual sweep and observer
+      const entryId = `${entry.name}-${entry.startTime}`;
+      if (processedUrls.current.has(entryId)) return;
+
+      const isRelatedResource = () => {
+        if (isHLS) {
+          const basePath = src.substring(0, src.lastIndexOf("/"));
+          // Capture the .m3u8 playlist itself OR the .ts segments
+          return (
+            entry.name === src ||
+            (entry.name.startsWith(basePath) &&
+              (entry.name.endsWith(".ts") || entry.name.includes("segment")))
+          );
+        }
+        return entry.name === src;
+      };
+
+      if (isRelatedResource() && entry.encodedBodySize >= 0) {
+        const stalled = Math.max(0, entry.domainLookupStart - entry.fetchStart);
+        const dns = Math.max(
+          0,
+          entry.domainLookupEnd - entry.domainLookupStart,
+        );
+        const tcp =
+          entry.secureConnectionStart > 0
+            ? entry.secureConnectionStart - entry.connectStart
+            : entry.connectEnd - entry.connectStart;
+        const ssl =
+          entry.secureConnectionStart > 0
+            ? entry.connectEnd - entry.secureConnectionStart
+            : 0;
+        const waiting = Math.round(entry.responseStart - entry.requestStart);
+        const download = Math.round(entry.responseEnd - entry.responseStart);
+        const total_duration = Math.round(entry.responseEnd - entry.fetchStart);
+
+        const newMetric = {
+          name: entry.name.split("/").pop(), // Helpful for debugging which segment is which
+          stalled,
+          dns,
+          initial_connection: Math.max(0, tcp),
+          ssl,
+          waiting_time: waiting,
+          download_time: download,
+          total_time: total_duration,
+          timestamp: Date.now(),
+          bytes: entry.encodedBodySize,
+        };
+
+        processedUrls.current.add(entryId);
+        setMetrics((prev) => [...prev, newMetric]);
+      }
+    },
+    [src, isHLS],
+  );
 
   useEffect(() => {
     if (!src) return;
 
-    // Helper to determine if a resource belongs to our current audio src
-    const isRelatedResource = (name: string) => {
-      if (isHLS) {
-        // HLS: The playlist is .m3u8, but we want the .ts segments
-        // Usually, segments are in the same directory as the playlist
-        const basePath = src.substring(0, src.lastIndexOf("/"));
-        return (
-          name.startsWith(basePath) &&
-          (name.endsWith(".ts") || name.includes("segment"))
-        );
-      }
-      // Direct: The browser makes multiple range requests to the same .mp3 URL
-      return name === src;
-    };
+    // 1. Manual Sweep: Catch requests that happened before the JS loaded
+    const existingEntries = performance.getEntriesByType("resource");
+    existingEntries.forEach(processEntry);
 
+    // 2. Observer: Catch all future requests (segments/range requests)
     observerRef.current = new PerformanceObserver((list) => {
-      const entries = list.getEntries();
-      entries.forEach((entry: any) => {
-        if (isRelatedResource(entry.name)) {
-          const newMetric: AudioMetric = {
-            // responseStart - requestStart is the TTFB (Waiting time)
-            value: Math.round(entry.responseStart - entry.requestStart),
-            timestamp: Date.now(),
-            // encodedBodySize is the actual compressed bytes transferred
-            bytes: entry.encodedBodySize || 0,
-          };
-
-          setMetrics((prev) => [...prev, newMetric]);
-        }
-      });
+      list.getEntries().forEach(processEntry);
     });
 
     observerRef.current.observe({ type: "resource", buffered: true });
 
     return () => {
       observerRef.current?.disconnect();
+      processedUrls.current.clear();
     };
-  }, [src, isHLS]);
+  }, [src, processEntry]);
 
   const getFinalPayload = () => ({
+    userId,
+    examSessionId,
     configuration: config,
     audio_url: src,
-    [isHLS ? "waiting_time_per_segment" : "waiting_time_per_chunk"]: metrics,
+    total_size: metrics.reduce((acc, curr) => acc + curr.bytes, 0),
+    metrics: metrics,
+    timestamp: Date.now(),
   });
 
   return { metrics, getFinalPayload };
