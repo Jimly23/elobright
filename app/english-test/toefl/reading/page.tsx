@@ -25,10 +25,10 @@ export default function Page({ onStart }: { onStart: () => void }) {
       const token = getCookie('token') || '';
       const cookieUserId = getCookie('userId');
       
-      const parsedUserId = rawUserId ? parseInt(rawUserId, 10) : NaN;
+      const parsedUserId = cookieUserId ? parseInt(cookieUserId, 10) : NaN;
       let userId = Number.isFinite(parsedUserId) && parsedUserId > 0 ? parsedUserId : 1;
       
-      if (token && !rawUserId) {
+      if (token && !cookieUserId) {
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
           if (payload.userId) {
