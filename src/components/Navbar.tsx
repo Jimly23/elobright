@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, ArrowRight, Menu, X } from 'lucide-react';
+import { ChevronDown, ArrowRight, Menu, X, LayoutDashboard } from 'lucide-react';
 import Image from 'next/image';
 import { ESSAY_PRACTICE_ROUTES } from '@/src/constants/essayPractice';
+import { examService } from '../api/exam';
 
 const navLinks = [
   { 
@@ -51,15 +52,37 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [examSubmenus, setExamSubmenus] = useState<any[]>(navLinks[0].submenus || []);
   const router = useRouter();
 
   useEffect(() => {
     // Check if user is logged in
     const token = localStorage.getItem('token');
+    
+    // Fetch exams for navigation
+    examService.getAllExams(token || undefined)
+      .then(data => {
+        if (Array.isArray(data)) {
+          const newSubmenus = data.map((exam: any) => ({
+            name: exam.title, // Menggunakan title dari response (misal: "TOEFL Practice Exam 1")
+            href: `/exams/${exam.id}` // Link ke /exams/[id_examnya]
+          }));
+          setExamSubmenus(newSubmenus);
+        }
+      })
+      .catch(console.error);
+
     if (token) {
       setIsLoggedIn(true);
     }
   }, []);
+
+  const dynamicNavLinks = navLinks.map(link => {
+    if (link.name === 'English Test') {
+      return { ...link, submenus: examSubmenus };
+    }
+    return link;
+  });
 
   const handleLogout = () => {
     // Clear tokens
@@ -109,7 +132,7 @@ const Navbar = () => {
 
       {/* Desktop Navigation Links */}
       <ul className="hidden md:flex items-center gap-8">
-        {navLinks.map((link) => (
+        {dynamicNavLinks.map((link) => (
           <li key={link.name} className="relative group">
             <Link 
               href={link.href}
@@ -156,12 +179,20 @@ const Navbar = () => {
             </button>
           </>
         ) : (
-          <button 
-            onClick={handleLogout}
-            className="px-6 py-2 text-[15px] font-semibold text-red-600 hover:bg-red-50 border border-red-200 rounded-xl transition-all"
-          >
-            Logout
-          </button>
+          <>
+            <Link href="/dashboard">
+              <button className="flex items-center gap-2 px-6 py-2 text-[15px] font-semibold text-blue-600 hover:bg-blue-50 border border-blue-200 rounded-xl transition-all">
+                <LayoutDashboard size={18} />
+                Dashboard
+              </button>
+            </Link>
+            <button 
+              onClick={handleLogout}
+              className="px-6 py-2 text-[15px] font-semibold text-red-600 hover:bg-red-50 border border-red-200 rounded-xl transition-all"
+            >
+              Logout
+            </button>
+          </>
         )}
       </div>
 
@@ -183,7 +214,7 @@ const Navbar = () => {
         `}
       >
         <div className="flex flex-col px-6 py-4 space-y-2">
-          {navLinks.map((link) => (
+          {dynamicNavLinks.map((link) => (
             <div key={link.name} className="flex flex-col border-b border-slate-50 last:border-none">
               {link.hasDropdown ? (
                 <button
@@ -238,15 +269,23 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              <button 
-                onClick={() => {
-                  handleLogout();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full py-2.5 text-[15px] font-semibold text-red-600 border border-red-200 hover:bg-red-50 rounded-xl transition-all shadow-sm"
-              >
-                Logout
-              </button>
+              <>
+                <Link href="/dashboard" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
+                  <button className="flex items-center justify-center gap-2 w-full py-2.5 text-[15px] font-semibold text-blue-600 border border-blue-200 hover:bg-blue-50 rounded-xl transition-all shadow-sm">
+                    <LayoutDashboard size={18} />
+                    Dashboard
+                  </button>
+                </Link>
+                <button 
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 text-[15px] font-semibold text-red-600 border border-red-200 hover:bg-red-50 rounded-xl transition-all shadow-sm"
+                >
+                  Logout
+                </button>
+              </>
             )}
           </div>
         </div>

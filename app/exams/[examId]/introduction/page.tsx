@@ -70,7 +70,12 @@ export default function ExamIntroductionPage() {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
       }, token);
 
-      if (res && res.session) {
+      console.log(res);
+
+      if (res && res.session.id) {
+        console.log(res.session);
+        console.log(res.session.id);
+        console.log(res.session.endTimeLocale);
         if (res.session.id) localStorage.setItem('currentExamSessionId', res.session.id);
         if (res.session.endTimeLocale) localStorage.setItem('currentExamEndTimeLimit', res.session.endTimeLocale);
       }
