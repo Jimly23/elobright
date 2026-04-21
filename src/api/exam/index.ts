@@ -108,7 +108,7 @@ export const examService = {
   // --- EXAM SESSIONS ---
   startExam: async (data: { userId: number | string; examId: string; timezone?: string }, token?: string) => {
     const response = await api.post('/exam-sessions/start', data, getConfig(token));
-    return response.data;
+    return response.data?.session ?? response.data;
   },
   recordAnswerMCQ: async (sessionId: string, data: { questionId: string; selectedOptionId: string }, token?: string) => {
     const response = await api.post(`/exam-sessions/${sessionId}/answers`, data, getConfig(token));

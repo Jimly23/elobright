@@ -1,6 +1,7 @@
 import React from 'react';
 import { PenTool } from 'lucide-react';
 import Link from 'next/link';
+import { ESSAY_PRACTICE_ROUTES } from '@/src/constants/essayPractice';
 
 export default function Page() {
   return (
@@ -57,7 +58,7 @@ export default function Page() {
           </ul>
 
           {/* Continue Button */}
-          <Link href={'/english-test/essay-practice/writing'}>
+          <Link href={ESSAY_PRACTICE_ROUTES.start}>
             <button className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]">
               Continue
             </button>

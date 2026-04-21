@@ -25,13 +25,18 @@ export default function Page({ onStart }: { onStart: () => void }) {
       const token = getCookie('token') || '';
       const rawUserId = getCookie('userId') || localStorage.getItem('userId');
       
-      let parsedUserId = rawUserId ? parseInt(rawUserId, 10) : 1;
-      let userId: string | number = (rawUserId && isNaN(parsedUserId)) ? rawUserId : parsedUserId;
+      const parsedUserId = rawUserId ? parseInt(rawUserId, 10) : NaN;
+      let userId = Number.isFinite(parsedUserId) && parsedUserId > 0 ? parsedUserId : 1;
       
       if (token && !rawUserId) {
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
-          if (payload.userId) userId = payload.userId;
+          if (payload.userId) {
+            const tokenUserId = Number(payload.userId);
+            if (Number.isFinite(tokenUserId) && tokenUserId > 0) {
+              userId = tokenUserId;
+            }
+          }
         } catch (e) {}
       }
 
@@ -41,15 +46,18 @@ export default function Page({ onStart }: { onStart: () => void }) {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
       }, token);
 
-      console.log(res);
-
-      if (res && res.id) {
+      if (res?.id) {
         localStorage.setItem('currentExamSessionId', res.id);
       }
 
       router.push('/english-test/toefl/reading/exam');
-    } catch (e) {
-      console.error('Failed to start exam:', e);
+    } catch (e: any) {
+      const existingSessionId = e?.response?.data?.session?.id;
+      if (e?.response?.status === 400 && e?.response?.data?.message === 'Ongoing session already exists' && existingSessionId) {
+        localStorage.setItem('currentExamSessionId', existingSessionId);
+      } else {
+        console.error('Failed to start exam:', e?.response?.data || e);
+      }
       router.push('/english-test/toefl/reading/exam');
     } finally {
       setLoading(false);

@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { PenTool, Clock } from 'lucide-react';
+import { PenTool } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import EnglishTestNavbar from '@/src/components/EnglishTest/EnglishTestNavbar';
 import { exam } from '@/src/api/exam';
-
-const ESSAY_PRACTICE_ID = '11111111-0000-4000-8000-000000000003';
-const WORD_TARGET = 250;
+import { ESSAY_PRACTICE_ID, ESSAY_PRACTICE_ROUTES, ESSAY_WORD_TARGET } from '@/src/constants/essayPractice';
 
 export default function WritingExamPage() {
   const router = useRouter();
@@ -64,15 +62,14 @@ export default function WritingExamPage() {
         setCurrentQuestionIndex(prev => prev + 1);
         setText("");
       } else {
-        router.push('/english-test/essay-practice/finish');
+        router.push(ESSAY_PRACTICE_ROUTES.finish);
       }
-    } catch(e) {
-      console.error('Error submitting answer:', e);
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-        setText("");
-      } else {
-        router.push('/english-test/essay-practice/finish');
+    } catch(e: any) {
+      const message = e?.response?.data?.message || e?.response?.data?.error;
+      console.error('Error submitting answer:', e?.response?.data || e);
+
+      if (message === 'Time window exceeded' || message === 'Exam is not currently ongoing') {
+        router.push(ESSAY_PRACTICE_ROUTES.finish);
       }
     } finally {
       setSubmitting(false);
@@ -80,7 +77,7 @@ export default function WritingExamPage() {
   };
 
   const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
-  const progressPercentage = Math.min((wordCount / WORD_TARGET) * 100, 100);
+  const progressPercentage = Math.min((wordCount / ESSAY_WORD_TARGET) * 100, 100);
 
   return (
     <div className="min-h-screen relative flex flex-col font-sans overflow-hidden bg-white">
@@ -131,7 +128,7 @@ export default function WritingExamPage() {
           {/* Word Count Progress Section */}
           <div className="mb-12">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-slate-700 text-sm font-bold">Target : {WORD_TARGET} words</span>
+              <span className="text-slate-700 text-sm font-bold">Target : {ESSAY_WORD_TARGET} words</span>
               <span className="text-slate-400 text-sm font-medium">{wordCount} words</span>
             </div>
             <div className="w-full h-3 bg-orange-50 rounded-full overflow-hidden">
