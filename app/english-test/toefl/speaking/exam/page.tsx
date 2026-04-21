@@ -141,7 +141,11 @@ export default function SpeakingTest() {
       </div>
 
       {/* Header */}
-      <EnglishTestNavbar />
+      <EnglishTestNavbar 
+        sectionName="Speaking"
+        currentQuestion={currentQuestionIndex + 1}
+        totalQuestions={questions.length}
+      />
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6 mt-8">

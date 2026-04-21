@@ -23,7 +23,7 @@ export default function Page({ onStart }: { onStart: () => void }) {
     setLoading(true);
     try {
       const token = getCookie('token') || '';
-      const rawUserId = getCookie('userId') || localStorage.getItem('userId');
+      const cookieUserId = getCookie('userId');
       
       const parsedUserId = rawUserId ? parseInt(rawUserId, 10) : NaN;
       let userId = Number.isFinite(parsedUserId) && parsedUserId > 0 ? parsedUserId : 1;
@@ -41,9 +41,9 @@ export default function Page({ onStart }: { onStart: () => void }) {
       }
 
       const res = await exam.startExam({
-        userId,
+        userId: userId,
         examId: TOEFL_ID,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
+        timezone: 'Asia/Jakarta'
       }, token);
 
       if (res?.id) {

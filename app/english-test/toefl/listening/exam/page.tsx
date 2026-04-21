@@ -130,7 +130,11 @@ export default function Page() {
       </div>
 
       {/* Header Navigation */}
-      <EnglishTestNavbar />
+      <EnglishTestNavbar 
+        sectionName="Listening"
+        currentQuestion={currentQuestionIndex + 1}
+        totalQuestions={questions.length}
+      />
 
       {/* Main Content */}
       <main className="relative mt-20 z-10 flex-1 flex items-center justify-center p-6">

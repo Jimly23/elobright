@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/src/api/auth';
+import CryptoJS from 'crypto-js';
+import Cookies from 'js-cookie';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -24,20 +26,42 @@ export default function SignInPage() {
 
     try {
       const response = await authService.login(formData);
+      console.log('Login Response:', response);
 
       // Simpan token ke cookie
       if (response.token) {
-        document.cookie = `token=${response.token}; path=/; max-age=86400; SameSite=Lax`;
+        Cookies.set('token', response.token, { expires: 1, path: '/', sameSite: 'Lax' });
         
-        if (response.user && response.user.id) {
-          document.cookie = `userId=${response.user.id}; path=/; max-age=86400; SameSite=Lax`;
+        if (response.user) {
+          const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY || 'elobright_secret_key';
+          // Enkripsi data user
+          const encryptedUser = CryptoJS.AES.encrypt(JSON.stringify(response.user), secretKey).toString();
+          
+          // Simpan data user yang sudah dienkripsi ke cookie
+          Cookies.set('userData', encryptedUser, { expires: 1, path: '/', sameSite: 'Lax' });
+          
+          if (response.user.id) {
+            Cookies.set('userId', response.user.id.toString(), { expires: 1, path: '/', sameSite: 'Lax' });
+          }
+
+          // Dekripsi kembali data untuk membuktikan bahwa di sisi frontend data dapat kembali seperti semula
+          const decryptedBytes = CryptoJS.AES.decrypt(encryptedUser, secretKey);
+          const decryptedUser = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+          console.log("Decrypted User Data dari Cookie:", decryptedUser);
         }
 
         // Tetap simpan di localStorage jika aplikasi masih membutuhkan
         localStorage.setItem('token', response.token);
         
-        if (response.user && response.user.id) {
-          localStorage.setItem('userId', response.user.id.toString());
+        if (response.user) {
+          const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY || 'elobright_secret_key';
+          const encryptedUser = CryptoJS.AES.encrypt(JSON.stringify(response.user), secretKey).toString();
+          
+          localStorage.setItem('userData', encryptedUser);
+          
+          if (response.user.id) {
+            localStorage.setItem('userId', response.user.id.toString());
+          }
         }
       }
 

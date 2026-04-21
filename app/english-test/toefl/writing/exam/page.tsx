@@ -102,7 +102,11 @@ export default function WritingTestPage() {
       </div>
 
       {/* Header Navigation */}
-      <EnglishTestNavbar />
+      <EnglishTestNavbar 
+        sectionName="Writing"
+        currentQuestion={currentQuestionIndex + 1}
+        totalQuestions={questions.length}
+      />
 
       {/* Main Content Area */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6">
