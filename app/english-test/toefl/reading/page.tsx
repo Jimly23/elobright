@@ -25,7 +25,20 @@ export default function Page({ onStart }: { onStart: () => void }) {
       const token = getCookie('token') || '';
       const cookieUserId = getCookie('userId');
       
-      const userId = cookieUserId ? parseInt(cookieUserId, 10) : 2;
+      const parsedUserId = rawUserId ? parseInt(rawUserId, 10) : NaN;
+      let userId = Number.isFinite(parsedUserId) && parsedUserId > 0 ? parsedUserId : 1;
+      
+      if (token && !rawUserId) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.userId) {
+            const tokenUserId = Number(payload.userId);
+            if (Number.isFinite(tokenUserId) && tokenUserId > 0) {
+              userId = tokenUserId;
+            }
+          }
+        } catch (e) {}
+      }
 
       const res = await exam.startExam({
         userId: userId,
@@ -33,21 +46,19 @@ export default function Page({ onStart }: { onStart: () => void }) {
         timezone: 'Asia/Jakarta'
       }, token);
 
-      if (res && res.session) {
-        if (res.session.id) localStorage.setItem('currentExamSessionId', res.session.id);
-        if (res.session.endTimeLimit) localStorage.setItem('currentExamEndTimeLimit', res.session.endTimeLimit);
-        if (res.session.endTimeLocale) localStorage.setItem('currentExamEndTimeLocale', res.session.endTimeLocale);
+      if (res?.id) {
+        localStorage.setItem('currentExamSessionId', res.id);
       }
 
       router.push('/english-test/toefl/reading/exam');
     } catch (e: any) {
-      console.error('Failed to start exam:', e.response?.data || e);
-      if (e.response?.data) {
-        alert('Gagal memulai exam: ' + JSON.stringify(e.response.data));
+      const existingSessionId = e?.response?.data?.session?.id;
+      if (e?.response?.status === 400 && e?.response?.data?.message === 'Ongoing session already exists' && existingSessionId) {
+        localStorage.setItem('currentExamSessionId', existingSessionId);
       } else {
-        alert('Gagal memulai exam: ' + e.message);
+        console.error('Failed to start exam:', e?.response?.data || e);
       }
-      // router.push('/english-test/toefl/reading/exam'); // we can comment this out so it doesn't navigate if there's an error
+      router.push('/english-test/toefl/reading/exam');
     } finally {
       setLoading(false);
     }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, ArrowRight, Menu, X } from 'lucide-react';
 import Image from 'next/image';
+import { ESSAY_PRACTICE_ROUTES } from '@/src/constants/essayPractice';
 
 const navLinks = [
   { 
@@ -13,7 +14,8 @@ const navLinks = [
     hasDropdown: true,
     submenus: [
       { name: 'TOEFL', href: '/english-test/toefl' },
-      { name: 'IELTS', href: '/english-test/ielts' }
+      { name: 'IELTS', href: '/english-test/ielts' },
+      { name: 'Essay Practice', href: ESSAY_PRACTICE_ROUTES.start }
     ]
   },
   { 
