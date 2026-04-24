@@ -12,6 +12,8 @@ export default function SignUpPage() {
     email: '',
     password: '',
     role: 'user',
+    type: 'student',
+    student_id: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -38,22 +40,22 @@ export default function SignUpPage() {
 
   return (
     <>
-      <div className="text-center lg:text-left mb-8">
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">Create your account</h1>
-        <p className="text-slate-400 font-medium text-sm md:text-base">Welcome! Please fill in the details to get started</p>
+      <div className="text-center lg:text-left mb-5 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-1 md:mb-2">Create your account</h1>
+        <p className="text-slate-400 font-medium text-xs md:text-base">Welcome! Please fill in the details to get started</p>
       </div>
 
-      <form className="space-y-5" onSubmit={handleSubmit}>
+      <form className="space-y-3.5 md:space-y-5" onSubmit={handleSubmit}>
         {error && (
-          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-medium animate-in fade-in slide-in-from-top-1">
+          <div className="p-2.5 md:p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs md:text-sm font-medium animate-in fade-in slide-in-from-top-1">
             {error}
           </div>
         )}
 
         {/* Grid untuk Full Name & Phone Number */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2.5 md:gap-4">
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Full name</label>
+            <label className="block text-xs md:text-sm font-bold text-slate-700 mb-1 md:mb-2">Full name</label>
             <input 
               type="text"
               name="full_name"
@@ -61,11 +63,11 @@ export default function SignUpPage() {
               onChange={handleChange}
               placeholder="Full name"
               required
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 text-black"
+              className="w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 text-black"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Phone Number</label>
+            <label className="block text-xs md:text-sm font-bold text-slate-700 mb-1 md:mb-2">Phone Number</label>
             <input 
               type="tel"
               name="phone_number"
@@ -73,13 +75,26 @@ export default function SignUpPage() {
               onChange={handleChange}
               placeholder="0823-XXXX-XXXX"
               required
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 text-black"
+              className="w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 text-black"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Email address</label>
+          <label className="block text-xs md:text-sm font-bold text-slate-700 mb-1 md:mb-2">NIM</label>
+          <input 
+            type="text"
+            name="student_id"
+            value={formData.student_id}
+            onChange={handleChange}
+            placeholder="Enter your NIM"
+            required
+            className="w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 text-black"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs md:text-sm font-bold text-slate-700 mb-1 md:mb-2">Email address</label>
           <input 
             type="email"
             name="email"
@@ -87,12 +102,12 @@ export default function SignUpPage() {
             onChange={handleChange}
             placeholder="Enter your email address"
             required
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 text-black"
+            className="w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 text-black"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Password</label>
+          <label className="block text-xs md:text-sm font-bold text-slate-700 mb-1 md:mb-2">Password</label>
           <input 
             type="password"
             name="password"
@@ -100,30 +115,29 @@ export default function SignUpPage() {
             onChange={handleChange}
             placeholder="Enter your password"
             required
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 text-black"
+            className="w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 text-black"
           />
         </div>
 
-        <div className="pt-2 space-y-3">
+        <div className="pt-1 md:pt-2 space-y-2.5 md:space-y-3">
           <button 
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] disabled:active:scale-100"
+            className="w-full py-2.5 md:py-4 text-sm md:text-base bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] disabled:active:scale-100"
           >
             {loading ? 'Creating account...' : 'Continue'}
           </button>
           
-          <button 
+          {/* <button 
             type="button" 
-            className="w-full py-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+            className="w-full py-2.5 md:py-4 text-sm md:text-base bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all flex items-center justify-center gap-2"
           >
-            {/* <img src="/google-icon.svg" alt="" className="w-5 h-5" />  */}
             Continue with google
-          </button>
+          </button> */}
         </div>
       </form>
 
-      <p className="text-center mt-8 text-slate-500 font-medium">
+      <p className="text-center mt-5 md:mt-8 text-slate-500 font-medium text-sm md:text-base">
         Already have an account? <a href="/signin" className="text-slate-900 font-bold hover:underline">Sign in</a>
       </p>
     </>

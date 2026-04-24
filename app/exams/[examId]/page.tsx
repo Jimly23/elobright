@@ -6,6 +6,7 @@ import EnglishTestHero from '@/src/components/EnglishTest/EnglishTestHero';
 import InfoSection from '@/src/components/EnglishTest/InfoSection';
 import TakeTestSection from '@/src/components/EnglishTest/TakeTestSection';
 import NeedMoreTimeSection from '@/src/components/EnglishTest/NeedMoreTimeSection';
+import ResumeExamBanner from '@/src/components/Exams/ResumeExamBanner';
 import { useGeneralExamContext } from '@/src/context/GeneralExamContext';
 import { useParams } from 'next/navigation';
 
@@ -17,7 +18,8 @@ export default function ExamLandingPage() {
   return (
     <>
       <Navbar />
-      <EnglishTestHero title={examData?.title || 'English Test'} examData={examData} />
+      <ResumeExamBanner examId={examId} />
+      <EnglishTestHero title={examData?.title || 'English Test'} url={`/exams/${examId}/introduction`} examData={examData} />
       <InfoSection url={`/exams/${examId}/introduction`} />
       <TakeTestSection />
       <NeedMoreTimeSection />

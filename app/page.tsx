@@ -9,12 +9,14 @@ import PreFooterCTASection from "@/src/components/PreFooterCTASection";
 import TrustSection from "@/src/components/TrustSection";
 import { BookOpen, Check, Sparkles } from "lucide-react";
 import ExamLogger from "@/src/components/ExamLogger";
+import ResumeExamBanner from "@/src/components/Exams/ResumeExamBanner";
 
 export default function Home() {
   return (
     <>
       <ExamLogger />
       <Navbar />
+      <ResumeExamBanner />
       <HeroSection />
       <TrustSection />
       <FeaturedSection />

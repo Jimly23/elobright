@@ -25,11 +25,12 @@ export default function SectionOnboardingPage() {
     return <BookOpen size={28} />;
   };
 
-  const getSectionDuration = () => {
-    if (t.includes('listen')) return '20 mins';
-    if (t.includes('writ')) return '35 mins';
-    if (t.includes('speak')) return '15 mins';
-    return '20 mins';
+  // Use actual durationMinutes from API
+  const getDuration = () => {
+    if (currentSection?.durationMinutes) {
+      return `${currentSection.durationMinutes} mins`;
+    }
+    return '-- mins';
   };
 
   const getCustomInstructions = () => {
@@ -104,7 +105,7 @@ export default function SectionOnboardingPage() {
             {getSectionIcon()}
           </div>
           <h2 className="text-2xl font-extrabold text-slate-800 mb-1 capitalize">{title}</h2>
-          <p className="text-slate-400 text-sm mb-1">{getSectionDuration()}</p>
+          <p className="text-slate-400 text-sm mb-1">{getDuration()}</p>
           <p className="text-slate-400 text-sm mb-10">{questions.length} questions</p>
 
           <ul className="space-y-2.5 w-full mb-10">

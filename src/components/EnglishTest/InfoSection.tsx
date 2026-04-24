@@ -1,6 +1,9 @@
+"use client";
+
 import React from 'react';
 import { Check, Sparkles } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 interface InfoSectionProps {
   url: string;
@@ -27,10 +30,20 @@ export default function InfoSection({
   description,
   benefits = DEFAULT_BENEFITS 
 }: InfoSectionProps) {
+  const router = useRouter();
   const badgeText = testBadge || `${testName} English Test`;
   const h2Line1 = titleLine1 || `Free ${testName} English`;
   const h2Line2 = titleLine2 || 'certification test';
   const descText = description || `Certify all your English skills at once: speaking, writing, listening and reading. All four skills will be shown on your Elobright certificate.`;
+
+  const handleStartTest = () => {
+    const token = Cookies.get('token');
+    if (!token) {
+      router.push(`/signin?callbackUrl=${encodeURIComponent(url)}`);
+    } else {
+      router.push(url);
+    }
+  };
 
   return (
     <section className="py-20 bg-white">
@@ -85,12 +98,13 @@ export default function InfoSection({
 
             {/* CTA Button */}
             <div className="pt-4">
-              <Link href={url}>
-                <button className="group flex items-center gap-3 px-10 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95">
-                  Start Test
-                  <Sparkles size={20} fill="currentColor" className="group-hover:animate-pulse" />
-                </button>
-              </Link>
+              <button
+                onClick={handleStartTest}
+                className="group flex items-center gap-3 px-10 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95"
+              >
+                Start Test
+                <Sparkles size={20} fill="currentColor" className="group-hover:animate-pulse" />
+              </button>
             </div>
           </div>
 

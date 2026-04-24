@@ -53,7 +53,7 @@ export default function AuthLayout({
       </main>
 
       {/* Footer */}
-      <footer className="py-6 flex flex-col md:flex-row items-center justify-center gap-6 text-[13px] text-slate-400 font-medium">
+      <footer className="hidden md:block py-6 flex flex-col md:flex-row items-center justify-center gap-6 text-[13px] text-slate-400 font-medium">
         <p>© 2026 Elobright. All rights reserved</p>
         <div className="flex gap-6">
           <a href="#" className="hover:text-slate-900 transition-colors">LinkedIn</a>

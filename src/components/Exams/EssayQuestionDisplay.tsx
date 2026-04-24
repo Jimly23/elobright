@@ -16,23 +16,26 @@ interface EssayQuestionDisplayProps {
   question: any;
   currentIndex: number;
   onNext: () => void;
+  onPrev?: () => void;
+  isLastQuestion?: boolean;
+  finishing?: boolean;
 }
 
-export default function EssayQuestionDisplay({ question, currentIndex, onNext }: EssayQuestionDisplayProps) {
+export default function EssayQuestionDisplay({ question, currentIndex, onNext, onPrev }: EssayQuestionDisplayProps) {
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const wordTarget = 45; // Match old layout constraint
+  const wordTarget = 45;
 
   const handleSubmit = async () => {
     if (!text.trim()) return;
     setSubmitting(true);
-    
+
     try {
-      const sessionId = localStorage.getItem('currentExamSessionId');
+      const sectionSessionId = localStorage.getItem('currentSectionSessionId');
       const token = getCookie('token') || '';
       
-      if (sessionId) {
-        await exam.recordAnswerEssay(sessionId, {
+      if (sectionSessionId) {
+        await exam.recordAnswerEssay(sectionSessionId, {
           questionId: question.id,
           textResponse: text
         }, token);
@@ -51,7 +54,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext }:
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10 w-full">
-      <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-50 mt-10">
+      <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-200 mt-10">
         
         {/* Question Badge */}
         <div className="flex justify-center mb-10">
@@ -93,7 +96,18 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext }:
         </div>
 
         {/* Action Button */}
-        <div className="flex justify-center">
+        <div className="flex items-center justify-between">
+          {onPrev ? (
+            <button
+              onClick={onPrev}
+              disabled={submitting}
+              className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95 disabled:opacity-50"
+            >
+              ← Previous
+            </button>
+          ) : (
+            <div />
+          )}
           <button 
             onClick={handleSubmit}
             disabled={!text.trim() || submitting}

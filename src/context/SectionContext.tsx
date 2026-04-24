@@ -6,17 +6,21 @@ export interface Question {
   id: string;
   sectionId: string;
   audioUrl: string | null;
+  questionAudioUrl: string | null;
   imageUrl: string | null;
   narrativeText: string | null;
   questionText: string;
   questionType: string | null;
   points: number | null;
+  orderIndex: number | null;
+  isActive: boolean;
   options?: any[]; // For MCQ or prepopulated options
 }
 
 export interface SectionContextType {
   questions: Question[];
   getNextQuestionId: (currentQuestionId: string) => string | null;
+  getPrevQuestionId: (currentQuestionId: string) => string | null;
   getQuestionIndex: (currentQuestionId: string) => number;
 }
 
@@ -38,12 +42,20 @@ export const SectionProvider = ({
     return null; // Null means we reached the end of this section
   };
 
+  const getPrevQuestionId = (currentQuestionId: string): string | null => {
+    const currentIndex = questions.findIndex(q => q.id === currentQuestionId);
+    if (currentIndex > 0) {
+      return questions[currentIndex - 1].id;
+    }
+    return null; // Null means we're at the first question
+  };
+
   const getQuestionIndex = (currentQuestionId: string): number => {
     return questions.findIndex(q => q.id === currentQuestionId);
   };
 
   return (
-    <SectionContext.Provider value={{ questions, getNextQuestionId, getQuestionIndex }}>
+    <SectionContext.Provider value={{ questions, getNextQuestionId, getPrevQuestionId, getQuestionIndex }}>
       {children}
     </SectionContext.Provider>
   );

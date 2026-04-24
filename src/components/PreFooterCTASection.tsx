@@ -10,10 +10,10 @@ export default function PreFooterCTASection() {
           Start your first <br />
           <span className="relative inline-block">
             {/* Blue Highlight Overlay */}
-            <span className="absolute inset-x-[-15px] inset-y-1 bg-blue-50 rounded-2xl -rotate-1" />
+            <span className="absolute hidden md:block inset-x-[-15px] inset-y-1 bg-blue-50 rounded-2xl -rotate-1" />
             <span className="relative">English test Now!</span>
             {/* Blue Tag 'Eloo' */}
-            <span className="absolute -right-10 -top-4 bg-blue-500 text-[10px] text-white px-2 py-0.5 rounded-md font-black rotate-12 shadow-sm">
+            <span className="absolute hidden md:block -right-10 -top-4 bg-blue-500 text-[10px] text-white px-2 py-0.5 rounded-md font-black rotate-12 shadow-sm">
               Eloo
             </span>
           </span>
@@ -24,12 +24,12 @@ export default function PreFooterCTASection() {
         </p>
 
         {/* Action Button */}
-        <div className="flex justify-center mb-20">
+        {/* <div className="flex justify-center mb-20">
           <button className="group flex items-center gap-3 px-12 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-2xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95">
             Get Access 
             <Sparkles size={20} className="group-hover:animate-pulse" />
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Maskot / Image Section */}

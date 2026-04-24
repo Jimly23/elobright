@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BookOpen, Clock, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Clock, Settings, LogOut, Trophy } from 'lucide-react';
 
 const UserSidebar = () => {
   const pathname = usePathname();
@@ -8,6 +8,7 @@ const UserSidebar = () => {
   const links = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { name: 'My Exams', href: '/dashboard/exams', icon: BookOpen },
+    { name: 'Scores', href: '/dashboard/scores', icon: Trophy },
     { name: 'History', href: '/dashboard/history', icon: Clock },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];

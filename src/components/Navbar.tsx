@@ -88,6 +88,11 @@ const Navbar = () => {
     // Clear tokens
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
+    // Clear exam session data
+    localStorage.removeItem('examCheckpoint');
+    localStorage.removeItem('currentExamSessionId');
+    localStorage.removeItem('currentSectionSessionId');
+    localStorage.removeItem('currentSectionEndTimeLimit');
     document.cookie = 'token=; path=/; max-age=0; SameSite=Lax';
     document.cookie = 'userId=; path=/; max-age=0; SameSite=Lax';
     setIsLoggedIn(false);
@@ -173,10 +178,12 @@ const Navbar = () => {
                 Login
               </button>
             </Link>
-            <button className="flex items-center gap-2 px-6 py-2 text-[15px] font-semibold text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 rounded-xl shadow-md shadow-blue-100 transition-all">
-              Get Access
-              <ArrowRight size={18} />
-            </button>
+            <Link href="/signup">
+              <button className="flex items-center gap-2 px-6 py-2 text-[15px] font-semibold text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 rounded-xl shadow-md shadow-blue-100 transition-all">
+                Get Access
+                <ArrowRight size={18} />
+              </button>
+            </Link>
           </>
         ) : (
           <>

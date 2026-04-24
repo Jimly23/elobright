@@ -110,20 +110,28 @@ export const examService = {
     const response = await api.post('/exam-sessions/start', data, getConfig(token));
     return response.data;
   },
-  recordAnswerMCQ: async (sessionId: string, data: { questionId: string; selectedOptionId: string }, token?: string) => {
-    const response = await api.post(`/exam-sessions/${sessionId}/answers`, data, getConfig(token));
+  recordAnswerMCQ: async (sectionSessionId: string, data: { questionId: string; selectedOptionId: string }, token?: string) => {
+    const response = await api.post(`/exam-sessions/${sectionSessionId}/answers`, data, getConfig(token));
     return response.data;
   },
-  recordAnswerEssay: async (sessionId: string, data: { questionId: string; textResponse: string }, token?: string) => {
-    const response = await api.post(`/exam-sessions/${sessionId}/answers`, data, getConfig(token));
+  recordAnswerEssay: async (sectionSessionId: string, data: { questionId: string; textResponse: string }, token?: string) => {
+    const response = await api.post(`/exam-sessions/${sectionSessionId}/answers`, data, getConfig(token));
     return response.data;
   },
-  recordAnswerSpeaking: async (sessionId: string, formData: FormData, token?: string) => {
-    const response = await api.post(`/exam-sessions/${sessionId}/answers`, formData, getConfig(token, true));
+  recordAnswerSpeaking: async (sectionSessionId: string, formData: FormData, token?: string) => {
+    const response = await api.post(`/exam-sessions/${sectionSessionId}/answers`, formData, getConfig(token, true));
+    return response.data;
+  },
+  finishSection: async (examSectionSessionId: string, token?: string) => {
+    const response = await api.post(`/exam-sessions/sections/${examSectionSessionId}/finish`, {}, getConfig(token));
     return response.data;
   },
   finishExam: async (sessionId: string, token?: string) => {
     const response = await api.post(`/exam-sessions/${sessionId}/finish`, {}, getConfig(token));
+    return response.data;
+  },
+  getMySubmissions: async (token?: string) => {
+    const response = await api.get('/exam-sessions/my-submissions', getConfig(token));
     return response.data;
   },
 };

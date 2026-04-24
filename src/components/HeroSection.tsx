@@ -30,10 +30,10 @@ const HeroSection = () => {
         <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 leading-[1.1] mb-8 tracking-tight">
           Free online English <br />
           <span className="relative inline-block mt-3">
-            <span className="absolute inset-x-[-10px] inset-y-0 bg-blue-100 rounded -rotate-1" />
+            <span className="absolute hidden md:block inset-x-[-10px] inset-y-0 bg-blue-100 rounded -rotate-1" />
             <span className="relative px-2">certification test</span>
-            <span className="absolute -right-8 -top-2 bg-blue-500 text-[10px] text-white px-1.5 py-0.5 rounded-md font-black rotate-12 shadow-sm">
-              Eloe
+            <span className="absolute hidden md:block -right-8 -top-2 bg-blue-500 text-[10px] text-white px-1.5 py-0.5 rounded-md font-black rotate-12 shadow-sm">
+              Elo
             </span>
           </span>
         </h1>
@@ -50,16 +50,16 @@ const HeroSection = () => {
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-          <Link href="/sertification/english-level">
+          <Link href="/signup">
             <button className="group w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1">
               Get Access <Sparkles size={18} className="group-hover:animate-pulse" />
             </button>
           </Link>
-          <Link href="/sertification/english-test">
+          {/* <Link href="/sertification/english-test">
             <button className="w-full sm:w-auto px-10 py-4 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded-2xl border border-gray-200 shadow-sm transition-all">
               Try Now
             </button>
-          </Link>
+          </Link> */}
         </div>
 
         {/* App Mockup UI */}

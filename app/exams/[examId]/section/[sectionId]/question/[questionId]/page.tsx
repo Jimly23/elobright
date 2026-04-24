@@ -1,14 +1,23 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useGeneralExamContext } from '@/src/context/GeneralExamContext';
 import { useSectionContext } from '@/src/context/SectionContext';
+import { exam } from '@/src/api/exam';
 import EnglishTestNavbar from '@/src/components/EnglishTest/EnglishTestNavbar';
 import McqQuestionDisplay from '@/src/components/Exams/McqQuestionDisplay';
 import ListeningQuestionDisplay from '@/src/components/Exams/ListeningQuestionDisplay';
 import EssayQuestionDisplay from '@/src/components/Exams/EssayQuestionDisplay';
 import AudioUploadQuestionDisplay from '@/src/components/Exams/AudioUploadQuestionDisplay';
+
+const getCookie = (name: string) => {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return null;
+};
 
 export default function QuestionPage() {
   const params = useParams();
@@ -18,8 +27,27 @@ export default function QuestionPage() {
   const sectionId = params.sectionId as string;
   const questionId = params.questionId as string;
 
-  const { sections, getNextSectionId } = useGeneralExamContext();
-  const { questions, getNextQuestionId, getQuestionIndex } = useSectionContext();
+  const { sections, getNextSectionId, setCurrentSectionSession } = useGeneralExamContext();
+  const { questions, getNextQuestionId, getPrevQuestionId, getQuestionIndex } = useSectionContext();
+
+  const [finishing, setFinishing] = useState(false);
+
+  // Save checkpoint to localStorage so the landing page can show a resume banner
+  useEffect(() => {
+    if (examId && sectionId && questionId) {
+      const userId = getCookie('userId') || '';
+      localStorage.setItem('examCheckpoint', JSON.stringify({
+        examId,
+        sectionId,
+        questionId,
+        userId,
+        sectionSessionId: localStorage.getItem('currentSectionSessionId') || '',
+        examSessionId: localStorage.getItem('currentExamSessionId') || '',
+        endTimeLimit: localStorage.getItem('currentSectionEndTimeLimit') || '',
+        savedAt: new Date().toISOString(),
+      }));
+    }
+  }, [examId, sectionId, questionId]);
 
   const currentSection = sections.find(s => s.id === sectionId);
   const sectionName = currentSection?.title || 'Section';
@@ -37,18 +65,72 @@ export default function QuestionPage() {
     );
   }
 
-  const handleNext = () => {
+  const isLastQuestion = getNextQuestionId(questionId) === null;
+
+  const handleNext = async () => {
     const nextQuestionId = getNextQuestionId(questionId);
+    
     if (nextQuestionId) {
+      // Not the last question, just navigate to the next one
       router.push(`/exams/${examId}/section/${sectionId}/question/${nextQuestionId}`);
     } else {
-      // Reached the end of the section, go to the next section or finish
-      const nextSectionId = getNextSectionId(sectionId);
-      if (nextSectionId) {
-        router.push(`/exams/${examId}/section/${nextSectionId}`);
-      } else {
-        router.push(`/exams/${examId}/finish`);
+      // Last question in this section — finish the section
+      setFinishing(true);
+      try {
+        const token = getCookie('token') || '';
+        const sectionSessionId = localStorage.getItem('currentSectionSessionId');
+        
+        if (sectionSessionId) {
+          const finishRes = await exam.finishSection(sectionSessionId, token);
+          console.log('finishSection response:', finishRes);
+
+          if (finishRes && finishRes.nextSectionSubmission) {
+            // There's a next section — store its session data
+            const nextSession = finishRes.nextSectionSubmission;
+            setCurrentSectionSession(nextSession);
+            localStorage.setItem('currentSectionSessionId', nextSession.id);
+            localStorage.setItem('currentSectionEndTimeLimit', nextSession.endTimeLocale || nextSession.endTimeLimit);
+
+            // Navigate to the next section's onboarding page
+            const nextSectionId = getNextSectionId(sectionId);
+            if (nextSectionId) {
+              router.push(`/exams/${examId}/section/${nextSectionId}`);
+            } else {
+              // Fallback: navigate to finish
+              router.push(`/exams/${examId}/finish`);
+            }
+          } else {
+            // No next section — all sections are done, go to finish
+            router.push(`/exams/${examId}/finish`);
+          }
+        } else {
+          // No section session ID found, just navigate
+          const nextSectionId = getNextSectionId(sectionId);
+          if (nextSectionId) {
+            router.push(`/exams/${examId}/section/${nextSectionId}`);
+          } else {
+            router.push(`/exams/${examId}/finish`);
+          }
+        }
+      } catch (e) {
+        console.error('Error finishing section:', e);
+        // Navigate anyway to avoid being stuck
+        const nextSectionId = getNextSectionId(sectionId);
+        if (nextSectionId) {
+          router.push(`/exams/${examId}/section/${nextSectionId}`);
+        } else {
+          router.push(`/exams/${examId}/finish`);
+        }
+      } finally {
+        setFinishing(false);
       }
+    }
+  };
+
+  const handlePrev = () => {
+    const prevQuestionId = getPrevQuestionId(questionId);
+    if (prevQuestionId) {
+      router.push(`/exams/${examId}/section/${sectionId}/question/${prevQuestionId}`);
     }
   };
 
@@ -91,7 +173,10 @@ export default function QuestionPage() {
         <DisplayComponent 
           question={currentQuestion} 
           currentIndex={currentIndex} 
-          onNext={handleNext} 
+          onNext={handleNext}
+          onPrev={currentIndex > 0 ? handlePrev : undefined}
+          isLastQuestion={isLastQuestion}
+          finishing={finishing}
         />
       </main>
 

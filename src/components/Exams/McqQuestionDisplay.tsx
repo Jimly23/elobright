@@ -16,9 +16,12 @@ interface McqQuestionDisplayProps {
   question: any;
   currentIndex: number;
   onNext: () => void;
+  onPrev?: () => void;
+  isLastQuestion?: boolean;
+  finishing?: boolean;
 }
 
-export default function McqQuestionDisplay({ question, currentIndex, onNext }: McqQuestionDisplayProps) {
+export default function McqQuestionDisplay({ question, currentIndex, onNext, onPrev }: McqQuestionDisplayProps) {
   const [options, setOptions] = useState<any[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -44,7 +47,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext }: M
       }
     };
     fetchOptions();
-    setSelectedOption(null); // reset selected option when question changes
+    setSelectedOption(null);
   }, [question.id]);
 
   const handleSubmit = async () => {
@@ -52,11 +55,11 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext }: M
     setSubmitting(true);
     
     try {
-      const sessionId = localStorage.getItem('currentExamSessionId');
+      const sectionSessionId = localStorage.getItem('currentSectionSessionId');
       const token = getCookie('token') || '';
       
-      if (sessionId) {
-        await exam.recordAnswerMCQ(sessionId, {
+      if (sectionSessionId) {
+        await exam.recordAnswerMCQ(sectionSessionId, {
           questionId: question.id,
           selectedOptionId: selectedOption
         }, token);
@@ -72,7 +75,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext }: M
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 mt-20 relative z-10 w-full">
-      <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-50">
+      <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-200">
         
         <div className="mb-5">
           <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-4 py-2 rounded-full uppercase tracking-[0.15em] border border-blue-100">
@@ -121,7 +124,17 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext }: M
           )}
         </div>
 
-        <div className="flex justify-center mt-10">
+        <div className="flex items-center justify-between mt-10">
+          {onPrev ? (
+            <button
+              onClick={onPrev}
+              className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95"
+            >
+              ← Previous
+            </button>
+          ) : (
+            <div />
+          )}
           <button 
             onClick={handleSubmit}
             disabled={!selectedOption || submitting || loading}

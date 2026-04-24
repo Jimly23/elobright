@@ -17,8 +17,8 @@ export default function EnglishTestNavbar({
     const [timeLeft, setTimeLeft] = useState<string>("0.00 min");
 
     useEffect(() => {
-        // Karena server menyimpan limit di UTC "2026-04-07T08:23:36.547Z" format ISO, kita parse menggunakan new Date()
-        const endTimeStr = localStorage.getItem("currentExamEndTimeLimit");
+        // Read the section-level end time limit from localStorage
+        const endTimeStr = localStorage.getItem("currentSectionEndTimeLimit");
         if (!endTimeStr) return;
 
         const endTime = new Date(endTimeStr).getTime();
@@ -83,13 +83,13 @@ export default function EnglishTestNavbar({
                 )}
 
                 {/* Timer right */}
-                <div className="flex items-center justify-end gap-3 border-l px-6 border-slate-200 w-48">
+                <div className="flex items-center justify-end gap-3 md:border-l px-6 border-slate-200 w-48">
                     <div className="text-[#0080FF]">
                         <Timer size={28} />
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex gap-x-1 items-center">
                         <span className="text-sm font-bold text-slate-800 leading-none">{timeLeft}</span>
-                        <span className="text-[9px] text-red-500 font-bold tracking-tight self-end mt-0.5">time left</span>
+                        {/* <span className="text-[9px] text-red-500 font-bold">time left</span> */}
                     </div>
                 </div>
             </div>

@@ -24,18 +24,10 @@ const Page = () => {
             </h2>
             <div className="space-y-6">
               <p className="text-slate-600 text-lg leading-relaxed">
-                Our Goal Is To Make English Proficiency Testing Not Only Reliable, But Also
-                Affordable, Simple To Use, And Always Accessible. At EF SET We Are Applying
-                Sophisticated Research And Development To Provide Objectively Scored
-                Standardized English Tests For All Level Learners - From Beginner To Advanced - For Free.
+                Elobright adalah platform kursus bahasa Inggris online yang dirancang untuk membantu Anda menguasai bahasa Inggris dengan cara yang efektif, fleksibel, dan menyenangkan. Dengan kurikulum yang terstruktur dan didampingi oleh instruktur berpengalaman, Elobright hadir untuk semua level — mulai dari pemula hingga tingkat lanjut. Setiap materi pembelajaran dirancang secara khusus agar mudah dipahami dan langsung dapat dipraktikkan dalam kehidupan sehari-hari maupun dunia profesional.
               </p>
               <p className="text-slate-600 text-lg leading-relaxed">
-                To Create Our State-Of-The-Art Testing Platform, We Assembled The Industry's Top
-                Experts In Language Assessment, Large Scale Testing And Psychometrics. To Learn
-                More, Please Download Our Whitepaper Titled The EF SET Academic Report. It
-                Details Our Approach To Test Design, Test Specifications, Alignment To The Common
-                European Framework Of Reference, Form Assembly, Item Analysis, Standards-Setting,
-                And Ongoing Quality Control.
+                Selain program kursus bahasa Inggris reguler, Elobright juga menyediakan layanan persiapan ujian TOEFL dan IELTS yang komprehensif. Dengan modul latihan soal, simulasi tes resmi, serta bimbingan intensif dari instruktur tersertifikasi, Elobright siap membantu Anda meraih skor terbaik untuk mendukung impian akademik maupun karier internasional Anda. Bergabunglah bersama ribuan pelajar yang telah membuktikan kemajuan mereka bersama Elobright — karena setiap langkah menuju kemahiran bahasa Inggris dimulai dari sini.
               </p>
             </div>
           </div>

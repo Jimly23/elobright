@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Award, Target, Brain, BarChart, CheckCircle2 } from "lucide-react";
+import { Award, Target, Brain, BarChart, CheckCircle2, BookOpen, Headphones, Edit3, Mic } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { exam } from "@/src/api/exam";
 
@@ -14,12 +14,23 @@ const getCookie = (name: string) => {
   return null;
 };
 
+const getSectionIcon = (title: string) => {
+  const t = title.toLowerCase();
+  if (t.includes('listen')) return <Headphones size={18} />;
+  if (t.includes('read')) return <BookOpen size={18} />;
+  if (t.includes('writ')) return <Edit3 size={18} />;
+  if (t.includes('speak')) return <Mic size={18} />;
+  return <Brain size={18} />;
+};
+
 export default function ExamFinishPage() {
-  const [session, setSession] = useState<any>(null);
+  const [finishData, setFinishData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const finishAttempt = useRef(false);
 
   useEffect(() => {
+    if (finishAttempt.current) return;
+    
     const finishExam = async () => {
       finishAttempt.current = true;
       try {
@@ -27,37 +38,42 @@ export default function ExamFinishPage() {
         const token = getCookie("token") || "";
 
         if (sessionId) {
-          const sessionData = await exam.finishExam(sessionId, token);
-          setSession(sessionData);
+          const data = await exam.finishExam(sessionId, token);
+          console.log('finishExam response:', data);
+          setFinishData(data);
         }
       } catch (error) {
         console.error("Failed to finish exam", error);
       } finally {
         setLoading(false);
+        // Clean up localStorage
+        localStorage.removeItem("currentExamSessionId");
+        localStorage.removeItem("currentSectionSessionId");
+        localStorage.removeItem("currentSectionEndTimeLimit");
+        localStorage.removeItem("examCheckpoint");
       }
     };
     finishExam();
   }, []);
 
-  const totalScore = session?.session?.totalScore || 0;
+  // Build score details from the actual API response
+  const sectionSubmissions = finishData?.sectionSubmissions || [];
+  
+  const scoreDetails = sectionSubmissions.map((sub: any) => {
+    const sectionTitle = sub.section?.title || 'Section';
+    const isPending = sub.totalScore === 0 && (sectionTitle.toLowerCase().includes('speak') || sectionTitle.toLowerCase().includes('writ'));
+    
+    return {
+      label: sectionTitle,
+      max: sub.allScore || 0,
+      achieved: isPending ? 'pending' : sub.totalScore || 0,
+      icon: getSectionIcon(sectionTitle),
+    };
+  });
 
-  // Extract custom scoring details based on sections or question type. Fallbacks to dummy if unavailable for immediate feedback.
-  const scoreDetails = session?.scoringDetails || [
-    { label: "Reading", max: 30, achieved: 25, icon: <Brain size={18} /> },
-    { label: "Listening", max: 30, achieved: 22, icon: <Target size={18} /> },
-    {
-      label: "Speaking",
-      max: 30,
-      achieved: "pending",
-      icon: <Award size={18} />,
-    },
-    {
-      label: "Writing",
-      max: 30,
-      achieved: "pending",
-      icon: <BarChart size={18} />,
-    },
-  ];
+  // Calculate total score
+  const totalScore = sectionSubmissions.reduce((sum: number, sub: any) => sum + (sub.totalScore || 0), 0);
+  const totalMax = sectionSubmissions.reduce((sum: number, sub: any) => sum + (sub.allScore || 0), 0);
 
   if (loading) {
     return (
@@ -134,7 +150,7 @@ export default function ExamFinishPage() {
               {totalScore}
             </div>
             <span className="text-slate-400 text-xs mt-2 relative z-10">
-              / 120 Total
+              / {totalMax} Total
             </span>
           </div>
 

@@ -41,6 +41,9 @@ interface ListeningQuestionDisplayProps {
   question: any;
   currentIndex: number;
   onNext: () => void;
+  onPrev?: () => void;
+  isLastQuestion?: boolean;
+  finishing?: boolean;
 }
 
 const AudioPlayer = ({
@@ -102,6 +105,7 @@ export default function ListeningQuestionDisplay({
   question,
   currentIndex,
   onNext,
+  onPrev,
 }: ListeningQuestionDisplayProps) {
   const [options, setOptions] = useState<any[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -151,12 +155,12 @@ export default function ListeningQuestionDisplay({
     setSubmitting(true);
 
     try {
-      const sessionId = localStorage.getItem("currentExamSessionId");
+      const sectionSessionId = localStorage.getItem("currentSectionSessionId");
       const token = getCookie("token") || "";
 
-      if (sessionId) {
+      if (sectionSessionId) {
         await exam.recordAnswerMCQ(
-          sessionId,
+          sectionSessionId,
           {
             questionId: question.id,
             selectedOptionId: selectedOption,
@@ -178,7 +182,7 @@ export default function ListeningQuestionDisplay({
 
   return (
     <div className="flex-1 flex items-center justify-center p-6 mt-20 relative z-10 w-full font-sans">
-      <div className="w-full max-w-6xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 border border-slate-50 flex flex-col md:flex-row overflow-hidden min-h-[600px]">
+      <div className="w-full max-w-6xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 border border-slate-200 flex flex-col md:flex-row overflow-hidden min-h-[600px]">
         {/* Left Side: Context Audio Player */}
         <div className="flex-1 p-8 md:p-12 border-r border-slate-100 flex flex-col justify-center bg-white">
           <div className="mb-8">
@@ -324,7 +328,18 @@ export default function ListeningQuestionDisplay({
           </div>
 
           {/* Submit Button */}
-          <div className="mt-12 flex justify-end">
+          <div className="mt-12 flex items-center justify-between">
+            {onPrev ? (
+              <button
+                onClick={onPrev}
+                disabled={submitting}
+                className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95 disabled:opacity-50"
+              >
+                ← Previous
+              </button>
+            ) : (
+              <div />
+            )}
             <button
               onClick={handleSubmit}
               disabled={!selectedOption || submitting || loading}

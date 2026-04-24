@@ -1,9 +1,10 @@
 "use client";
 
 import React from 'react';
-import { Play, Check, Sparkles } from 'lucide-react';
+import { Play, Sparkles } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 interface ExamData {
   id: string;
@@ -14,11 +15,23 @@ interface ExamData {
 
 interface EnglishTestHeroProps {
   title?: string;
+  url: string;
   examData?: ExamData | null;
 }
 
-const EnglishTestHero = ({ title = 'TOEFL', examData }: EnglishTestHeroProps) => {
+const EnglishTestHero = ({ title = 'TOEFL', url, examData }: EnglishTestHeroProps) => {
+  const router = useRouter();
   const duration = examData ? `${examData.durationMinutes} mins` : '120 mins';
+
+  const handleStartTest = () => {
+    const token = Cookies.get('token');
+    if (!token) {
+      router.push(`/signin?callbackUrl=${encodeURIComponent(url)}`);
+    } else {
+      router.push(url);
+    }
+  };
+
   return (
     <section className="relative min-h-[600px] w-full bg-[#f8fbff] overflow-hidden py-20">
       {/* Background Decor (Sky & Clouds effect) */}
@@ -50,15 +63,15 @@ const EnglishTestHero = ({ title = 'TOEFL', examData }: EnglishTestHeroProps) =>
 
               {/* Heading */}
               <h1 className="text-4xl md:text-7xl font-extrabold text-slate-900 leading-[1.1] tracking-tight text-center">
-                Free <span className="relative inline-block">
-                  <span className="text-3xl md:text-7xl absolute inset-x-[-10px] inset-y-2 bg-blue-100 rounded -z-10" />
-                  {title} English
+                 <span className="relative inline-block">
+                  <span className="text-3xl hidden md:block md:text-7xl absolute inset-x-[-10px] inset-y-2 bg-blue-100 rounded -z-10" />
+                  {title}
                   {/* Eloo Tag */}
-                  <span className="absolute -right-8 -top-4 bg-blue-500 text-[10px] text-white px-2 py-0.5 rounded-md font-black shadow-sm">
+                  <span className="absolute hidden md:block -right-8 -top-4 bg-blue-500 text-[10px] text-white px-2 py-0.5 rounded-md font-black shadow-sm">
                     Eloo
                   </span>
                 </span> <br />
-                certification test
+                certification
               </h1>
 
               {/* Sub-description */}
@@ -68,8 +81,11 @@ const EnglishTestHero = ({ title = 'TOEFL', examData }: EnglishTestHeroProps) =>
 
               {/* CTA Buttons */}
               <div className="flex items-center justify-center mt-10">
-                <button className="flex items-center justify-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95">
-                  Try Now <Sparkles size={18} fill="currentColor" />
+                <button
+                  onClick={handleStartTest}
+                  className="flex items-center justify-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95"
+                >
+                  Start Test <Sparkles size={18} fill="currentColor" />
                 </button>
               </div>
             </div>

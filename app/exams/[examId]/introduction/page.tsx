@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { BookOpen, Headphones, PenTool, Mic2 } from 'lucide-react';
 import { useGeneralExamContext } from '@/src/context/GeneralExamContext';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { exam } from '@/src/api/exam';
 
 const getCookie = (name: string) => {
@@ -16,7 +16,7 @@ const getCookie = (name: string) => {
 };
 
 export default function ExamIntroductionPage() {
-  const { sections } = useGeneralExamContext();
+  const { sections, setExamSessionId, setCurrentSectionSession } = useGeneralExamContext();
   const params = useParams();
   const router = useRouter();
   const examId = params.examId as string;
@@ -31,37 +31,47 @@ export default function ExamIntroductionPage() {
     return <BookOpen size={24} />; // Default reading/other
   };
 
-  const getSectionDuration = (title: string) => {
-    const t = title.toLowerCase();
-    if (t.includes('listen')) return '20 mins';
-    if (t.includes('writ')) return '35 mins';
-    if (t.includes('speak')) return '15 mins';
-    return '20 mins';
-  };
-
   const testSections = sections.length > 0 ? sections.map(s => ({
     icon: getSectionIcon(s.title || ''),
     title: s.title || 'Section',
-    duration: getSectionDuration(s.title || ''),
+    duration: s.durationMinutes ? `${s.durationMinutes} mins` : '-- mins',
   })) : [
-    { icon: <BookOpen size={24} />, title: 'Reading', duration: '20 mins' },
-    { icon: <Headphones size={24} />, title: 'Listening', duration: '20 mins' },
-    { icon: <PenTool size={24} />, title: 'Writing', duration: '35 mins' },
-    { icon: <Mic2 size={24} />, title: 'Speaking', duration: '15 mins' },
+    { icon: <BookOpen size={24} />, title: 'Reading', duration: '-- mins' },
+    { icon: <Headphones size={24} />, title: 'Listening', duration: '-- mins' },
+    { icon: <PenTool size={24} />, title: 'Writing', duration: '-- mins' },
+    { icon: <Mic2 size={24} />, title: 'Speaking', duration: '-- mins' },
   ];
 
-  // If sections exist, the first section ID is where we go next.
-  const nextUrl = sections.length > 0 
-    ? `/exams/${examId}/section/${sections[0].id}`
-    : '#';
+  // Helper: store session data from API response and navigate
+  const storeSessionAndNavigate = useCallback((session: any, checkpoint: any) => {
+    // Store exam session
+    setExamSessionId(session.id);
+    localStorage.setItem('currentExamSessionId', session.id);
 
-    const handleStart = async () => {
+    // Store current section session
+    if (session.currentSectionSession) {
+      const ss = session.currentSectionSession;
+      setCurrentSectionSession(ss);
+      localStorage.setItem('currentSectionSessionId', ss.id);
+      localStorage.setItem('currentSectionEndTimeLimit', ss.endTimeLocale || ss.endTimeLimit);
+    }
+
+    // Navigate based on checkpoint or section
+    if (checkpoint?.questionId && checkpoint?.sectionId) {
+      router.push(`/exams/${session.examId || examId}/section/${checkpoint.sectionId}/question/${checkpoint.questionId}`);
+    } else if (session.currentSectionSession?.examSectionId) {
+      router.push(`/exams/${session.examId || examId}/section/${session.currentSectionSession.examSectionId}`);
+    } else if (sections.length > 0) {
+      router.push(`/exams/${examId}/section/${sections[0].id}`);
+    }
+  }, [examId, sections, router, setExamSessionId, setCurrentSectionSession]);
+
+  const handleStart = async () => {
     if (sections.length === 0) return;
     setLoading(true);
     try {
       const token = getCookie('token') || '';
       const cookieUserId = getCookie('userId');
-      
       const userId = cookieUserId ? parseInt(cookieUserId, 10) : 2;
 
       const res = await exam.startExam({
@@ -70,19 +80,38 @@ export default function ExamIntroductionPage() {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
       }, token);
 
-      console.log(res);
+      console.log('startExam response:', res);
 
-      if (res && res.session.id) {
-        console.log(res.session);
-        console.log(res.session.id);
-        console.log(res.session.endTimeLocale);
-        if (res.session.id) localStorage.setItem('currentExamSessionId', res.session.id);
-        if (res.session.endTimeLocale) localStorage.setItem('currentExamEndTimeLimit', res.session.endTimeLocale);
+      // Check if this is an "ongoing session" response (200 with ongoing message)
+      if (res?.message === 'Ongoing session already exists' && res?.session) {
+        storeSessionAndNavigate(res.session, res.checkpoint || null);
+        return;
+      }
+
+      if (res && res.session) {
+        // Fresh start — store session and navigate to first section
+        const sessionId = res.session.id;
+        setExamSessionId(sessionId);
+        localStorage.setItem('currentExamSessionId', sessionId);
+
+        if (res.session.currentSectionSession) {
+          const sectionSession = res.session.currentSectionSession;
+          setCurrentSectionSession(sectionSession);
+          localStorage.setItem('currentSectionSessionId', sectionSession.id);
+          localStorage.setItem('currentSectionEndTimeLimit', sectionSession.endTimeLocale || sectionSession.endTimeLimit);
+        }
       }
 
       router.push(`/exams/${examId}/section/${sections[0].id}`);
     } catch (e: any) {
       console.error('Failed to start exam:', e.response?.data || e);
+
+      // Handle 409 Conflict — ongoing session: store and redirect immediately
+      if (e.response?.status === 409 && e.response?.data?.session) {
+        storeSessionAndNavigate(e.response.data.session, e.response.data.checkpoint || null);
+        return;
+      }
+
       if (e.response?.data) {
         alert('Gagal memulai exam: ' + JSON.stringify(e.response.data));
       } else {
@@ -94,7 +123,7 @@ export default function ExamIntroductionPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col items-center justify-center font-sans overflow-hidden">
+    <div className="min-h-screen relative flex flex-col items-center justify-center font-sans overflow-hidden p-3 md:p-0">
       {/* Background Layer: Gradient & Grid */}
       <div className="absolute inset-0 z-0 flex flex-col">
         <div className="relative top-0 bottom-0 bg-gradient-to-b from-blue-50/50 to-white" />
@@ -112,7 +141,7 @@ export default function ExamIntroductionPage() {
         </div>
       </div>
 
-      {/* Header / Logo (Konsisten dengan halaman lain) */}
+      {/* Header / Logo */}
       <header className="absolute top-8 left-8 z-20">
         <div className="w-10 h-10 bg-white p-1 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
           <Image src={'/logo/logo-icon.jpg'} width={100} height={100} alt='logo' className='w-10' />
@@ -124,7 +153,6 @@ export default function ExamIntroductionPage() {
         
         {/* Card Header: Sky Image & Text */}
         <div className="h-48 bg-gradient-to-b from-blue-200 to-white relative flex flex-col items-center justify-end pb-4">
-           {/* Simulasi Awan (Bisa diganti dengan file image awan asli Anda) */}
            <div 
              className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/clouds.png')]"
              style={{ backgroundRepeat: 'repeat-x', backgroundPosition: 'center' }}
@@ -157,7 +185,7 @@ export default function ExamIntroductionPage() {
             ))}
           </div>
 
-          {/* Instructions List (Bullet Points) */}
+          {/* Instructions List */}
           <ul className="space-y-5 text-slate-600 text-[13px] leading-relaxed mb-12">
              {[
               "Check you will have enough time to complete the whole test before you begin. Once you begin the test, you cannot pause the timer or restart the test. You can take very short breaks between test sections if needed. These breaks are also timed.",

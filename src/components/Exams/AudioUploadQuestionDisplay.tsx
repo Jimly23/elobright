@@ -17,9 +17,12 @@ interface AudioUploadQuestionDisplayProps {
   question: any;
   currentIndex: number;
   onNext: () => void;
+  onPrev?: () => void;
+  isLastQuestion?: boolean;
+  finishing?: boolean;
 }
 
-export default function AudioUploadQuestionDisplay({ question, currentIndex, onNext }: AudioUploadQuestionDisplayProps) {
+export default function AudioUploadQuestionDisplay({ question, currentIndex, onNext, onPrev }: AudioUploadQuestionDisplayProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -67,15 +70,15 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
     
     setSubmitting(true);
     try {
-      const sessionId = localStorage.getItem('currentExamSessionId');
+      const sectionSessionId = localStorage.getItem('currentSectionSessionId');
       const token = getCookie('token') || '';
       
-      if (sessionId) {
+      if (sectionSessionId) {
         const formData = new FormData();
         formData.append("questionId", question.id);
         formData.append("audio", fileToSend, "answer.mp3");
 
-        await exam.recordAnswerSpeaking(sessionId, formData, token);
+        await exam.recordAnswerSpeaking(sectionSessionId, formData, token);
       }
       onNext();
     } catch (e) {
@@ -143,17 +146,30 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
           </div>
         )}
 
-        {/* Tombol Kirim */}
-        <button 
-          onClick={handleSend}
-          disabled={!audioUrl || submitting}
-          className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${
-            audioUrl && !submitting ? 'bg-blue-500 text-white shadow-xl shadow-blue-200 hover:bg-blue-600 active:scale-[0.98]' : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-          }`}
-        >
-          <Send size={18} />
-          {submitting ? 'Submitting...' : 'Send Answer'}
-        </button>
+        {/* Tombol Navigasi */}
+        <div className="flex items-center justify-between mt-2">
+          {onPrev ? (
+            <button
+              onClick={onPrev}
+              disabled={submitting}
+              className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95 disabled:opacity-50"
+            >
+              ← Previous
+            </button>
+          ) : (
+            <div />
+          )}
+          <button 
+            onClick={handleSend}
+            disabled={!audioUrl || submitting}
+            className={`px-10 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${
+              audioUrl && !submitting ? 'bg-blue-500 text-white shadow-xl shadow-blue-200 hover:bg-blue-600 active:scale-[0.98]' : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+            }`}
+          >
+            <Send size={18} />
+            {submitting ? 'Submitting...' : 'Send Answer'}
+          </button>
+        </div>
       </div>
     </div>
   );
