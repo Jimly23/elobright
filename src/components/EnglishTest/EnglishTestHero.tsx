@@ -15,11 +15,11 @@ interface ExamData {
 
 interface EnglishTestHeroProps {
   title?: string;
-  url: string;
+  url?: string;
   examData?: ExamData | null;
 }
 
-const EnglishTestHero = ({ title = 'TOEFL', url, examData }: EnglishTestHeroProps) => {
+const EnglishTestHero = ({ title = 'TOEFL', url = '#', examData }: EnglishTestHeroProps) => {
   const router = useRouter();
   const duration = examData ? `${examData.durationMinutes} mins` : '120 mins';
 
