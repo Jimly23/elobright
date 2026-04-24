@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authService } from '@/src/api/auth';
 import CryptoJS from 'crypto-js';
 import Cookies from 'js-cookie';
 
-export default function SignInPage() {
+function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
@@ -147,5 +147,17 @@ export default function SignInPage() {
         Don&apos;t have an account? <a href="/signup" className="text-slate-900 font-bold hover:underline">Sign up</a>
       </p>
     </>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    }>
+      <SignInContent />
+    </Suspense>
   );
 }
