@@ -85,7 +85,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
 
         <QuestionFeaturedResources imageUrl={question.imageUrl} narrativeText={question.narrativeText} />
 
-        <h2 className="text-xl md:text-2xl font-medium text-slate-700 leading-relaxed mb-5">
+        <h2 className="text-xl md:text-2xl font-medium text-slate-700 leading-relaxed mb-5 text-left">
           {question.questionText || 'No question found.'}
         </h2>
         
@@ -116,7 +116,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
                   {selectedOption === option.id && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />}
                 </div>
 
-                <span className={`font-bold ${selectedOption === option.id ? 'text-white' : 'text-slate-600'}`}>
+                <span className={`font-bold text-left ${selectedOption === option.id ? 'text-white' : 'text-slate-600'}`}>
                   {option.optionText || option.label}
                 </span>
               </label>

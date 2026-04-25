@@ -57,7 +57,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
       <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-200 mt-10">
         
         {/* Question Badge */}
-        <div className="flex justify-center mb-10">
+        <div className="flex md:justify-center mb-10">
           <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-5 py-2 rounded-full uppercase tracking-[0.2em] border border-blue-100">
             Question {currentIndex + 1 < 10 ? `0${currentIndex + 1}` : currentIndex + 1}
           </span>
@@ -66,7 +66,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
         <QuestionFeaturedResources imageUrl={question.imageUrl} narrativeText={question.narrativeText} />
 
         {/* Question Text */}
-        <h2 className="text-xl md:text-2xl font-medium text-slate-700 text-center leading-relaxed mb-12">
+        <h2 className="text-xl md:text-2xl font-medium text-slate-700 text-left md:text-center leading-relaxed mb-12">
           {question.questionText || 'No question found.'}
         </h2>
 

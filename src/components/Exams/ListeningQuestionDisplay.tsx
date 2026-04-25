@@ -237,7 +237,7 @@ export default function ListeningQuestionDisplay({
             />
 
             {/* Question Text */}
-            <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-tight mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-tight mb-6 text-left">
               {question.questionText || "No question text provided."}
             </h2>
 
@@ -325,7 +325,7 @@ export default function ListeningQuestionDisplay({
                     </div>
 
                     <span
-                      className={`text-base font-bold ${selectedOption === option.id ? "text-white" : "text-slate-700"}`}
+                      className={`text-base font-bold text-left ${selectedOption === option.id ? "text-white" : "text-slate-700"}`}
                     >
                       {option.optionText || option.label}
                     </span>

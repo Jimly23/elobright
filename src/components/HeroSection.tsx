@@ -28,10 +28,10 @@ const HeroSection = () => {
 
         {/* Main Title */}
         <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 leading-[1.1] mb-8 tracking-tight">
-          Free online English <br />
+          Online English <br />
           <span className="relative inline-block mt-3">
             <span className="absolute hidden md:block inset-x-[-10px] inset-y-0 bg-blue-100 rounded -rotate-1" />
-            <span className="relative px-2">certification test</span>
+            <span className="relative px-2">Certification Test</span>
             <span className="absolute hidden md:block -right-8 -top-2 bg-blue-500 text-[10px] text-white px-1.5 py-0.5 rounded-md font-black rotate-12 shadow-sm">
               Elo
             </span>
