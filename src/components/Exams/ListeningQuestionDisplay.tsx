@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Play, Pause, Volume2, AlertCircle } from "lucide-react";
+import { Play, Pause, Volume2, AlertCircle, Lock } from "lucide-react";
 import { exam } from "@/src/api/exam";
 import { useAudioPlayback } from "@/src/hooks/useAudioPlayback";
 import {
@@ -63,9 +63,11 @@ const AudioPlayer = ({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const isDisabled = state.error || state.hasPlayed;
+
   return (
     <div
-      className={`flex items-center gap-6 p-6 rounded-3xl border transition-colors ${state.error ? "bg-red-50 border-red-100" : "bg-blue-50/50 border-blue-100"}`}
+      className={`flex items-center gap-6 p-6 rounded-3xl border transition-colors ${state.error ? "bg-red-50 border-red-100" : state.hasPlayed ? "bg-slate-50 border-slate-200" : "bg-blue-50/50 border-blue-100"}`}
     >
       {isHLS ? (
         <HLSAudioElement src={src} audioRef={audioRef} handlers={handlers} />
@@ -74,11 +76,13 @@ const AudioPlayer = ({
       )}
       <button
         onClick={togglePlay}
-        disabled={state.error}
-        className={`w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-lg ${state.error ? "bg-slate-300 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 shadow-blue-200"}`}
+        disabled={isDisabled}
+        className={`w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-lg ${state.error ? "bg-slate-300 cursor-not-allowed" : state.hasPlayed ? "bg-slate-300 cursor-not-allowed text-white" : "bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 shadow-blue-200"}`}
       >
         {state.error ? (
           <AlertCircle />
+        ) : state.hasPlayed ? (
+          <Lock size={22} />
         ) : state.isPlaying ? (
           <Pause fill="currentColor" />
         ) : (
@@ -87,11 +91,11 @@ const AudioPlayer = ({
       </button>
       <div>
         <p
-          className={`${state.error ? "text-red-500" : "text-blue-600"} text-xs font-black uppercase tracking-wider mb-1`}
+          className={`${state.error ? "text-red-500" : state.hasPlayed ? "text-slate-400" : "text-blue-600"} text-xs font-black uppercase tracking-wider mb-1`}
         >
-          {state.error ? "Playback Error" : label}
+          {state.error ? "Playback Error" : state.hasPlayed ? "Played" : label}
         </p>
-        <p className="text-slate-800 font-black text-xl tabular-nums">
+        <p className={`font-black text-xl tabular-nums ${state.hasPlayed ? "text-slate-400" : "text-slate-800"}`}>
           {state.error
             ? "--:--"
             : `${formatTime(state.progress)} / ${formatTime(state.duration)}`}
@@ -240,7 +244,7 @@ export default function ListeningQuestionDisplay({
             {/* Question Audio Player (if exists) */}
             {question.questionAudioUrl && (
               <div
-                className={`mb-10 flex items-center gap-4 p-4 rounded-2xl border shadow-sm w-fit transition-colors ${rightAudio.state.error ? "bg-red-50 border-red-100" : "bg-white border-slate-100"}`}
+                className={`mb-10 flex items-center gap-4 p-4 rounded-2xl border shadow-sm w-fit transition-colors ${rightAudio.state.error ? "bg-red-50 border-red-100" : rightAudio.state.hasPlayed ? "bg-slate-50 border-slate-200" : "bg-white border-slate-100"}`}
               >
                 {rightSrc.endsWith(".m3u8") ? (
                   <HLSAudioElement
@@ -257,11 +261,13 @@ export default function ListeningQuestionDisplay({
                 )}
                 <button
                   onClick={rightAudio.togglePlay}
-                  disabled={rightAudio.state.error}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${rightAudio.state.error ? "bg-red-100 text-red-500 cursor-not-allowed" : "bg-blue-100 text-blue-600 hover:bg-blue-200"}`}
+                  disabled={rightAudio.state.error || rightAudio.state.hasPlayed}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${rightAudio.state.error ? "bg-red-100 text-red-500 cursor-not-allowed" : rightAudio.state.hasPlayed ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-blue-100 text-blue-600 hover:bg-blue-200"}`}
                 >
                   {rightAudio.state.error ? (
                     <AlertCircle size={14} />
+                  ) : rightAudio.state.hasPlayed ? (
+                    <Lock size={14} />
                   ) : rightAudio.state.isPlaying ? (
                     <Pause size={18} fill="currentColor" />
                   ) : (
@@ -269,11 +275,13 @@ export default function ListeningQuestionDisplay({
                   )}
                 </button>
                 <div
-                  className={`text-xs font-black tabular-nums ${rightAudio.state.error ? "text-red-400" : "text-slate-500"}`}
+                  className={`text-xs font-black tabular-nums ${rightAudio.state.error ? "text-red-400" : rightAudio.state.hasPlayed ? "text-slate-400" : "text-slate-500"}`}
                 >
                   {rightAudio.state.error
                     ? "Error"
-                    : `${formatTime(rightAudio.state.progress)} / ${formatTime(rightAudio.state.duration)}`}
+                    : rightAudio.state.hasPlayed
+                      ? "Played"
+                      : `${formatTime(rightAudio.state.progress)} / ${formatTime(rightAudio.state.duration)}`}
                 </div>
               </div>
             )}

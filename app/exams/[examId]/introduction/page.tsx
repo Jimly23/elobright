@@ -1,7 +1,7 @@
 "use client";
 
 import Image from 'next/image';
-import { BookOpen, Headphones, PenTool, Mic2 } from 'lucide-react';
+import { BookOpen, Headphones, PenTool, Mic2, Loader2 } from 'lucide-react';
 import { useGeneralExamContext } from '@/src/context/GeneralExamContext';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
@@ -124,6 +124,63 @@ export default function ExamIntroductionPage() {
 
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center font-sans overflow-hidden p-3 md:p-0">
+
+      {/* ── Full-Screen Loading Overlay ── */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-md">
+          {/* Animated ring */}
+          <div className="relative w-28 h-28 mb-8">
+            {/* Outer spinning ring */}
+            <div className="absolute inset-0 rounded-full border-[5px] border-blue-100" />
+            <div
+              className="absolute inset-0 rounded-full border-[5px] border-transparent border-t-blue-500 border-r-blue-400"
+              style={{ animation: 'spin 1s linear infinite' }}
+            />
+            {/* Inner icon */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-200">
+                <Loader2 size={28} className="text-white" style={{ animation: 'spin 1.5s linear infinite' }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Text */}
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">Preparing Your Exam</h2>
+          <p className="text-slate-400 font-medium text-sm mb-8">Setting up your session, please wait...</p>
+
+          {/* Animated dots */}
+          <div className="flex gap-2">
+            {[0, 1, 2].map(i => (
+              <div
+                key={i}
+                className="w-2.5 h-2.5 bg-blue-400 rounded-full"
+                style={{
+                  animation: 'bounce 1.2s ease-in-out infinite',
+                  animationDelay: `${i * 0.15}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* CSS keyframes */}
+          <style jsx>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+            @keyframes bounce {
+              0%, 80%, 100% {
+                transform: scale(0.6);
+                opacity: 0.4;
+              }
+              40% {
+                transform: scale(1);
+                opacity: 1;
+              }
+            }
+          `}</style>
+        </div>
+      )}
+
       {/* Background Layer: Gradient & Grid */}
       <div className="absolute inset-0 z-0 flex flex-col">
         <div className="relative top-0 bottom-0 bg-gradient-to-b from-blue-50/50 to-white" />
@@ -207,7 +264,12 @@ export default function ExamIntroductionPage() {
               disabled={sections.length === 0 || loading}
               className="w-full py-4.5 bg-blue-400 hover:bg-blue-500 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-[0.98] focus:ring-4 focus:ring-blue-200 outline-none disabled:bg-slate-300 disabled:shadow-none"
             >
-               {loading ? 'Starting...' : 'Continue'}
+               {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 size={18} className="animate-spin" />
+                  Starting...
+                </span>
+              ) : 'Continue'}
             </button>
           </div>
         </div>
@@ -222,3 +284,4 @@ export default function ExamIntroductionPage() {
     </div>
   );
 }
+

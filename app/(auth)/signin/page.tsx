@@ -9,7 +9,7 @@ import Cookies from 'js-cookie';
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = searchParams.get('callbackUrl') || '/exams/f9a81bb6-3bcb-11f1-8449-8121fa317a64/introduction';
   const [formData, setFormData] = useState({
     email: '',
     password: '',

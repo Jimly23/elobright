@@ -174,7 +174,8 @@ export default function QuestionPage() {
           question={currentQuestion} 
           currentIndex={currentIndex} 
           onNext={handleNext}
-          onPrev={currentIndex > 0 ? handlePrev : undefined}
+          // onPrev temporarily disabled
+          // onPrev={currentIndex > 0 ? handlePrev : undefined}
           isLastQuestion={isLastQuestion}
           finishing={finishing}
         />

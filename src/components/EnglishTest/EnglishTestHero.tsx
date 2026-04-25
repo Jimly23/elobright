@@ -64,14 +64,13 @@ const EnglishTestHero = ({ title = 'TOEFL', url = '#', examData }: EnglishTestHe
               {/* Heading */}
               <h1 className="text-4xl md:text-7xl font-extrabold text-slate-900 leading-[1.1] tracking-tight text-center">
                  <span className="relative inline-block">
-                  <span className="text-3xl hidden md:block md:text-7xl absolute inset-x-[-10px] inset-y-2 bg-blue-100 rounded -z-10" />
+                  <span className="text-3xl hidden md:block md:text-7xl absolute inset-x-[-10px] inset-y-2 rounded -z-10" />
                   {title}
                   {/* Eloo Tag */}
                   <span className="absolute hidden md:block -right-8 -top-4 bg-blue-500 text-[10px] text-white px-2 py-0.5 rounded-md font-black shadow-sm">
                     Eloo
                   </span>
                 </span> <br />
-                certification
               </h1>
 
               {/* Sub-description */}

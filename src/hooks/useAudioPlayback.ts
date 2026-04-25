@@ -7,6 +7,7 @@ export interface AudioPlaybackState {
   progress: number;
   duration: number;
   error: boolean;
+  hasPlayed: boolean; // true after audio has finished playing once
 }
 
 export function useAudioPlayback() {
@@ -15,12 +16,16 @@ export function useAudioPlayback() {
     progress: 0,
     duration: 0,
     error: false,
+    hasPlayed: false,
   });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const togglePlay = useCallback(() => {
     if (!audioRef.current || state.error) return;
+
+    // Block playback if audio has already been played once
+    if (state.hasPlayed) return;
 
     if (state.isPlaying) {
       audioRef.current.pause();
@@ -30,7 +35,7 @@ export function useAudioPlayback() {
         setState((s) => ({ ...s, error: true }));
       });
     }
-  }, [state.isPlaying, state.error]);
+  }, [state.isPlaying, state.error, state.hasPlayed]);
 
   const handleTimeUpdate = useCallback(() => {
     if (audioRef.current) {
@@ -49,7 +54,8 @@ export function useAudioPlayback() {
   }, []);
 
   const handleEnded = useCallback(() => {
-    setState((s) => ({ ...s, isPlaying: false }));
+    // Mark audio as played once it finishes
+    setState((s) => ({ ...s, isPlaying: false, hasPlayed: true }));
   }, []);
 
   const handleError = useCallback(() => {
@@ -70,6 +76,7 @@ export function useAudioPlayback() {
       progress: 0,
       duration: 0,
       error: false,
+      hasPlayed: false,
     });
   }, []);
 
