@@ -134,6 +134,10 @@ export const examService = {
     const response = await api.get('/exam-sessions/my-submissions', getConfig(token));
     return response.data;
   },
+  getExamHistory: async (token?: string) => {
+    const response = await api.get('/exam-sessions/history', getConfig(token));
+    return response.data;
+  },
 };
 
 // Aliases untuk backward compatibility dengan kode lama

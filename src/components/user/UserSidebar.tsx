@@ -7,10 +7,10 @@ const UserSidebar = () => {
 
   const links = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'My Exams', href: '/dashboard/exams', icon: BookOpen },
+    // { name: 'My Exams', href: '/dashboard/exams', icon: BookOpen },
     { name: 'Scores', href: '/dashboard/scores', icon: Trophy },
-    { name: 'History', href: '/dashboard/history', icon: Clock },
-    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+    // { name: 'History', href: '/dashboard/history', icon: Clock },
+    // { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
 
   return (

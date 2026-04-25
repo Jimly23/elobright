@@ -14,6 +14,8 @@ import {
   ChevronUp,
   Loader2,
   FileX2,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
 
 const getCookie = (name: string) => {
@@ -35,79 +37,132 @@ const getSectionIcon = (title: string) => {
 
 const getSectionColor = (title: string) => {
   const t = title.toLowerCase();
-  if (t.includes("listen")) return { bg: "bg-purple-50", text: "text-purple-600", border: "border-purple-100", bar: "bg-purple-500" };
-  if (t.includes("read")) return { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-100", bar: "bg-blue-500" };
-  if (t.includes("writ")) return { bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-100", bar: "bg-amber-500" };
-  if (t.includes("speak")) return { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-100", bar: "bg-emerald-500" };
-  return { bg: "bg-slate-50", text: "text-slate-600", border: "border-slate-100", bar: "bg-slate-500" };
+  if (t.includes("listen"))
+    return {
+      bg: "bg-purple-50",
+      text: "text-purple-600",
+      border: "border-purple-100",
+      bar: "bg-purple-500",
+      iconBg: "bg-purple-100",
+    };
+  if (t.includes("read"))
+    return {
+      bg: "bg-blue-50",
+      text: "text-blue-600",
+      border: "border-blue-100",
+      bar: "bg-blue-500",
+      iconBg: "bg-blue-100",
+    };
+  if (t.includes("writ"))
+    return {
+      bg: "bg-amber-50",
+      text: "text-amber-600",
+      border: "border-amber-100",
+      bar: "bg-amber-500",
+      iconBg: "bg-amber-100",
+    };
+  if (t.includes("speak"))
+    return {
+      bg: "bg-emerald-50",
+      text: "text-emerald-600",
+      border: "border-emerald-100",
+      bar: "bg-emerald-500",
+      iconBg: "bg-emerald-100",
+    };
+  return {
+    bg: "bg-slate-50",
+    text: "text-slate-600",
+    border: "border-slate-100",
+    bar: "bg-slate-500",
+    iconBg: "bg-slate-100",
+  };
+};
+
+// Check if a section is under review (Writing/Speaking with score 0)
+const isSectionUnderReview = (title: string, totalScore: number) => {
+  const t = title.toLowerCase();
+  return totalScore === 0 && (t.includes("speak") || t.includes("writ"));
 };
 
 interface SectionScore {
   title: string;
   totalScore: number;
-  allScore: number;
   status: string;
+  isUnderReview: boolean;
 }
 
-interface ExamSubmission {
+interface ExamHistory {
   id: string;
   examId: string;
   examTitle: string;
+  examType: string;
   status: string;
   startedAt: string;
   submittedAt: string | null;
   totalScore: number;
-  maxScore: number;
   sectionScores: SectionScore[];
 }
 
 export default function ScoresPage() {
-  const [submissions, setSubmissions] = useState<ExamSubmission[]>([]);
+  const [history, setHistory] = useState<ExamHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchScores = async () => {
+    const fetchHistory = async () => {
       try {
         const token = getCookie("token") || "";
-        const data = await exam.getMySubmissions(token);
-        console.log("My submissions:", data);
+        const data = await exam.getExamHistory(token);
+        console.log("Exam history:", data);
 
-        // Map API response to our interface
         if (Array.isArray(data)) {
-          const mapped: ExamSubmission[] = data.map((sub: any) => {
-            const sectionScores: SectionScore[] = (sub.sectionSubmissions || []).map((ss: any) => ({
-              title: ss.section?.title || ss.examSection?.title || "Section",
-              totalScore: ss.totalScore || 0,
-              allScore: ss.allScore || 0,
-              status: ss.status || "unknown",
-            }));
+          const mapped: ExamHistory[] = data.map((session: any) => {
+            const sectionScores: SectionScore[] = (
+              session.examSectionSubmissions || []
+            ).map((ss: any) => {
+              const title = ss.section?.title || "Section";
+              const totalScore = ss.totalScore || 0;
+              return {
+                title,
+                totalScore,
+                status: ss.status || "unknown",
+                isUnderReview: isSectionUnderReview(title, totalScore),
+              };
+            });
 
-            const totalScore = sectionScores.reduce((sum, s) => sum + s.totalScore, 0);
-            const maxScore = sectionScores.reduce((sum, s) => sum + s.allScore, 0);
+            // Only sum scores from non-review sections
+            const totalScore = sectionScores.reduce(
+              (sum, s) => sum + (s.isUnderReview ? 0 : s.totalScore),
+              0,
+            );
 
             return {
-              id: sub.id,
-              examId: sub.examId,
-              examTitle: sub.exam?.title || "Exam",
-              status: sub.status || "unknown",
-              startedAt: sub.startedAt,
-              submittedAt: sub.submittedAt,
+              id: session.id,
+              examId: session.examId,
+              examTitle: session.exam?.title || "Exam",
+              examType: session.exam?.type || "SIMULATION",
+              status: session.status || "unknown",
+              startedAt: session.startedAt,
+              submittedAt: session.submittedAt,
               totalScore,
-              maxScore,
               sectionScores,
             };
           });
-          setSubmissions(mapped);
+          setHistory(mapped);
+
+          // Auto-expand first item
+          if (mapped.length > 0) {
+            setExpandedId(mapped[0].id);
+          }
         }
       } catch (error) {
-        console.error("Failed to fetch submissions:", error);
+        console.error("Failed to fetch exam history:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchScores();
+    fetchHistory();
   }, []);
 
   const toggleExpand = (id: string) => {
@@ -130,13 +185,15 @@ export default function ScoresPage() {
       case "submitted":
       case "finished":
         return (
-          <span className="px-3 py-1 text-[11px] font-bold rounded-full bg-green-50 text-green-600 border border-green-100 uppercase tracking-wider">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold rounded-full bg-green-50 text-green-600 border border-green-100 uppercase tracking-wider">
+            <CheckCircle2 size={12} />
             Completed
           </span>
         );
       case "ongoing":
         return (
-          <span className="px-3 py-1 text-[11px] font-bold rounded-full bg-amber-50 text-amber-600 border border-amber-100 uppercase tracking-wider">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold rounded-full bg-amber-50 text-amber-600 border border-amber-100 uppercase tracking-wider">
+            <Clock size={12} />
             In Progress
           </span>
         );
@@ -154,7 +211,9 @@ export default function ScoresPage() {
       <div className="flex items-center justify-center h-full min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 size={40} className="text-blue-500 animate-spin" />
-          <p className="text-slate-400 text-sm font-medium">Loading your scores...</p>
+          <p className="text-slate-400 text-sm font-medium">
+            Loading your scores...
+          </p>
         </div>
       </div>
     );
@@ -178,138 +237,156 @@ export default function ScoresPage() {
       </div>
 
       {/* Empty State */}
-      {submissions.length === 0 && (
+      {history.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 flex flex-col items-center text-center">
           <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
             <FileX2 size={32} className="text-slate-300" />
           </div>
-          <h3 className="text-lg font-bold text-slate-700 mb-2">No Scores Yet</h3>
+          <h3 className="text-lg font-bold text-slate-700 mb-2">
+            No Scores Yet
+          </h3>
           <p className="text-slate-400 text-sm max-w-sm">
-            You haven't completed any exams yet. Start an exam to see your scores here.
+            You haven&apos;t completed any exams yet. Start an exam to see your
+            scores here.
           </p>
         </div>
       )}
 
-      {/* Submissions List */}
+      {/* History List */}
       <div className="space-y-4">
-        {submissions.map((sub) => {
-          const isExpanded = expandedId === sub.id;
-          const scorePercentage = sub.maxScore > 0 ? Math.round((sub.totalScore / sub.maxScore) * 100) : 0;
+        {history.map((item) => {
+          const isExpanded = expandedId === item.id;
+          const reviewCount = item.sectionScores.filter(
+            (s) => s.isUnderReview,
+          ).length;
 
           return (
             <div
-              key={sub.id}
+              key={item.id}
               className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all hover:shadow-md"
             >
               {/* Summary Row */}
               <button
-                onClick={() => toggleExpand(sub.id)}
+                onClick={() => toggleExpand(item.id)}
                 className="w-full px-6 py-5 flex items-center justify-between gap-4 text-left hover:bg-slate-50/50 transition-colors"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   {/* Score Circle */}
                   <div className="relative w-14 h-14 flex-shrink-0">
-                    <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
-                      <circle cx="28" cy="28" r="24" fill="none" stroke="#f1f5f9" strokeWidth="4" />
-                      <circle
-                        cx="28" cy="28" r="24" fill="none"
-                        stroke={scorePercentage >= 70 ? "#22c55e" : scorePercentage >= 40 ? "#f59e0b" : "#ef4444"}
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeDasharray={`${(scorePercentage / 100) * 150.8} 150.8`}
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-sm font-black text-slate-800">{scorePercentage}%</span>
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-200/50">
+                      <span className="text-lg font-black text-white">
+                        {item.totalScore}
+                      </span>
                     </div>
                   </div>
 
                   {/* Info */}
                   <div className="min-w-0">
-                    <h3 className="font-bold text-slate-800 truncate">{sub.examTitle}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Calendar size={12} className="text-slate-400" />
-                      <span className="text-xs text-slate-400 font-medium">{formatDate(sub.submittedAt || sub.startedAt)}</span>
+                    <h3 className="font-bold text-slate-800 truncate">
+                      {item.examTitle}
+                    </h3>
+                    <div className="flex items-center gap-3 mt-1">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar size={12} className="text-slate-400" />
+                        <span className="text-xs text-slate-400 font-medium">
+                          {formatDate(item.submittedAt || item.startedAt)}
+                        </span>
+                      </div>
+                      {reviewCount > 0 && (
+                        <span className="text-[10px] font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                          {reviewCount} section{reviewCount > 1 ? "s" : ""}{" "}
+                          under review
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4 flex-shrink-0">
-                  {/* Total Score */}
-                  <div className="text-right hidden sm:block">
-                    <p className="text-xl font-black text-slate-800">{sub.totalScore}</p>
-                    <p className="text-[11px] text-slate-400 font-bold">/ {sub.maxScore}</p>
-                  </div>
-
-                  {getStatusBadge(sub.status)}
-
+                  {getStatusBadge(item.status)}
                   <div className="text-slate-400">
-                    {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    {isExpanded ? (
+                      <ChevronUp size={20} />
+                    ) : (
+                      <ChevronDown size={20} />
+                    )}
                   </div>
                 </div>
               </button>
 
-              {/* Expanded Section Breakdown */}
+              {/* Expanded Section Breakdown — styled like the finish page */}
               <div
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  isExpanded ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+                  isExpanded
+                    ? "max-h-[800px] opacity-100"
+                    : "max-h-0 opacity-0"
                 }`}
               >
                 <div className="px-6 pb-6 pt-2 border-t border-gray-50">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
+                  {/* Estimated Score Banner */}
+                  <div className="bg-blue-50/50 border-2 border-blue-100 rounded-2xl p-5 flex flex-col items-center mb-6 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-3 opacity-10">
+                      <Trophy size={80} />
+                    </div>
+                    <span className="text-blue-500 font-bold uppercase tracking-wider text-[10px] mb-1 relative z-10">
+                      Estimated Score
+                    </span>
+                    <div className="text-4xl font-black text-blue-600 relative z-10">
+                      {item.totalScore}
+                    </div>
+                    <span className="text-slate-400 text-[11px] mt-1 relative z-10">
+                      {reviewCount > 0
+                        ? `${reviewCount} section${reviewCount > 1 ? "s" : ""} still under review`
+                        : "Final Score"}
+                    </span>
+                  </div>
+
+                  {/* Section Breakdown Grid */}
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
                     Section Breakdown
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {sub.sectionScores.map((section, idx) => {
+                    {item.sectionScores.map((section, idx) => {
                       const color = getSectionColor(section.title);
-                      const isPending =
-                        section.totalScore === 0 &&
-                        (section.title.toLowerCase().includes("speak") ||
-                          section.title.toLowerCase().includes("writ"));
-                      const pct =
-                        section.allScore > 0
-                          ? Math.round((section.totalScore / section.allScore) * 100)
-                          : 0;
 
                       return (
                         <div
                           key={idx}
-                          className={`${color.bg} border ${color.border} rounded-xl p-4`}
+                          className={`${color.bg} border ${color.border} rounded-xl p-4 relative overflow-hidden`}
                         >
                           {/* Section Header */}
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className={`p-1.5 bg-white rounded-lg shadow-sm ${color.text}`}>
+                          <div className="flex items-center gap-2 mb-3 relative z-10">
+                            <div
+                              className={`p-1.5 bg-white rounded-lg shadow-sm ${color.text}`}
+                            >
                               {getSectionIcon(section.title)}
                             </div>
-                            <span className="font-bold text-sm text-slate-700">
+                            <span className="font-bold text-xs text-slate-600">
                               {section.title}
                             </span>
                           </div>
 
                           {/* Score */}
-                          {isPending ? (
-                            <p className="text-sm font-bold text-orange-500">Under Review</p>
-                          ) : (
-                            <>
-                              <div className="flex items-baseline gap-1 mb-2">
+                          <div className="relative z-10">
+                            {section.isUnderReview ? (
+                              <div className="flex items-center gap-1.5">
+                                <Clock size={14} className="text-orange-400" />
+                                <span className="text-sm font-bold text-orange-500">
+                                  Under Review
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="flex items-baseline gap-1">
                                 <span className="text-2xl font-black text-slate-800">
                                   {section.totalScore}
                                 </span>
                                 <span className="text-xs font-bold text-slate-400">
-                                  / {section.allScore}
+                                  pts
                                 </span>
                               </div>
-
-                              {/* Progress bar */}
-                              <div className="w-full h-1.5 bg-white/60 rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full ${color.bar} rounded-full transition-all duration-500`}
-                                  style={{ width: `${pct}%` }}
-                                />
-                              </div>
-                            </>
-                          )}
+                            )}
+                          </div>
                         </div>
                       );
                     })}
