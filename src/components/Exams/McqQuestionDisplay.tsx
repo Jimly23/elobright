@@ -110,7 +110,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
                   onChange={() => setSelectedOption(option.id)}
                 />
                 
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                <div className={`w-6 h-6 min-w-6 min-h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                    selectedOption === option.id ? 'border-white bg-white text-blue-500' : 'border-slate-300 bg-white'
                 }`}>
                   {selectedOption === option.id && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />}

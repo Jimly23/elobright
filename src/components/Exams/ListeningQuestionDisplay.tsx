@@ -313,7 +313,7 @@ export default function ListeningQuestionDisplay({
                     />
 
                     <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                      className={`w-6 h-6 min-w-6 min-h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                         selectedOption === option.id
                           ? "border-white bg-white text-blue-500"
                           : "border-slate-200 bg-white"
