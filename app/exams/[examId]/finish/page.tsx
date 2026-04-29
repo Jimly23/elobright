@@ -153,10 +153,10 @@ export default function ExamFinishPage() {
               Estimated Score
             </span>
             <div className="text-5xl font-black text-blue-600 relative z-10">
-              {totalScore}
+              {totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0}%
             </div>
             <span className="text-slate-400 text-xs mt-2 relative z-10">
-              / {totalMax} Total
+              ({totalScore} / {totalMax} Correct)
             </span>
           </div>
 
@@ -184,10 +184,10 @@ export default function ExamFinishPage() {
                     ) : (
                       <>
                         <span className="text-2xl font-black text-slate-800">
-                          {s.achieved}
+                          {s.max > 0 ? Math.round((s.achieved / s.max) * 100) : 0}%
                         </span>
                         <span className="text-xs font-bold text-slate-400">
-                          / {s.max}
+                          ({s.achieved}/{s.max})
                         </span>
                       </>
                     )}
