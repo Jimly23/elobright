@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { BookOpen, Headphones, PenTool, Mic2, Clock } from 'lucide-react';
+import { BookOpen, Headphones, PenTool, Mic2, Clock, ClipboardCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Option {
@@ -35,6 +35,7 @@ const SECTION_BAR_ICONS: Record<string, React.ReactNode> = {
   Listening: <Headphones size={20} />,
   Writing:   <PenTool size={20} />,
   Speaking:  <Mic2 size={20} />,
+  'Usability Testing': <ClipboardCheck size={20} />,
 };
 
 const COLOR_MAP: Record<string, string> = {
@@ -42,6 +43,7 @@ const COLOR_MAP: Record<string, string> = {
   Listening: 'text-indigo-600',
   Writing:   'text-violet-600',
   Speaking:  'text-purple-600',
+  'Usability Testing': 'text-teal-600',
 };
 
 const BG_MAP: Record<string, string> = {
@@ -49,6 +51,7 @@ const BG_MAP: Record<string, string> = {
   Listening: 'bg-indigo-500',
   Writing:   'bg-violet-500',
   Speaking:  'bg-purple-500',
+  'Usability Testing': 'bg-teal-500',
 };
 
 const SHADOW_MAP: Record<string, string> = {
@@ -56,6 +59,7 @@ const SHADOW_MAP: Record<string, string> = {
   Listening: 'shadow-indigo-200',
   Writing:   'shadow-violet-200',
   Speaking:  'shadow-purple-200',
+  'Usability Testing': 'shadow-teal-200',
 };
 
 function generateOptions(question: TestQuestion): Option[] {

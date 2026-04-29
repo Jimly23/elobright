@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { BookOpen, Headphones, PenTool, Mic2 } from 'lucide-react';
+import { BookOpen, Headphones, PenTool, Mic2, ClipboardCheck } from 'lucide-react';
 
 interface SectionIntroPageProps {
   sectionName: string;
@@ -15,6 +15,7 @@ const SECTION_META: Record<string, { icon: React.ReactNode; color: string; shado
   Listening: { icon: <Headphones size={32} />, color: 'bg-indigo-500', shadow: 'shadow-indigo-200' },
   Writing:   { icon: <PenTool size={32} />,    color: 'bg-violet-500', shadow: 'shadow-violet-200' },
   Speaking:  { icon: <Mic2 size={32} />,       color: 'bg-purple-500', shadow: 'shadow-purple-200' },
+  'Usability Testing': { icon: <ClipboardCheck size={32} />, color: 'bg-teal-500', shadow: 'shadow-teal-200' },
 };
 
 export default function SectionIntroPage({ sectionName, duration, questionCount, onStart }: SectionIntroPageProps) {

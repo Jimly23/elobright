@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Award, Target, Brain, BarChart, CheckCircle2, BookOpen, Headphones, Edit3, Mic } from "lucide-react";
+import { Award, Target, Brain, BarChart, CheckCircle2, BookOpen, Headphones, Edit3, Mic, ClipboardCheck } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { exam } from "@/src/api/exam";
 
@@ -16,6 +16,7 @@ const getCookie = (name: string) => {
 
 const getSectionIcon = (title: string) => {
   const t = title.toLowerCase();
+  if (t.includes('usability') || t.includes('feedback')) return <ClipboardCheck size={18} />;
   if (t.includes('listen')) return <Headphones size={18} />;
   if (t.includes('read')) return <BookOpen size={18} />;
   if (t.includes('writ')) return <Edit3 size={18} />;
@@ -57,9 +58,14 @@ export default function ExamFinishPage() {
   }, []);
 
   // Build score details from the actual API response
+  // Filter out Usability Testing section (it's a feedback section, not scored)
   const sectionSubmissions = finishData?.sectionSubmissions || [];
+  const scoredSubmissions = sectionSubmissions.filter((sub: any) => {
+    const title = (sub.section?.title || '').toLowerCase();
+    return !title.includes('usability') && !title.includes('feedback');
+  });
   
-  const scoreDetails = sectionSubmissions.map((sub: any) => {
+  const scoreDetails = scoredSubmissions.map((sub: any) => {
     const sectionTitle = sub.section?.title || 'Section';
     const isPending = sub.totalScore === 0 && (sectionTitle.toLowerCase().includes('speak') || sectionTitle.toLowerCase().includes('writ'));
     
@@ -71,9 +77,9 @@ export default function ExamFinishPage() {
     };
   });
 
-  // Calculate total score
-  const totalScore = sectionSubmissions.reduce((sum: number, sub: any) => sum + (sub.totalScore || 0), 0);
-  const totalMax = sectionSubmissions.reduce((sum: number, sub: any) => sum + (sub.allScore || 0), 0);
+  // Calculate total score (only from scored sections)
+  const totalScore = scoredSubmissions.reduce((sum: number, sub: any) => sum + (sub.totalScore || 0), 0);
+  const totalMax = scoredSubmissions.reduce((sum: number, sub: any) => sum + (sub.allScore || 0), 0);
 
   if (loading) {
     return (

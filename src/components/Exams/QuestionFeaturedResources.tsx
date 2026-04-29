@@ -34,9 +34,9 @@ export default function QuestionFeaturedResources({ imageUrl, narrativeText }: Q
 
       {narrativeText && (
         <div className="w-full bg-blue-50/30 border border-blue-100 p-6 rounded-2xl">
-          <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm md:text-base">
+          <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm md:text-base text-left">
             {narrativeText.split('\n').map((paragraph, idx) => (
-              paragraph.trim() ? <p key={idx} className="mb-4 last:mb-0">{paragraph}</p> : null
+              paragraph.trim() ? <p key={idx} className="mb-4 last:mb-0 text-left">{paragraph}</p> : null
             ))}
           </div>
         </div>

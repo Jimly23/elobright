@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Headphones, PenTool, Mic2 } from 'lucide-react';
+import { BookOpen, Headphones, PenTool, Mic2, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useGeneralExamContext } from '@/src/context/GeneralExamContext';
@@ -19,6 +19,7 @@ export default function SectionOnboardingPage() {
   const t = title.toLowerCase();
 
   const getSectionIcon = () => {
+    if (t.includes('usability') || t.includes('feedback')) return <ClipboardCheck size={28} />;
     if (t.includes('listen')) return <Headphones size={28} />;
     if (t.includes('writ')) return <PenTool size={28} />;
     if (t.includes('speak')) return <Mic2 size={28} />;
@@ -34,7 +35,14 @@ export default function SectionOnboardingPage() {
   };
 
   const getCustomInstructions = () => {
-    if (t.includes('listen')) {
+    if (t.includes('usability') || t.includes('feedback')) {
+      return [
+        "Berikan penilaian jujur sesuai pengalaman Anda.",
+        "Tidak ada jawaban benar atau salah.",
+        "Gunakan skala 1 (Sangat Tidak Setuju) hingga 5 (Sangat Setuju).",
+        "Terima kasih atas partisipasi Anda!"
+      ];
+    } else if (t.includes('listen')) {
       return [
         "Please listen to the audio carefully.",
         "You cannot go back once you submit an answer.",
@@ -101,7 +109,7 @@ export default function SectionOnboardingPage() {
         </div>
 
         <div className="p-10 flex flex-col items-center">
-          <div className={`w-20 h-20 bg-blue-500 text-white rounded-full flex items-center justify-center mb-4 shadow-xl shadow-blue-100`}>
+          <div className={`w-20 h-20 ${(t.includes('usability') || t.includes('feedback')) ? 'bg-teal-500 shadow-teal-100' : 'bg-blue-500 shadow-blue-100'} text-white rounded-full flex items-center justify-center mb-4 shadow-xl`}>
             {getSectionIcon()}
           </div>
           <h2 className="text-2xl font-extrabold text-slate-800 mb-1 capitalize">{title}</h2>
@@ -119,7 +127,7 @@ export default function SectionOnboardingPage() {
 
           <Link href={nextTarget} className='w-full'>
             <button
-              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] text-lg disabled:bg-slate-300 disabled:shadow-none"
+              className={`w-full py-4 ${(t.includes('usability') || t.includes('feedback')) ? 'bg-teal-500 hover:bg-teal-600 shadow-teal-200' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'} text-white font-bold rounded-2xl shadow-lg transition-all active:scale-[0.98] text-lg disabled:bg-slate-300 disabled:shadow-none`}
             >
               Start
             </button>

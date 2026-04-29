@@ -1,7 +1,7 @@
 "use client";
 
 import Image from 'next/image';
-import { BookOpen, Headphones, PenTool, Mic2, Loader2 } from 'lucide-react';
+import { BookOpen, Headphones, PenTool, Mic2, Loader2, ClipboardCheck } from 'lucide-react';
 import { useGeneralExamContext } from '@/src/context/GeneralExamContext';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
@@ -25,13 +25,20 @@ export default function ExamIntroductionPage() {
   // We map the dynamic sections array to the static display style
   const getSectionIcon = (title: string) => {
     const t = title.toLowerCase();
+    if (t.includes('usability') || t.includes('feedback')) return <ClipboardCheck size={24} />;
     if (t.includes('listen')) return <Headphones size={24} />;
     if (t.includes('writ')) return <PenTool size={24} />;
     if (t.includes('speak')) return <Mic2 size={24} />;
     return <BookOpen size={24} />; // Default reading/other
   };
 
-  const testSections = sections.length > 0 ? sections.map(s => ({
+  // Filter out Usability Testing section so users don't see it beforehand
+  const visibleSections = sections.filter(s => {
+    const t = (s.title || '').toLowerCase();
+    return !t.includes('usability') && !t.includes('feedback');
+  });
+
+  const testSections = visibleSections.length > 0 ? visibleSections.map(s => ({
     icon: getSectionIcon(s.title || ''),
     title: s.title || 'Section',
     duration: s.durationMinutes ? `${s.durationMinutes} mins` : '-- mins',
@@ -66,6 +73,40 @@ export default function ExamIntroductionPage() {
     }
   }, [examId, sections, router, setExamSessionId, setCurrentSectionSession]);
 
+  // Helper: check if a session is stale (endTimeLimit already passed)
+  const isSessionStale = (session: any): boolean => {
+    const sectionSession = session?.currentSectionSession;
+    if (!sectionSession) return false;
+    const endTime = sectionSession.endTimeLocale || sectionSession.endTimeLimit;
+    if (!endTime) return false;
+    return new Date(endTime).getTime() < Date.now();
+  };
+
+  // Helper: finish a stale session and start a new one
+  const finishStaleAndRestart = async (staleSessionId: string, token: string, userId: number) => {
+    try {
+      console.log('Finishing stale session:', staleSessionId);
+      await exam.finishExam(staleSessionId, token);
+      // Clean up old session data
+      localStorage.removeItem('currentExamSessionId');
+      localStorage.removeItem('currentSectionSessionId');
+      localStorage.removeItem('currentSectionEndTimeLimit');
+      localStorage.removeItem('examCheckpoint');
+    } catch (err) {
+      console.warn('Failed to finish stale session, proceeding anyway:', err);
+    }
+
+    // Now start a fresh exam
+    const freshRes = await exam.startExam({
+      userId: userId,
+      examId: examId,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
+    }, token);
+
+    console.log('Fresh startExam response:', freshRes);
+    return freshRes;
+  };
+
   const handleStart = async () => {
     if (sections.length === 0) return;
     setLoading(true);
@@ -74,7 +115,7 @@ export default function ExamIntroductionPage() {
       const cookieUserId = getCookie('userId');
       const userId = cookieUserId ? parseInt(cookieUserId, 10) : 2;
 
-      const res = await exam.startExam({
+      let res = await exam.startExam({
         userId: userId,
         examId: examId,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
@@ -84,8 +125,14 @@ export default function ExamIntroductionPage() {
 
       // Check if this is an "ongoing session" response (200 with ongoing message)
       if (res?.message === 'Ongoing session already exists' && res?.session) {
-        storeSessionAndNavigate(res.session, res.checkpoint || null);
-        return;
+        // If the session is stale (time expired), auto-finish and start fresh
+        if (isSessionStale(res.session)) {
+          res = await finishStaleAndRestart(res.session.id, token, userId);
+        } else {
+          // Session is still valid, resume it
+          storeSessionAndNavigate(res.session, res.checkpoint || null);
+          return;
+        }
       }
 
       if (res && res.session) {
@@ -106,10 +153,39 @@ export default function ExamIntroductionPage() {
     } catch (e: any) {
       console.error('Failed to start exam:', e.response?.data || e);
 
-      // Handle 409 Conflict — ongoing session: store and redirect immediately
+      // Handle 409 Conflict — ongoing session
       if (e.response?.status === 409 && e.response?.data?.session) {
-        storeSessionAndNavigate(e.response.data.session, e.response.data.checkpoint || null);
-        return;
+        const conflictSession = e.response.data.session;
+        
+        // If the conflicting session is stale, finish it and retry
+        if (isSessionStale(conflictSession)) {
+          try {
+            const token = getCookie('token') || '';
+            const cookieUserId = getCookie('userId');
+            const userId = cookieUserId ? parseInt(cookieUserId, 10) : 2;
+            const freshRes = await finishStaleAndRestart(conflictSession.id, token, userId);
+            
+            if (freshRes && freshRes.session) {
+              const sessionId = freshRes.session.id;
+              setExamSessionId(sessionId);
+              localStorage.setItem('currentExamSessionId', sessionId);
+              if (freshRes.session.currentSectionSession) {
+                const ss = freshRes.session.currentSectionSession;
+                setCurrentSectionSession(ss);
+                localStorage.setItem('currentSectionSessionId', ss.id);
+                localStorage.setItem('currentSectionEndTimeLimit', ss.endTimeLocale || ss.endTimeLimit);
+              }
+            }
+            router.push(`/exams/${examId}/section/${sections[0].id}`);
+            return;
+          } catch (retryErr) {
+            console.error('Failed to restart after finishing stale session:', retryErr);
+          }
+        } else {
+          // Session is still valid, resume it
+          storeSessionAndNavigate(conflictSession, e.response.data.checkpoint || null);
+          return;
+        }
       }
 
       if (e.response?.data) {

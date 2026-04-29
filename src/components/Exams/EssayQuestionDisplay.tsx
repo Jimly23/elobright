@@ -66,7 +66,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
         <QuestionFeaturedResources imageUrl={question.imageUrl} narrativeText={question.narrativeText} />
 
         {/* Question Text */}
-        <h2 className="text-xl md:text-2xl font-medium text-slate-700 text-left md:text-center leading-relaxed mb-12">
+        <h2 className="text-xl md:text-2xl font-medium text-slate-700 text-left leading-relaxed mb-12">
           {question.questionText || 'No question found.'}
         </h2>
 

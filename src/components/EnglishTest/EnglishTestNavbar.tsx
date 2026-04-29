@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, Timer, Headphones, Edit3, Mic } from "lucide-react";
+import { BookOpen, Timer, Headphones, Edit3, Mic, ClipboardCheck } from "lucide-react";
 
 interface EnglishTestNavbarProps {
     sectionName?: string;
@@ -44,8 +44,12 @@ export default function EnglishTestNavbar({
         return () => clearInterval(interval);
     }, []);
 
+    const isUsability = sectionName.toLowerCase().includes('usability') || sectionName.toLowerCase().includes('feedback');
+
     const getSectionIcon = () => {
-        switch (sectionName.toLowerCase()) {
+        const name = sectionName.toLowerCase();
+        if (name.includes('usability') || name.includes('feedback')) return <ClipboardCheck size={24} />;
+        switch (name) {
             case 'listening': return <Headphones size={24} />;
             case 'writing': return <Edit3 size={24} />;
             case 'speaking': return <Mic size={24} />;
@@ -61,7 +65,7 @@ export default function EnglishTestNavbar({
 
                 {/* Section info */}
                 <div className="flex items-center gap-3 w-48">
-                    <div className="text-[#0080FF]">
+                    <div className={isUsability ? 'text-teal-500' : 'text-[#0080FF]'}>
                         {getSectionIcon()}
                     </div>
                     <span className="font-bold text-slate-800 text-lg capitalize">{sectionName}</span>
@@ -72,7 +76,7 @@ export default function EnglishTestNavbar({
                     <div className="flex-1 flex items-center justify-center gap-6">
                         <div className="w-full max-w-xl h-2.5 bg-[#E5F0FF] rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-[#4080FF] rounded-full transition-all duration-500"
+                                className={`h-full ${isUsability ? 'bg-teal-500' : 'bg-[#4080FF]'} rounded-full transition-all duration-500`}
                                 style={{ width: `${(currentQuestion / totalQuestions) * 100}%` }}
                             />
                         </div>

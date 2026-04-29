@@ -10,6 +10,7 @@ import McqQuestionDisplay from '@/src/components/Exams/McqQuestionDisplay';
 import ListeningQuestionDisplay from '@/src/components/Exams/ListeningQuestionDisplay';
 import EssayQuestionDisplay from '@/src/components/Exams/EssayQuestionDisplay';
 import AudioUploadQuestionDisplay from '@/src/components/Exams/AudioUploadQuestionDisplay';
+import LikertQuestionDisplay from '@/src/components/Exams/LikertQuestionDisplay';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -139,7 +140,9 @@ export default function QuestionPage() {
   
   const type = currentQuestion.questionType?.toLowerCase();
   
-  if (type === 'audio_upload' || type === 'speaking' || sectionTitleLower.includes('speak')) {
+  if (sectionTitleLower.includes('usability') || sectionTitleLower.includes('feedback')) {
+    DisplayComponent = LikertQuestionDisplay as any;
+  } else if (type === 'audio_upload' || type === 'speaking' || sectionTitleLower.includes('speak')) {
     DisplayComponent = AudioUploadQuestionDisplay as any;
   } else if (type === 'essay' || type === 'writing' || sectionTitleLower.includes('writ')) {
     DisplayComponent = EssayQuestionDisplay as any;
@@ -169,7 +172,7 @@ export default function QuestionPage() {
         totalQuestions={questions.length} 
       />
 
-      <main className="relative flex-1 flex items-center justify-center w-full z-10 p-0 text-center md:text-left">
+      <main className="relative flex-1 flex items-center justify-center w-full z-10 p-0 text-left">
         <DisplayComponent 
           question={currentQuestion} 
           currentIndex={currentIndex} 
