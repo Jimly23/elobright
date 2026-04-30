@@ -29,6 +29,8 @@ export const metadata: Metadata = {
   description: "Advanced English certification test",
 };
 
+import CountdownPopup from "@/src/components/CountdownPopup";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -39,6 +41,7 @@ export default function RootLayout({
       <body
         className={`${satoshi.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <CountdownPopup />
         {children}
       </body>
     </html>
