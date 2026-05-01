@@ -41,7 +41,7 @@ export default function RootLayout({
       <body
         className={`${satoshi.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <CountdownPopup />
+        {/* <CountdownPopup /> */}
         {children}
       </body>
     </html>
