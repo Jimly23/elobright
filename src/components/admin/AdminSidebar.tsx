@@ -1,11 +1,13 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, Users, FileText, Settings, LogOut, ListChecks, Award } from 'lucide-react';
+import Cookies from 'js-cookie';
 
 const AdminSidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
 
   const links = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -18,6 +20,13 @@ const AdminSidebar = () => {
     { name: 'Score Definitions', href: '/admin/score-definitions', icon: ListChecks },
     { name: 'Certification', href: '/admin/certification', icon: Award },
   ];
+
+  const handleLogout = () => {
+    Cookies.remove('token');
+    Cookies.remove('userData');
+    Cookies.remove('userId');
+    router.push('/signin');
+  };
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-800 h-full text-slate-300">
@@ -70,7 +79,10 @@ const AdminSidebar = () => {
       </div>
 
       <div className="p-4 border-t border-slate-800">
-        <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-red-400 hover:bg-slate-800 hover:text-red-300">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-red-400 hover:bg-slate-800 hover:text-red-300"
+        >
           <LogOut size={18} />
           Logout
         </button>

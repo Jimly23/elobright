@@ -23,7 +23,7 @@ const getCookie = (name: string) => {
 export default function QuestionPage() {
   const params = useParams();
   const router = useRouter();
-  
+
   const examId = params.examId as string;
   const sectionId = params.sectionId as string;
   const questionId = params.questionId as string;
@@ -70,7 +70,7 @@ export default function QuestionPage() {
 
   const handleNext = async () => {
     const nextQuestionId = getNextQuestionId(questionId);
-    
+
     if (nextQuestionId) {
       // Not the last question, just navigate to the next one
       router.push(`/exams/${examId}/section/${sectionId}/question/${nextQuestionId}`);
@@ -80,7 +80,7 @@ export default function QuestionPage() {
       try {
         const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
         const sectionSessionId = localStorage.getItem('currentSectionSessionId');
-        
+
         if (sectionSessionId) {
           const finishRes = await exam.finishSection(sectionSessionId, token);
           console.log('finishSection response:', finishRes);
@@ -137,9 +137,9 @@ export default function QuestionPage() {
 
   // Determine component based on question_type or section title mapping
   let DisplayComponent = McqQuestionDisplay;
-  
+
   const type = currentQuestion.questionType?.toLowerCase();
-  
+
   if (sectionTitleLower.includes('usability') || sectionTitleLower.includes('feedback')) {
     DisplayComponent = LikertQuestionDisplay as any;
   } else if (type === 'audio_upload' || type === 'speaking' || sectionTitleLower.includes('speak')) {
@@ -166,16 +166,16 @@ export default function QuestionPage() {
         </div>
       </div>
 
-      <EnglishTestNavbar 
-        sectionName={sectionName} 
-        currentQuestion={currentIndex + 1} 
-        totalQuestions={questions.length} 
+      <EnglishTestNavbar
+        sectionName={sectionName}
+        currentQuestion={currentIndex + 1}
+        totalQuestions={questions.length}
       />
 
       <main className="relative flex-1 flex items-center justify-center w-full z-10 p-0 text-left">
-        <DisplayComponent 
-          question={currentQuestion} 
-          currentIndex={currentIndex} 
+        <DisplayComponent
+          question={currentQuestion}
+          currentIndex={currentIndex}
           onNext={handleNext}
           // onPrev temporarily disabled
           // onPrev={currentIndex > 0 ? handlePrev : undefined}
@@ -183,15 +183,6 @@ export default function QuestionPage() {
           finishing={finishing}
         />
       </main>
-
-      {/* Footer */}
-      <footer className="relative z-10 py-6 flex justify-center">
-        <div className="bg-white/90 backdrop-blur-md px-8 py-2 rounded-full border border-white/50 shadow-sm">
-          <p className="text-slate-400 text-[11px] font-medium tracking-tight">
-            © 2026 Elobright. All rights reserved
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

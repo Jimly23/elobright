@@ -142,6 +142,10 @@ export const examService = {
     const response = await api.get('/exam-sessions/history', getConfig(token));
     return response.data;
   },
+  getReport: async (token?: string) => {
+    const response = await api.get('/exam-sessions/report', getConfig(token));
+    return response.data;
+  },
 };
 
 // Aliases untuk backward compatibility dengan kode lama

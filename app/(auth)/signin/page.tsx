@@ -92,15 +92,15 @@ function SignInContent() {
   };
 
   return (
-    <>
-      <div className="text-center mb-6 md:mb-10">
-        <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-1 md:mb-2">Sign in to Elobright</h1>
-        <p className="text-slate-400 font-medium text-sm md:text-base">Welcome back! Please sign in to continue</p>
+    <div className="w-full max-w-md mx-auto">
+      <div className="mb-8 md:mb-10 text-left">
+        <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-500 mb-2">Sign in to Elobright</h1>
+        <p className="text-slate-500 font-medium text-sm md:text-base">Welcome back! Please sign in to continue.</p>
       </div>
 
-      <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-5" onSubmit={handleSubmit}>
         {error && (
-          <div className="p-2.5 md:p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs md:text-sm font-medium flex flex-col gap-2">
+          <div className="p-3 md:p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs md:text-sm font-medium flex flex-col gap-2">
             <span>{error}</span>
             {unverifiedEmail && (
               <button 
@@ -115,62 +115,69 @@ function SignInContent() {
         )}
 
         <div>
-          <label className="block text-xs md:text-sm font-bold text-slate-700 mb-1.5 md:mb-2">Email address</label>
-          <input 
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter your email address"
-            required
-            className="w-full px-3.5 md:px-4 py-2.5 md:py-3.5 text-sm md:text-base text-black rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300"
-          />
+          <label className="block text-xs md:text-sm font-semibold text-slate-700 mb-2">Email</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <input 
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="nama@email.com"
+              required
+              className="w-full pl-11 pr-4 py-3 md:py-3.5 text-sm md:text-base text-slate-700 bg-slate-50/50 rounded-xl border border-slate-200 focus:bg-white focus:border-[#292275] focus:ring-4 focus:ring-[#292275]/10 outline-none transition-all placeholder:text-slate-400"
+            />
+          </div>
         </div>
 
         <div>
-          <div className="flex justify-between items-center mb-1.5 md:mb-2">
-            <label className="block text-xs md:text-sm font-bold text-slate-700">Password</label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-xs md:text-sm font-semibold text-slate-700">Password</label>
+            <a href="#" className="text-xs md:text-sm font-semibold text-blue-500 hover:text-blue-600 transition-colors">Forgot password?</a>
           </div>
-          <input 
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-            required
-            className="w-full px-3.5 md:px-4 py-2.5 md:py-3.5 text-sm md:text-base rounded-xl border text-black border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300"
-          />
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <input 
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Minimal 8 karakter"
+              required
+              className="w-full pl-11 pr-12 py-3 md:py-3.5 text-sm md:text-base text-slate-700 bg-slate-50/50 rounded-xl border border-slate-200 focus:bg-white focus:border-[#292275] focus:ring-4 focus:ring-[#292275]/10 outline-none transition-all placeholder:text-slate-400"
+            />
+            <div className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-2.5 md:space-y-3">
+        <div className="pt-2">
           <button 
             type="submit"
             disabled={loading}
-            className="w-full py-3 md:py-4 text-sm md:text-base bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] disabled:active:scale-100"
+            className="w-full py-3.5 md:py-4 text-sm md:text-base text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 disabled:from-blue-300 disabled:to-blue-400 font-bold rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] disabled:active:scale-100"
           >
-            {loading ? 'Signing in...' : 'Continue'}
+            {loading ? 'Signing in...' : 'Masuk'}
           </button>
-          {/* <button 
-            type="button" 
-            className="w-full py-3 md:py-4 text-sm md:text-base bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all flex items-center justify-center gap-2"
-          >
-            Continue with google
-          </button> */}
-        </div>
-
-        <div className="flex items-center justify-between text-xs md:text-sm">
-          <label className="flex items-center gap-2 text-slate-500 cursor-pointer">
-            <input type="checkbox" className="w-3.5 h-3.5 md:w-4 md:h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-            Stay signed in
-          </label>
-          <a href="#" className="text-slate-400 font-medium hover:text-blue-600 transition-colors">Forgot password?</a>
         </div>
       </form>
 
-      <p className="text-center mt-6 md:mt-10 text-slate-500 font-medium text-sm md:text-base">
-        Don&apos;t have an account? <a href="/signup" className="text-slate-900 font-bold hover:underline">Sign up</a>
+      <p className="text-center mt-8 text-slate-500 font-medium text-sm md:text-base">
+        Belum punya akun? <a href="/signup" className="text-blue-500 font-bold hover:text-blue-600 transition-colors">Daftar</a>
       </p>
-    </>
+    </div>
   );
 }
 

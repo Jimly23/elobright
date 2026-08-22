@@ -36,7 +36,7 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
     mediaRecorderRef.current = mediaRecorder;
-    
+
     const chunks: BlobPart[] = [];
     mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
     mediaRecorder.onstop = () => {
@@ -67,12 +67,12 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
   const handleSend = async () => {
     const fileToSend = audioBlob || uploadedFile;
     if (!fileToSend) return alert("Pilih atau rekam suara terlebih dahulu!");
-    
+
     setSubmitting(true);
     try {
       const sectionSessionId = localStorage.getItem('currentSectionSessionId');
       const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
-      
+
       if (sectionSessionId) {
         const formData = new FormData();
         formData.append("questionId", question.id);
@@ -92,7 +92,7 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 mt-8 relative z-10 w-full">
       <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-12 border border-slate-50 text-left md:text-center">
-        
+
         <div className="mb-6 flex md:justify-center">
           <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-5 py-2 rounded-full uppercase tracking-[0.2em] border border-blue-100">
             Question {currentIndex + 1 < 10 ? `0${currentIndex + 1}` : currentIndex + 1}
@@ -159,12 +159,11 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
           ) : (
             <div />
           )}
-          <button 
+          <button
             onClick={handleSend}
             disabled={!audioUrl || submitting}
-            className={`px-10 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${
-              audioUrl && !submitting ? 'bg-blue-500 text-white shadow-xl shadow-blue-200 hover:bg-blue-600 active:scale-[0.98]' : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-            }`}
+            className={`px-10 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${audioUrl && !submitting ? 'bg-blue-500 text-white shadow-xl shadow-blue-200 hover:bg-blue-600 active:scale-[0.98]' : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              }`}
           >
             <Send size={18} />
             {submitting ? 'Submitting...' : 'Send Answer'}

@@ -60,45 +60,52 @@ function VerifyEmailContent() {
   };
 
   return (
-    <>
-      <div className="text-center mb-6 md:mb-10">
-        <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-1 md:mb-2">Verify your email</h1>
+    <div className="w-full max-w-md mx-auto">
+      <div className="text-center mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-500 mb-2">Verify your email</h1>
         <p className="text-slate-500 font-medium text-sm md:text-base">
           We have sent a 6-digit code to <br />
-          <span className="text-slate-800 font-bold">{emailParam || 'your email'}</span>
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-500 font-bold">{emailParam || 'your email'}</span>
         </p>
       </div>
 
       <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
         {error && (
-          <div className="p-2.5 md:p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs md:text-sm font-medium animate-in fade-in slide-in-from-top-1">
+          <div className="p-3 md:p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs md:text-sm font-medium animate-in fade-in slide-in-from-top-1">
             {error}
           </div>
         )}
         
         {successMsg && (
-          <div className="p-2.5 md:p-3 rounded-xl bg-green-50 border border-green-200 text-green-600 text-xs md:text-sm font-medium animate-in fade-in slide-in-from-top-1">
+          <div className="p-3 md:p-4 rounded-xl bg-green-50 border border-green-200 text-green-600 text-xs md:text-sm font-medium animate-in fade-in slide-in-from-top-1">
             {successMsg}
           </div>
         )}
 
         <div>
-          <label className="block text-xs md:text-sm font-bold text-slate-700 mb-1.5 md:mb-2">Verification Code</label>
-          <input 
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="Enter 6-digit code"
-            required
-            className="w-full px-3.5 md:px-4 py-2.5 md:py-3.5 text-center tracking-widest text-lg md:text-xl font-bold text-black rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 placeholder:tracking-normal placeholder:font-normal"
-          />
+          <label className="block text-xs md:text-sm font-semibold text-slate-700 mb-2">Verification Code</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+            </div>
+            <input 
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="Enter 6-digit code"
+              required
+              className="w-full pl-11 pr-4 py-3 md:py-3.5 text-center tracking-widest text-lg md:text-xl font-bold text-slate-700 bg-slate-50/50 rounded-xl border border-slate-200 focus:bg-white focus:border-[#292275] focus:ring-4 focus:ring-[#292275]/10 outline-none transition-all placeholder:text-slate-400 placeholder:tracking-normal placeholder:font-normal placeholder:text-sm md:placeholder:text-base placeholder:text-left"
+            />
+          </div>
         </div>
 
-        <div className="space-y-2.5 md:space-y-3 pt-2">
+        <div className="pt-2">
           <button 
             type="submit"
             disabled={loading || code.length !== 6 || !emailParam}
-            className="w-full py-3 md:py-4 text-sm md:text-base bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] disabled:active:scale-100"
+            className="w-full py-3.5 md:py-4 text-sm md:text-base text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 disabled:from-blue-300 disabled:to-blue-400 font-bold rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] disabled:active:scale-100"
           >
             {loading ? 'Verifying...' : 'Verify Email'}
           </button>
@@ -112,7 +119,7 @@ function VerifyEmailContent() {
         <button 
           onClick={handleResend}
           disabled={resendLoading || !emailParam}
-          className="text-blue-600 font-bold hover:text-blue-700 disabled:text-slate-400 transition-colors"
+          className="text-blue-500 font-bold hover:text-blue-600 disabled:text-slate-400 transition-colors"
         >
           {resendLoading ? 'Sending...' : 'Resend Code'}
         </button>
@@ -126,7 +133,7 @@ function VerifyEmailContent() {
           Back to sign in
         </button>
       </div>
-    </>
+    </div>
   );
 }
 

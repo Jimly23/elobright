@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Award, Search, Pencil, Mail, Download, X, Save, AlertTriangle, Loader2, CheckCircle2, ExternalLink } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { certificationService, CertificationScore, CertificationAdditionalScore } from '@/src/api/certification';
+import { examService } from '@/src/api/exam';
 
 export default function CertificationPage() {
   const [scores, setScores] = useState<CertificationScore[]>([]);
@@ -34,11 +35,54 @@ export default function CertificationPage() {
     try {
       setLoading(true);
       setError('');
-      const [scoresData, defsData] = await Promise.all([
+      const [scoresData, defsData, reportData] = await Promise.all([
         certificationService.getAllScores(token, appliedFilter || undefined),
         certificationService.getAllAdditionalScores(token),
+        examService.getReport(token).catch(() => ({ data: [] })),
       ]);
-      setScores(Array.isArray(scoresData) ? scoresData : []);
+
+      const reportMap = new Map();
+      if (reportData?.data) {
+        reportData.data.forEach((user: any) => {
+          if (user.exams) {
+            user.exams.forEach((exam: any) => {
+               reportMap.set(exam.submissionId, {
+                  name: user.nama || user.email,
+                  email: user.email,
+                  examTitle: exam.examTitle,
+                  rawScore: exam.totalScore,
+               });
+            });
+          }
+        });
+      }
+
+      const rawScores = Array.isArray(scoresData) ? scoresData : [];
+      const mappedScores = rawScores.map((score: any) => {
+        const reportInfo = reportMap.get(score.examSubmissionId);
+        if (reportInfo) {
+           return {
+             ...score,
+             user: {
+               ...score.user,
+               id: score.userId,
+               fullName: reportInfo.name,
+               email: reportInfo.email,
+             },
+             examSubmission: {
+               ...score.examSubmission,
+               exam: {
+                 ...score.examSubmission?.exam,
+                 title: reportInfo.examTitle,
+               }
+             },
+             rawExamScore: reportInfo.rawScore
+           }
+        }
+        return score;
+      });
+
+      setScores(mappedScores);
       setAdditionalScoreDefs(Array.isArray(defsData) ? defsData : []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load certification data.');
@@ -119,7 +163,7 @@ export default function CertificationPage() {
       });
 
       await certificationService.updateScore(editingScore.id, {
-        additional_score: hasAdditional ? additionalScore : null,
+        additional_score: additionalScore,
         exam_score_override: editForm.useOverride && editForm.examScoreOverride
           ? parseFloat(editForm.examScoreOverride)
           : null,
@@ -283,6 +327,7 @@ export default function CertificationPage() {
                 <tr>
                   <th className="px-6 py-3.5">User</th>
                   <th className="px-6 py-3.5">Exam Submission</th>
+                  <th className="px-6 py-3.5">Raw Exam Score</th>
                   <th className="px-6 py-3.5">Additional Scores</th>
                   <th className="px-6 py-3.5">Exam Override</th>
                   <th className="px-6 py-3.5 text-right">Actions</th>
@@ -306,6 +351,11 @@ export default function CertificationPage() {
                           <p className="text-xs text-slate-400 mt-0.5">{score.examSubmission.exam.title}</p>
                         )}
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg">
+                        {score.rawExamScore !== undefined ? score.rawExamScore : '—'}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       {score.additionalScore && Object.keys(score.additionalScore).length > 0 ? (

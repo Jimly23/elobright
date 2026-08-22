@@ -33,7 +33,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
     try {
       const sectionSessionId = localStorage.getItem('currentSectionSessionId');
       const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
-      
+
       if (sectionSessionId) {
         await exam.recordAnswerEssay(sectionSessionId, {
           questionId: question.id,
@@ -53,11 +53,11 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
   const progressPercentage = Math.min((wordCount / wordTarget) * 100, 100);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10 w-full">
-      <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-8 md:p-16 border border-slate-200 mt-10">
-        
+    <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-6 mt-[72px] md:mt-20 relative z-10 w-full">
+      <div className="w-full max-w-4xl bg-white rounded-none md:rounded-[32px] shadow-none md:shadow-2xl md:shadow-blue-200/40 p-6 md:p-16 border-0 md:border md:border-slate-200 mt-0 md:mt-10 flex-1 md:flex-none flex flex-col">
+
         {/* Question Badge */}
-        <div className="flex md:justify-center mb-10">
+        <div className="flex md:justify-center mb-10 shrink-0">
           <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-5 py-2 rounded-full uppercase tracking-[0.2em] border border-blue-100">
             Question {currentIndex + 1 < 10 ? `0${currentIndex + 1}` : currentIndex + 1}
           </span>
@@ -66,14 +66,14 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
         <QuestionFeaturedResources imageUrl={question.imageUrl} narrativeText={question.narrativeText} />
 
         {/* Question Text */}
-        <h2 className="text-xl md:text-2xl font-medium text-slate-700 text-left leading-relaxed mb-12">
+        <h2 className="text-xl md:text-2xl font-medium text-slate-700 text-left leading-relaxed mb-12 shrink-0">
           {question.questionText || 'No question found.'}
         </h2>
 
         {/* Writing Area */}
-        <div className="relative mb-6">
+        <div className="relative mb-6 flex-1 flex flex-col min-h-[250px]">
           <textarea
-            className="w-full h-64 p-6 rounded-2xl border-2 border-blue-100 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-600 leading-relaxed resize-none"
+            className="w-full flex-1 p-6 rounded-2xl border-2 border-blue-100 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-600 leading-relaxed resize-none"
             placeholder="Start writing your answer here..."
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -82,13 +82,13 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
         </div>
 
         {/* Word Count Progress Section */}
-        <div className="mb-12">
+        <div className="mb-8 shrink-0">
           <div className="flex justify-between items-center mb-3">
             <span className="text-slate-700 text-sm font-bold">Target : {wordTarget} words</span>
             <span className="text-slate-400 text-sm font-medium">{wordCount} words</span>
           </div>
           <div className="w-full h-3 bg-orange-50 rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full bg-yellow-500 rounded-full transition-all duration-300"
               style={{ width: `${progressPercentage}%` }}
             />
@@ -96,7 +96,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
         </div>
 
         {/* Action Button */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-auto pt-4 shrink-0">
           {onPrev ? (
             <button
               onClick={onPrev}
@@ -108,7 +108,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
           ) : (
             <div />
           )}
-          <button 
+          <button
             onClick={handleSubmit}
             disabled={!text.trim() || submitting}
             className="px-16 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100"

@@ -185,21 +185,21 @@ export default function ListeningQuestionDisplay({
   const rightSrc = resolveMediaUrl(question.questionAudioUrl);
 
   return (
-    <div className="flex-1 flex items-center justify-center p-6 mt-20 relative z-10 w-full font-sans">
-      <div className="w-full max-w-6xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 border border-slate-200 flex flex-col md:flex-row overflow-hidden min-h-[600px]">
+    <div className="flex-1 flex items-center justify-center p-0 md:p-6 mt-[72px] md:mt-20 relative z-10 w-full font-sans">
+      <div className="w-full max-w-6xl bg-white rounded-none md:rounded-[32px] shadow-none md:shadow-2xl md:shadow-blue-200/40 border-0 md:border md:border-slate-200 flex flex-col md:flex-row overflow-hidden min-h-[600px] flex-1 md:flex-none">
         {/* Left Side: Context Audio Player */}
-        <div className="flex-1 p-8 md:p-12 border-r border-slate-100 flex flex-col justify-center bg-white">
-          <div className="mb-8">
+        <div className="flex-1 p-6 md:p-12 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col justify-center bg-white shrink-0">
+          <div className="mb-8 shrink-0">
             <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-4 py-2 rounded-full uppercase tracking-widest border border-blue-100">
               Context Audio
             </span>
           </div>
 
-          <h3 className="text-2xl font-bold text-slate-800 mb-6">
+          <h3 className="text-2xl font-bold text-slate-800 mb-6 shrink-0">
             Listen to the conversation
           </h3>
 
-          <p className="text-slate-500 font-medium mb-10 text-sm leading-relaxed">
+          <p className="text-slate-500 font-medium mb-10 text-sm leading-relaxed shrink-0">
             Please listen to the conversation or lecture carefully. You will
             hear it only once. After the audio ends, answer the questions on the
             right.
@@ -223,9 +223,9 @@ export default function ListeningQuestionDisplay({
         </div>
 
         {/* Right Side: Question & Options */}
-        <div className="flex-[1.2] p-8 md:p-12 bg-slate-50/30 flex flex-col justify-between">
-          <div>
-            <div className="mb-6 flex items-center justify-between">
+        <div className="flex-[1.2] p-6 md:p-12 bg-slate-50/30 flex flex-col justify-between flex-1">
+          <div className="flex flex-col flex-1 overflow-y-auto">
+            <div className="mb-6 flex items-center justify-between shrink-0">
               <span className="bg-blue-100/50 text-blue-600 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest">
                 Question {currentIndex + 1}
               </span>
@@ -237,14 +237,14 @@ export default function ListeningQuestionDisplay({
             />
 
             {/* Question Text */}
-            <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-tight mb-6 text-left">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-tight mb-6 text-left shrink-0">
               {question.questionText || "No question text provided."}
             </h2>
 
             {/* Question Audio Player (if exists) */}
             {question.questionAudioUrl && (
               <div
-                className={`mb-10 flex items-center gap-4 p-4 rounded-2xl border shadow-sm w-fit transition-colors ${rightAudio.state.error ? "bg-red-50 border-red-100" : rightAudio.state.hasPlayed ? "bg-slate-50 border-slate-200" : "bg-white border-slate-100"}`}
+                className={`mb-10 flex items-center gap-4 p-4 rounded-2xl border shadow-sm w-fit transition-colors shrink-0 ${rightAudio.state.error ? "bg-red-50 border-red-100" : rightAudio.state.hasPlayed ? "bg-slate-50 border-slate-200" : "bg-white border-slate-100"}`}
               >
                 {rightSrc.endsWith(".m3u8") ? (
                   <HLSAudioElement
@@ -298,11 +298,10 @@ export default function ListeningQuestionDisplay({
                 options.map((option) => (
                   <label
                     key={option.id}
-                    className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
-                      selectedOption === option.id
-                        ? "border-blue-500 bg-blue-500 text-white shadow-lg shadow-blue-100 scale-[1.02]"
-                        : "border-white bg-white text-slate-600 hover:border-blue-100 hover:bg-white"
-                    }`}
+                    className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${selectedOption === option.id
+                      ? "border-blue-500 bg-blue-500 text-white shadow-lg shadow-blue-100 scale-[1.02]"
+                      : "border-white bg-white text-slate-600 hover:border-blue-100 hover:bg-white"
+                      }`}
                   >
                     <input
                       type="radio"
@@ -313,11 +312,10 @@ export default function ListeningQuestionDisplay({
                     />
 
                     <div
-                      className={`w-6 h-6 min-w-6 min-h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        selectedOption === option.id
-                          ? "border-white bg-white text-blue-500"
-                          : "border-slate-200 bg-white"
-                      }`}
+                      className={`w-6 h-6 min-w-6 min-h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${selectedOption === option.id
+                        ? "border-white bg-white text-blue-500"
+                        : "border-slate-200 bg-white"
+                        }`}
                     >
                       {selectedOption === option.id && (
                         <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />
@@ -336,7 +334,7 @@ export default function ListeningQuestionDisplay({
           </div>
 
           {/* Submit Button */}
-          <div className="mt-12 flex items-center justify-between">
+          <div className="mt-auto pt-12 flex items-center justify-between shrink-0">
             {onPrev ? (
               <button
                 onClick={onPrev}

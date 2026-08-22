@@ -66,23 +66,23 @@ export default function LikertQuestionDisplay({
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 mt-20 relative z-10 w-full">
-      <div className="w-full max-w-3xl bg-white rounded-[32px] shadow-2xl shadow-teal-200/40 p-8 md:p-14 border border-slate-200">
+    <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-6 mt-[72px] md:mt-20 relative z-10 w-full">
+      <div className="w-full max-w-3xl bg-white rounded-none md:rounded-[32px] shadow-none md:shadow-2xl md:shadow-teal-200/40 p-6 md:p-14 border-0 md:border md:border-slate-200 flex-1 md:flex-none flex flex-col">
 
         {/* Section badge */}
-        <div className="mb-5">
+        <div className="mb-5 shrink-0">
           <span className="bg-teal-50 text-teal-600 text-[11px] font-black px-4 py-2 rounded-full uppercase tracking-[0.15em] border border-teal-100">
             Pertanyaan {currentIndex + 1 < 10 ? `0${currentIndex + 1}` : currentIndex + 1}
           </span>
         </div>
 
         {/* Question text */}
-        <h2 className="text-lg md:text-xl font-medium text-slate-700 leading-relaxed mb-8 text-left">
+        <h2 className="text-lg md:text-xl font-medium text-slate-700 leading-relaxed mb-8 text-left shrink-0">
           {question.questionText || 'No question found.'}
         </h2>
 
         {/* Likert Scale Options */}
-        <div className="mb-8">
+        <div className="mb-8 flex-1 overflow-y-auto">
           {/* Desktop: Horizontal scale */}
           <div className="hidden md:flex items-stretch justify-between gap-3">
             {LIKERT_OPTIONS.map((option) => {
@@ -91,11 +91,10 @@ export default function LikertQuestionDisplay({
                 <button
                   key={option.value}
                   onClick={() => setSelectedValue(option.value)}
-                  className={`flex-1 flex flex-col items-center gap-2 py-5 px-3 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
-                    isSelected
-                      ? 'border-teal-500 bg-teal-500 text-white shadow-lg shadow-teal-200 scale-[1.05]'
-                      : 'border-slate-100 bg-white text-slate-600 hover:border-teal-200 hover:bg-teal-50/50 hover:scale-[1.02]'
-                  }`}
+                  className={`flex-1 flex flex-col items-center gap-2 py-5 px-3 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${isSelected
+                    ? 'border-teal-500 bg-teal-500 text-white shadow-lg shadow-teal-200 scale-[1.05]'
+                    : 'border-slate-100 bg-white text-slate-600 hover:border-teal-200 hover:bg-teal-50/50 hover:scale-[1.02]'
+                    }`}
                 >
                   <span className={`text-2xl transition-transform duration-300 ${isSelected ? 'scale-125' : ''}`}>
                     {option.emoji}
@@ -112,23 +111,21 @@ export default function LikertQuestionDisplay({
           </div>
 
           {/* Mobile: Vertical list */}
-          <div className="md:hidden space-y-3">
+          <div className="md:hidden space-y-3 pb-4">
             {LIKERT_OPTIONS.map((option) => {
               const isSelected = selectedValue === option.value;
               return (
                 <button
                   key={option.value}
                   onClick={() => setSelectedValue(option.value)}
-                  className={`w-full flex items-center gap-4 py-4 px-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
-                    isSelected
-                      ? 'border-teal-500 bg-teal-500 text-white shadow-lg shadow-teal-200'
-                      : 'border-slate-100 bg-white text-slate-600 hover:border-teal-200 hover:bg-teal-50/50'
-                  }`}
+                  className={`w-full flex items-center gap-4 py-4 px-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${isSelected
+                    ? 'border-teal-500 bg-teal-500 text-white shadow-lg shadow-teal-200'
+                    : 'border-slate-100 bg-white text-slate-600 hover:border-teal-200 hover:bg-teal-50/50'
+                    }`}
                 >
                   <span className="text-xl">{option.emoji}</span>
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-black text-sm flex-shrink-0 ${
-                    isSelected ? 'border-white bg-white text-teal-500' : 'border-slate-300 text-slate-500'
-                  }`}>
+                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-black text-sm flex-shrink-0 ${isSelected ? 'border-white bg-white text-teal-500' : 'border-slate-300 text-slate-500'
+                    }`}>
                     {option.value}
                   </div>
                   <span className={`font-bold text-sm text-left ${isSelected ? 'text-white' : 'text-slate-600'}`}>
@@ -141,7 +138,7 @@ export default function LikertQuestionDisplay({
         </div>
 
         {/* Navigation buttons */}
-        <div className="flex items-center justify-between mt-8">
+        <div className="flex items-center justify-between mt-auto pt-8 shrink-0">
           {onPrev ? (
             <button
               onClick={onPrev}
