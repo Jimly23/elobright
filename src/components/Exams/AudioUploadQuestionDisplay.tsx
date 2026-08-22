@@ -71,7 +71,7 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
     setSubmitting(true);
     try {
       const sectionSessionId = localStorage.getItem('currentSectionSessionId');
-      const token = getCookie('token') || '';
+      const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
       
       if (sectionSessionId) {
         const formData = new FormData();

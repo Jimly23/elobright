@@ -25,7 +25,7 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
 
     const fetchQuestions = async () => {
       try {
-        const token = getCookie('token') || '';
+        const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
         
         // Fetch questions for this section
         const data = await examApi.questionBySectionId(sectionId, token);

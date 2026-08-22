@@ -29,8 +29,11 @@ export default function SignUpPage() {
 
     try {
       // Pastikan backend Anda siap menerima firstName & telp
-      await authService.register(formData);
-      router.push('/signin');
+      await authService.register({
+        ...formData,
+        type: formData.type as 'user' | 'student'
+      });
+      router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {

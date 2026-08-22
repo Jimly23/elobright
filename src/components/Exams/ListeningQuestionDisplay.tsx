@@ -135,7 +135,7 @@ export default function ListeningQuestionDisplay({
         setLoading(false);
       } else {
         try {
-          const token = getCookie("token") || "";
+          const token = getCookie("token") || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || "";
           const opts = await exam.getOptionsByQuestionIdAttempt(
             question.id,
             token,
@@ -160,7 +160,7 @@ export default function ListeningQuestionDisplay({
 
     try {
       const sectionSessionId = localStorage.getItem("currentSectionSessionId");
-      const token = getCookie("token") || "";
+      const token = getCookie("token") || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || "";
 
       if (sectionSessionId) {
         await exam.recordAnswerMCQ(

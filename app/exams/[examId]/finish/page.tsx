@@ -36,7 +36,7 @@ export default function ExamFinishPage() {
       finishAttempt.current = true;
       try {
         const sessionId = localStorage.getItem("currentExamSessionId");
-        const token = getCookie("token") || "";
+        const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
 
         if (sessionId) {
           const data = await exam.finishExam(sessionId, token);

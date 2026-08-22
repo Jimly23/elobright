@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { exam } from "@/src/api/exam";
+import { certificationService, CertificationScore } from "@/src/api/certification";
 import {
   Trophy,
   BookOpen,
@@ -16,6 +17,7 @@ import {
   FileX2,
   CheckCircle2,
   Clock,
+  Download,
 } from "lucide-react";
 
 const getCookie = (name: string) => {
@@ -107,6 +109,7 @@ export default function ScoresPage() {
   const [history, setHistory] = useState<ExamHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [certScores, setCertScores] = useState<Record<string, CertificationScore>>({}); // keyed by examSubmissionId
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -153,6 +156,20 @@ export default function ScoresPage() {
           // Auto-expand first item
           if (mapped.length > 0) {
             setExpandedId(mapped[0].id);
+          }
+
+          // Fetch certification scores for completed exams
+          try {
+            const allCertScores = await certificationService.getAllScores(token);
+            if (Array.isArray(allCertScores)) {
+              const certMap: Record<string, CertificationScore> = {};
+              allCertScores.forEach((cs: CertificationScore) => {
+                certMap[cs.examSubmissionId] = cs;
+              });
+              setCertScores(certMap);
+            }
+          } catch {
+            // Certification scores might not be available, that's ok
           }
         }
       } catch (error) {
@@ -391,6 +408,23 @@ export default function ScoresPage() {
                       );
                     })}
                   </div>
+
+                  {/* Download Certificate Button */}
+                  {certScores[item.id] && (
+                    <div className="mt-5 pt-4 border-t border-slate-100">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const url = certificationService.getDownloadUrl(certScores[item.id].id);
+                          window.open(url, '_blank');
+                        }}
+                        className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-200/50 transition-all active:scale-[0.98] mx-auto"
+                      >
+                        <Download size={16} />
+                        Download Certificate
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

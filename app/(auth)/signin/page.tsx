@@ -16,6 +16,7 @@ function SignInContent() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -67,10 +68,24 @@ function SignInContent() {
         }
       }
 
-      // Redirect ke callbackUrl jika ada, atau ke halaman utama
-      router.push(callbackUrl);
+      // Redirect berdasarkan role
+      const adminRoles = ['admin', 'superadmin', 'reviewer', 'moderator'];
+      if (response.user && adminRoles.includes(response.user.role)) {
+        router.push('/admin/dashboard');
+      } else {
+        router.push(callbackUrl);
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      const status = err.response?.status;
+      const errorMessage = err.response?.data?.message || 'Login failed. Please check your credentials.';
+      
+      if (status === 403 || errorMessage.toLowerCase().includes('not verified')) {
+        setError('Email not verified. Please verify your email first.');
+        setUnverifiedEmail(formData.email);
+      } else {
+        setError(errorMessage);
+        setUnverifiedEmail('');
+      }
     } finally {
       setLoading(false);
     }
@@ -85,8 +100,17 @@ function SignInContent() {
 
       <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
         {error && (
-          <div className="p-2.5 md:p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs md:text-sm font-medium">
-            {error}
+          <div className="p-2.5 md:p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs md:text-sm font-medium flex flex-col gap-2">
+            <span>{error}</span>
+            {unverifiedEmail && (
+              <button 
+                type="button" 
+                onClick={() => router.push(`/verify-email?email=${encodeURIComponent(unverifiedEmail)}`)}
+                className="text-left font-bold underline hover:text-red-800"
+              >
+                Verify Email Now
+              </button>
+            )}
           </div>
         )}
 

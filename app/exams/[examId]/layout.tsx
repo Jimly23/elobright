@@ -26,7 +26,7 @@ export default function ExamLayout({ children }: { children: React.ReactNode }) 
 
     const fetchExamData = async () => {
       try {
-        const token = getCookie('token') || '';
+        const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
         
         // Fetch core exam data
         const data = await examApi.examById(examId, token);

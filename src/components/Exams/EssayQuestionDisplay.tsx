@@ -32,7 +32,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
 
     try {
       const sectionSessionId = localStorage.getItem('currentSectionSessionId');
-      const token = getCookie('token') || '';
+      const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
       
       if (sectionSessionId) {
         await exam.recordAnswerEssay(sectionSessionId, {

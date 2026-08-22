@@ -36,7 +36,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
         setLoading(false);
       } else {
         try {
-          const token = getCookie('token') || '';
+          const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
           const opts = await exam.getOptionsByQuestionIdAttempt(question.id, token);
           setOptions(opts);
         } catch (e) {
@@ -56,7 +56,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
     
     try {
       const sectionSessionId = localStorage.getItem('currentSectionSessionId');
-      const token = getCookie('token') || '';
+      const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
       
       if (sectionSessionId) {
         await exam.recordAnswerMCQ(sectionSessionId, {

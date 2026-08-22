@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, FileText, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, LogOut, ListChecks, Award } from 'lucide-react';
 
 const AdminSidebar = () => {
   const pathname = usePathname();
@@ -14,6 +14,11 @@ const AdminSidebar = () => {
     { name: 'System Settings', href: '/admin/settings', icon: Settings },
   ];
 
+  const certificationLinks = [
+    { name: 'Score Definitions', href: '/admin/score-definitions', icon: ListChecks },
+    { name: 'Certification', href: '/admin/certification', icon: Award },
+  ];
+
   return (
     <aside className="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-800 h-full text-slate-300">
       <div className="flex items-center justify-center h-16 border-b border-slate-800">
@@ -23,6 +28,27 @@ const AdminSidebar = () => {
       <div className="flex flex-col flex-1 py-6 px-4 space-y-2 overflow-y-auto">
         <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Management</p>
         {links.map((link) => {
+          const Icon = link.icon;
+          const isActive = pathname.startsWith(link.href);
+          
+          return (
+            <Link 
+              key={link.name} 
+              href={link.href}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
+                isActive 
+                  ? 'bg-blue-600 text-white' 
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Icon size={18} className={isActive ? 'text-white' : 'text-slate-400'} />
+              {link.name}
+            </Link>
+          );
+        })}
+
+        <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-6">Certification</p>
+        {certificationLinks.map((link) => {
           const Icon = link.icon;
           const isActive = pathname.startsWith(link.href);
           

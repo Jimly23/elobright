@@ -78,6 +78,10 @@ export const examService = {
     const response = await api.delete(`/questions/${id}`, getConfig(token));
     return response.data;
   },
+  reorderQuestion: async (id: string, direction: 'up' | 'down', token?: string) => {
+    const response = await api.patch(`/questions/${id}/reorder`, { direction }, getConfig(token));
+    return response.data;
+  },
 
   // --- QUESTION OPTIONS ---
   createOption: async (data: any, token?: string) => {

@@ -45,7 +45,7 @@ export default function LikertQuestionDisplay({
 
     try {
       const sectionSessionId = localStorage.getItem('currentSectionSessionId');
-      const token = getCookie('token') || '';
+      const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
 
       if (sectionSessionId) {
         // Submit as essay/text response with the Likert scale value

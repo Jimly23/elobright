@@ -36,7 +36,7 @@ export default function QuestionPage() {
   // Save checkpoint to localStorage so the landing page can show a resume banner
   useEffect(() => {
     if (examId && sectionId && questionId) {
-      const userId = getCookie('userId') || '';
+      const userId = getCookie('userId') || (typeof window !== 'undefined' ? localStorage.getItem('userId') : null) || '';
       localStorage.setItem('examCheckpoint', JSON.stringify({
         examId,
         sectionId,
@@ -78,7 +78,7 @@ export default function QuestionPage() {
       // Last question in this section — finish the section
       setFinishing(true);
       try {
-        const token = getCookie('token') || '';
+        const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
         const sectionSessionId = localStorage.getItem('currentSectionSessionId');
         
         if (sectionSessionId) {

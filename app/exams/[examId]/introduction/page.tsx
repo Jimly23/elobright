@@ -111,8 +111,8 @@ export default function ExamIntroductionPage() {
     if (sections.length === 0) return;
     setLoading(true);
     try {
-      const token = getCookie('token') || '';
-      const cookieUserId = getCookie('userId');
+      const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
+      const cookieUserId = getCookie('userId') || (typeof window !== 'undefined' ? localStorage.getItem('userId') : null);
       const userId = cookieUserId ? parseInt(cookieUserId, 10) : 2;
 
       let res = await exam.startExam({
@@ -160,8 +160,8 @@ export default function ExamIntroductionPage() {
         // If the conflicting session is stale, finish it and retry
         if (isSessionStale(conflictSession)) {
           try {
-            const token = getCookie('token') || '';
-            const cookieUserId = getCookie('userId');
+            const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
+            const cookieUserId = getCookie('userId') || (typeof window !== 'undefined' ? localStorage.getItem('userId') : null);
             const userId = cookieUserId ? parseInt(cookieUserId, 10) : 2;
             const freshRes = await finishStaleAndRestart(conflictSession.id, token, userId);
             
