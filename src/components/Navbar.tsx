@@ -8,6 +8,7 @@ import Button from '@/src/components/ui/Button';
 import Image from 'next/image';
 import { ESSAY_PRACTICE_ROUTES } from '@/src/constants/essayPractice';
 import { examService } from '../api/exam';
+import CryptoJS from 'crypto-js';
 
 const navLinks = [
   { 
@@ -53,6 +54,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [examSubmenus, setExamSubmenus] = useState<any[]>(navLinks[0].submenus || []);
   const router = useRouter();
 
@@ -75,6 +77,20 @@ const Navbar = () => {
 
     if (token) {
       setIsLoggedIn(true);
+      
+      try {
+        const encryptedUserData = localStorage.getItem('userData');
+        if (encryptedUserData) {
+          const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY || 'elobright_secret_key';
+          const bytes = CryptoJS.AES.decrypt(encryptedUserData, secretKey);
+          const user = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+          if (user && ['admin', 'superadmin', 'reviewer', 'moderator'].includes(user.role)) {
+            setIsAdmin(true);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse user role for Navbar', e);
+      }
     }
   }, []);
 
@@ -188,10 +204,10 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            <Link href="/dashboard">
+            <Link href={isAdmin ? "/admin/exams" : "/dashboard"}>
               <Button className="text-blue-600 hover:bg-blue-50 border border-blue-200 bg-white">
                 <LayoutDashboard size={18} />
-                Dashboard
+                {isAdmin ? "Admin Panel" : "Dashboard"}
               </Button>
             </Link>
             <Button 
@@ -280,10 +296,10 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Link href="/dashboard" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link href={isAdmin ? "/admin/exams" : "/dashboard"} className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button className="w-full py-2.5 text-blue-600 border border-blue-200 hover:bg-blue-50 bg-white">
                     <LayoutDashboard size={18} />
-                    Dashboard
+                    {isAdmin ? "Admin Panel" : "Dashboard"}
                   </Button>
                 </Link>
                 <Button 

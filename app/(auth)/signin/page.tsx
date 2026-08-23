@@ -73,7 +73,7 @@ function SignInContent() {
       // Redirect berdasarkan role
       const adminRoles = ['admin', 'superadmin', 'reviewer', 'moderator'];
       if (response.user && adminRoles.includes(response.user.role)) {
-        router.push('/admin/dashboard');
+        router.push('/admin/exams');
       } else {
         router.push(callbackUrl);
       }
