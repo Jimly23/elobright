@@ -109,7 +109,7 @@ export default function ScoreDefinitionsPage() {
       <div className="flex items-center justify-center h-full min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 size={40} className="text-blue-500 animate-spin" />
-          <p className="text-slate-400 text-sm font-medium">Loading score definitions...</p>
+          <p className="text-slate-400 text-sm font-medium">Memuat definisi nilai...</p>
         </div>
       </div>
     );
@@ -124,10 +124,10 @@ export default function ScoreDefinitionsPage() {
             <div className="p-2 bg-blue-50 rounded-xl">
               <ListChecks size={22} className="text-blue-600" />
             </div>
-            Score Definitions
+            Definisi Nilai
           </h1>
           <p className="text-slate-500 mt-1 text-sm">
-            Define additional score components and their weights for certification.
+            Tentukan komponen nilai tambahan dan bobotnya untuk sertifikasi.
           </p>
         </div>
         <Button
@@ -135,7 +135,7 @@ export default function ScoreDefinitionsPage() {
           className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
         >
           <Plus size={16} />
-          Add Score
+          Tambah Nilai
         </Button>
       </div>
 
@@ -156,13 +156,13 @@ export default function ScoreDefinitionsPage() {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Weight Used</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Bobot Terpakai</p>
             <p className={`text-3xl font-black mt-1 ${totalWeight > 1 ? 'text-red-500' : 'text-slate-900'}`}>
               {totalWeight.toFixed(2)}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Exam Weight (Auto)</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Bobot Ujian (Otomatis)</p>
             <p className="text-3xl font-black mt-1 text-blue-600">
               {Math.max(0, 1 - totalWeight).toFixed(2)}
             </p>
@@ -171,7 +171,7 @@ export default function ScoreDefinitionsPage() {
         {totalWeight > 1 && (
           <div className="mt-3 p-2.5 rounded-lg bg-red-50 border border-red-100 text-red-500 text-xs font-bold flex items-center gap-2">
             <AlertTriangle size={14} />
-            Total weight exceeds 1.0 — exam weight will be clamped to 0.
+            Total bobot melebihi 1.0 — bobot ujian akan dibatasi menjadi 0.
           </div>
         )}
         <div className="mt-3 w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
@@ -187,7 +187,7 @@ export default function ScoreDefinitionsPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-slate-900">
-              {editingId ? 'Edit Score Definition' : 'New Score Definition'}
+              {editingId ? 'Edit Definisi Nilai' : 'Definisi Nilai Baru'}
             </h3>
             <Button variant="ghost" size="icon" onClick={handleCancel}>
               <X size={18} />
@@ -195,7 +195,7 @@ export default function ScoreDefinitionsPage() {
           </div>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Score Name</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Nama Nilai</label>
               <input
                 type="text"
                 value={formData.scoreName}
@@ -206,7 +206,7 @@ export default function ScoreDefinitionsPage() {
               />
             </div>
             <div className="w-full sm:w-40">
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Weight (0–1)</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Bobot (0–1)</label>
               <input
                 type="number"
                 step="0.01"
@@ -226,7 +226,7 @@ export default function ScoreDefinitionsPage() {
                 className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold text-sm rounded-xl transition-all"
               >
                 {formLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                {editingId ? 'Update' : 'Create'}
+                {editingId ? 'Perbarui' : 'Buat'}
               </Button>
             </div>
           </form>
@@ -240,18 +240,18 @@ export default function ScoreDefinitionsPage() {
             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
               <ListChecks size={32} className="text-slate-300" />
             </div>
-            <h3 className="text-lg font-bold text-slate-700 mb-2">No Score Definitions</h3>
+            <h3 className="text-lg font-bold text-slate-700 mb-2">Tidak Ada Definisi Nilai</h3>
             <p className="text-slate-400 text-sm max-w-sm">
-              Add score definitions to configure additional scoring components for certificates.
+              Tambahkan definisi nilai untuk mengonfigurasi komponen penilaian tambahan untuk sertifikat.
             </p>
           </div>
         ) : (
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-700 font-medium border-b border-slate-100">
               <tr>
-                <th className="px-6 py-3.5">Score Name</th>
-                <th className="px-6 py-3.5">Weight</th>
-                <th className="px-6 py-3.5 text-right">Actions</th>
+                <th className="px-6 py-3.5">Nama Nilai</th>
+                <th className="px-6 py-3.5">Bobot</th>
+                <th className="px-6 py-3.5 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -281,14 +281,14 @@ export default function ScoreDefinitionsPage() {
                             onClick={() => handleDelete(score.id)}
                             className="px-3 py-1.5 text-xs rounded-lg"
                           >
-                            Confirm
+                            Konfirmasi
                           </Button>
                           <Button
                             variant="secondary"
                             onClick={() => setDeleteConfirmId(null)}
                             className="px-3 py-1.5 text-xs rounded-lg"
                           >
-                            Cancel
+                            Batal
                           </Button>
                         </div>
                       ) : (
@@ -297,7 +297,7 @@ export default function ScoreDefinitionsPage() {
                           size="icon"
                           onClick={() => setDeleteConfirmId(score.id)}
                           className="text-slate-400 hover:text-red-500 hover:bg-red-50"
-                          title="Delete"
+                          title="Hapus"
                         >
                           <Trash2 size={16} />
                         </Button>

@@ -15,13 +15,12 @@ const AdminSidebar = ({ isOpen = false, onClose }: AdminSidebarProps) => {
   const router = useRouter();
 
   const links = [
-    { name: 'Manage Exams', href: '/admin/exams', icon: FileText },
-    { name: 'Manage Users', href: '/admin/users', icon: Users },
+    { name: 'Kelola Ujian', href: '/admin/exams', icon: FileText },
   ];
 
   const certificationLinks = [
-    { name: 'Score Definitions', href: '/admin/score-definitions', icon: ListChecks },
-    { name: 'Certification', href: '/admin/certification', icon: Award },
+    { name: 'Definisi Nilai', href: '/admin/score-definitions', icon: ListChecks },
+    { name: 'Sertifikasi', href: '/admin/certification', icon: Award },
   ];
 
   const handleLogout = () => {
@@ -44,11 +43,11 @@ const AdminSidebar = ({ isOpen = false, onClose }: AdminSidebarProps) => {
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-slate-900 border-r border-slate-800 h-full text-slate-300 transition-transform duration-300 md:relative md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-center h-16 border-b border-slate-800">
-          <span className="text-xl font-bold tracking-tight text-white">Admin Panel</span>
+          <span className="text-xl font-bold tracking-tight text-white">Panel Admin</span>
         </div>
         
         <div className="flex flex-col flex-1 py-6 px-4 space-y-2 overflow-y-auto">
-          <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Management</p>
+          <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Manajemen</p>
           {links.map((link) => {
             const Icon = link.icon;
             const isActive = pathname.startsWith(link.href);
@@ -70,7 +69,7 @@ const AdminSidebar = ({ isOpen = false, onClose }: AdminSidebarProps) => {
             );
           })}
 
-          <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-6">Certification</p>
+          <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-6">Sertifikasi</p>
           {certificationLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname.startsWith(link.href);
@@ -99,7 +98,7 @@ const AdminSidebar = ({ isOpen = false, onClose }: AdminSidebarProps) => {
             className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-red-400 hover:bg-slate-800 hover:text-red-300"
           >
             <LogOut size={18} />
-            Logout
+            Keluar
           </button>
         </div>
       </aside>

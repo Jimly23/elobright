@@ -155,16 +155,16 @@ export default function AdminOptionsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <Link href={`/admin/exams/${examId}/sections/${sectionId}/questions`} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-amber-600 mb-2 transition-colors">
-            <ArrowLeft size={16} /> Back to Questions
+            <ArrowLeft size={16} /> Kembali ke Pertanyaan
           </Link>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
             <div className="p-2 bg-amber-50 rounded-xl">
               <ListChecks size={22} className="text-amber-600" />
             </div>
-            Manage Options
+            Kelola Opsi
           </h1>
           <p className="text-slate-500 mt-1 text-sm max-w-2xl truncate">
-            {questionData ? `Options for: ${questionDisplayText}` : 'Loading question info...'}
+            {questionData ? `Opsi untuk: ${questionDisplayText}` : 'Memuat info pertanyaan...'}
           </p>
         </div>
         <button
@@ -172,7 +172,7 @@ export default function AdminOptionsPage() {
           className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-xl transition-all shadow-sm"
         >
           <Plus size={18} />
-          Add Option
+          Tambah Opsi
         </button>
       </div>
 
@@ -195,19 +195,19 @@ export default function AdminOptionsPage() {
         {loading ? (
           <div className="p-12 flex flex-col items-center gap-4">
             <Loader2 size={40} className="text-amber-500 animate-spin" />
-            <p className="text-slate-400 text-sm font-medium">Loading options...</p>
+            <p className="text-slate-400 text-sm font-medium">Memuat opsi...</p>
           </div>
         ) : sortedOptions.length === 0 ? (
           <div className="p-12 flex flex-col items-center text-center">
             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
               <ListChecks size={32} className="text-slate-300" />
             </div>
-            <h3 className="text-lg font-bold text-slate-700 mb-2">No Options Found</h3>
+            <h3 className="text-lg font-bold text-slate-700 mb-2">Opsi Tidak Ditemukan</h3>
             <p className="text-slate-400 text-sm max-w-sm mb-6">
-              This question doesn't have any answer options yet.
+              Pertanyaan ini belum memiliki opsi jawaban apapun.
             </p>
             <button onClick={openCreateModal} className="text-amber-600 font-bold hover:underline">
-              + Add First Option
+              + Tambah Opsi Pertama
             </button>
           </div>
         ) : (
@@ -215,10 +215,10 @@ export default function AdminOptionsPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-slate-700 font-medium border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4 w-20 text-center">Order</th>
-                  <th className="px-6 py-4 min-w-[300px]">Option Text</th>
+                  <th className="px-6 py-4 w-20 text-center">Urutan</th>
+                  <th className="px-6 py-4 min-w-[300px]">Teks Opsi</th>
                   <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -233,11 +233,11 @@ export default function AdminOptionsPage() {
                     <td className="px-6 py-4">
                       {opt.isCorrect ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-lg uppercase tracking-wider">
-                          <CheckCircle2 size={14} /> Correct Answer
+                          <CheckCircle2 size={14} /> Jawaban Benar
                         </span>
                       ) : (
                         <span className="inline-flex px-2.5 py-1 bg-slate-100 text-slate-500 font-bold text-xs rounded-lg uppercase tracking-wider">
-                          Distractor
+                          Pengecoh
                         </span>
                       )}
                     </td>
@@ -246,14 +246,14 @@ export default function AdminOptionsPage() {
                         <button
                           onClick={() => openEditModal(opt)}
                           className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                          title="Edit Option"
+                          title="Edit Opsi"
                         >
                           <Pencil size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(opt.id)}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                          title="Delete Option"
+                          title="Hapus Opsi"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -274,7 +274,7 @@ export default function AdminOptionsPage() {
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-bold text-slate-900">
-                  {isEditing ? 'Edit Option' : 'Add New Option'}
+                  {isEditing ? 'Edit Opsi' : 'Tambah Opsi Baru'}
                 </h3>
               </div>
               <button onClick={closeModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
@@ -284,7 +284,7 @@ export default function AdminOptionsPage() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Option Text <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Teks Opsi <span className="text-red-500">*</span></label>
                 <textarea
                   required
                   rows={3}
@@ -304,8 +304,8 @@ export default function AdminOptionsPage() {
                     className="w-5 h-5 rounded border-slate-300 text-amber-600 focus:ring-amber-500"
                   />
                   <div>
-                    <span className="block text-sm font-bold text-slate-700">Mark as Correct Answer</span>
-                    <span className="block text-xs text-slate-500 mt-0.5">Check this box if this is the correct answer for the question.</span>
+                    <span className="block text-sm font-bold text-slate-700">Tandai sebagai Jawaban Benar</span>
+                    <span className="block text-xs text-slate-500 mt-0.5">Centang kotak ini jika ini adalah jawaban yang benar untuk pertanyaan.</span>
                   </div>
                 </label>
               </div>
@@ -316,7 +316,7 @@ export default function AdminOptionsPage() {
                   onClick={closeModal}
                   className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl transition-all"
                 >
-                  Cancel
+                  Batal
                 </button>
                 <button
                   type="submit"
@@ -324,7 +324,7 @@ export default function AdminOptionsPage() {
                   className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white font-bold text-sm rounded-xl transition-all"
                 >
                   {formLoading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                  {isEditing ? 'Save Changes' : 'Create Option'}
+                  {isEditing ? 'Simpan Perubahan' : 'Buat Opsi'}
                 </button>
               </div>
             </form>

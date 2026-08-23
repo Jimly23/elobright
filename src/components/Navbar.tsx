@@ -11,9 +11,9 @@ import { examService } from '../api/exam';
 import CryptoJS from 'crypto-js';
 
 const navLinks = [
-  { 
-    name: 'English Test', 
-    href: '/sertification/english-test', 
+  {
+    name: 'English Test',
+    href: '/sertification/english-test',
     hasDropdown: true,
     submenus: [
       { name: 'TOEFL', href: '/english-test/toefl' },
@@ -21,18 +21,18 @@ const navLinks = [
       { name: 'Essay Practice', href: ESSAY_PRACTICE_ROUTES.start }
     ]
   },
-  { 
-    name: 'Sertification', 
-    href: '/sertification/english-test', 
+  {
+    name: 'Sertification',
+    href: '/sertification/english-test',
     hasDropdown: true,
     submenus: [
       { name: 'English Sertification Test', href: '/sertification/english-test' },
       { name: 'English Level', href: '/sertification/english-level' }
     ]
   },
-  { 
-    name: 'Learning', 
-    href: '/learning', 
+  {
+    name: 'Learning',
+    href: '/learning',
     hasDropdown: true,
     submenus: [
       { name: 'All Courses', href: '/learning' },
@@ -61,7 +61,7 @@ const Navbar = () => {
   useEffect(() => {
     // Check if user is logged in
     const token = localStorage.getItem('token');
-    
+
     // Fetch exams for navigation
     examService.getAllExams(token || undefined)
       .then(data => {
@@ -77,7 +77,7 @@ const Navbar = () => {
 
     if (token) {
       setIsLoggedIn(true);
-      
+
       try {
         const encryptedUserData = localStorage.getItem('userData');
         if (encryptedUserData) {
@@ -113,7 +113,7 @@ const Navbar = () => {
     document.cookie = 'token=; path=/; max-age=0; SameSite=Lax';
     document.cookie = 'userId=; path=/; max-age=0; SameSite=Lax';
     setIsLoggedIn(false);
-    
+
     // Redirect to home or refresh
     router.push('/signin');
     router.refresh();
@@ -135,28 +135,28 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 bg-white backdrop-blur-md transition-all">
       {/* Logo Section */}
       <Link href="/">
-      <div className="flex items-center gap-2">
-        <div className="w-10 h-10 flex items-center justify-center">
-          {/* Ganti dengan Logo SVG Elobright Anda */}
-          <Image
-            src="/logo/logo-fixx.png"
-            alt="Logo"
-            width={60}
-            height={60}
-            className="object-contain"
-          />
+        <div className="flex items-center gap-2">
+          <div className="w-10 h-10 flex items-center justify-center">
+            {/* Ganti dengan Logo SVG Elobright Anda */}
+            <Image
+              src="/logo/logo-fixx.png"
+              alt="Logo"
+              width={60}
+              height={60}
+              className="object-contain"
+            />
+          </div>
+          <span className="text-xl font-bold text-slate-800 tracking-tight">
+            Elobright
+          </span>
         </div>
-        <span className="text-xl font-bold text-slate-800 tracking-tight">
-          Elobright
-        </span>
-      </div>
       </Link>
 
       {/* Desktop Navigation Links */}
       <ul className="hidden md:flex items-center gap-8">
         {dynamicNavLinks.map((link) => (
           <li key={link.name} className="relative group">
-            <Link 
+            <Link
               href={link.href}
               className="flex items-center gap-1 text-[15px] font-medium text-slate-700 hover:text-blue-600 transition-colors py-2"
             >
@@ -165,7 +165,7 @@ const Navbar = () => {
                 <ChevronDown size={16} className="text-slate-400 group-hover:rotate-180 transition-transform duration-200" />
               )}
             </Link>
-            
+
             {/* Dropdown Menu */}
             {link.hasDropdown && link.submenus && (
               <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-100 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden text-sm">
@@ -210,7 +210,7 @@ const Navbar = () => {
                 {isAdmin ? "Admin Panel" : "Dashboard"}
               </Button>
             </Link>
-            <Button 
+            <Button
               onClick={handleLogout}
               variant="danger"
             >
@@ -222,8 +222,8 @@ const Navbar = () => {
 
       {/* Mobile Menu Button (Burger Icon) */}
       <div className="md:hidden flex items-center">
-        <Button 
-          onClick={toggleMobileMenu} 
+        <Button
+          onClick={toggleMobileMenu}
           variant="ghost"
           size="icon"
           className="border-slate-100 bg-slate-50"
@@ -234,7 +234,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu Dropdown */}
-      <div 
+      <div
         className={`absolute top-full left-0 w-full bg-white border-b border-gray-100 shadow-xl transition-all duration-300 md:hidden z-40
           ${isMobileMenuOpen ? 'max-h-[85vh] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'}
         `}
@@ -259,7 +259,7 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               )}
-              
+
               {/* Mobile Submenu */}
               {link.hasDropdown && link.submenus && (
                 <div className={`overflow-hidden transition-all duration-300 ${openDropdown === link.name ? "max-h-[500px]" : "max-h-0"}`}>
@@ -302,7 +302,7 @@ const Navbar = () => {
                     {isAdmin ? "Admin Panel" : "Dashboard"}
                   </Button>
                 </Link>
-                <Button 
+                <Button
                   onClick={() => {
                     handleLogout();
                     setIsMobileMenuOpen(false);

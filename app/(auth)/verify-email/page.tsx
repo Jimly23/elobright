@@ -113,8 +113,11 @@ function VerifyEmailContent() {
       </form>
 
       <div className="mt-8 text-center">
-        <p className="text-slate-500 text-sm md:text-base font-medium mb-3">
+        <p className="text-slate-500 text-sm md:text-base font-medium mb-1">
           Didn't receive the email?
+        </p>
+        <p className="text-slate-400 text-xs mb-3 px-4">
+          Please check your spam/junk folder if you don't see it in your inbox.
         </p>
         <button 
           onClick={handleResend}

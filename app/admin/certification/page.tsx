@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Award, Search, Pencil, Mail, Download, X, Save, AlertTriangle, Loader2, CheckCircle2, ExternalLink, FileText, Layers } from 'lucide-react';
+import { Award, Search, Mail, Download, X, Save, AlertTriangle, Loader2, CheckCircle2, ExternalLink, FileText } from 'lucide-react';
 import Button from '@/src/components/ui/Button';
 import Cookies from 'js-cookie';
 import { certificationService, CertificationScore, CertificationAdditionalScore } from '@/src/api/certification';
-import { examService } from '@/src/api/exam';
 
 export default function CertificationPage() {
   const [scores, setScores] = useState<CertificationScore[]>([]);
@@ -15,6 +14,7 @@ export default function CertificationPage() {
   const [successMsg, setSuccessMsg] = useState('');
   const [filterSubmissionId, setFilterSubmissionId] = useState('');
   const [appliedFilter, setAppliedFilter] = useState('');
+  const [filterExamTitle, setFilterExamTitle] = useState('');
 
   // Edit modal state
   const [editingScore, setEditingScore] = useState<CertificationScore | null>(null);
@@ -36,54 +36,13 @@ export default function CertificationPage() {
     try {
       setLoading(true);
       setError('');
-      const [scoresData, defsData, reportData] = await Promise.all([
+      const [scoresData, defsData] = await Promise.all([
         certificationService.getAllScores(token, appliedFilter || undefined),
         certificationService.getAllAdditionalScores(token),
-        examService.getReport(token).catch(() => ({ data: [] })),
       ]);
 
-      const reportMap = new Map();
-      if (reportData?.data) {
-        reportData.data.forEach((user: any) => {
-          if (user.exams) {
-            user.exams.forEach((exam: any) => {
-               reportMap.set(exam.submissionId, {
-                  name: user.nama || user.email,
-                  email: user.email,
-                  examTitle: exam.examTitle,
-                  rawScore: exam.totalScore,
-               });
-            });
-          }
-        });
-      }
-
       const rawScores = Array.isArray(scoresData) ? scoresData : [];
-      const mappedScores = rawScores.map((score: any) => {
-        const reportInfo = reportMap.get(score.examSubmissionId);
-        if (reportInfo) {
-           return {
-             ...score,
-             user: {
-               ...score.user,
-               id: score.userId,
-               fullName: reportInfo.name,
-               email: reportInfo.email,
-             },
-             examSubmission: {
-               ...score.examSubmission,
-               exam: {
-                 ...score.examSubmission?.exam,
-                 title: reportInfo.examTitle,
-               }
-             },
-             rawExamScore: reportInfo.rawScore
-           }
-        }
-        return score;
-      });
-
-      setScores(mappedScores);
+      setScores(rawScores);
       setAdditionalScoreDefs(Array.isArray(defsData) ? defsData : []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load certification data.');
@@ -104,7 +63,16 @@ export default function CertificationPage() {
   const handleClearFilter = () => {
     setFilterSubmissionId('');
     setAppliedFilter('');
+    setFilterExamTitle('');
   };
+
+  const uniqueExams = Array.from(new Set(scores.map((s: any) => s.exam?.title).filter(Boolean)));
+  const filteredScores = scores.filter((score: any) => {
+    if (filterExamTitle && score.exam?.title !== filterExamTitle) {
+      return false;
+    }
+    return true;
+  });
 
   // --- Edit ---
   const openEditModal = (score: CertificationScore) => {
@@ -130,7 +98,7 @@ export default function CertificationPage() {
       ? parseFloat(editForm.examScoreOverride)
       : null;
 
-    if (examScore === null) return 'Using auto-calculated exam score';
+    if (examScore === null) return 'Menggunakan nilai ujian yang dihitung otomatis';
 
     const totalAdditionalWeight = additionalScoreDefs.reduce((sum, def) => sum + def.weight, 0);
     const examWeight = Math.max(0, 1 - totalAdditionalWeight);
@@ -213,7 +181,7 @@ export default function CertificationPage() {
       <div className="flex items-center justify-center h-full min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 size={40} className="text-blue-500 animate-spin" />
-          <p className="text-slate-400 text-sm font-medium">Loading certification scores...</p>
+          <p className="text-slate-400 text-sm font-medium">Memuat nilai sertifikasi...</p>
         </div>
       </div>
     );
@@ -227,10 +195,10 @@ export default function CertificationPage() {
           <div className="p-2 bg-blue-50 rounded-xl">
             <Award size={22} className="text-blue-600" />
           </div>
-          Certification Scores
+          Nilai Sertifikasi
         </h1>
         <p className="text-slate-500 mt-1 text-sm">
-          Manage certification scores, edit additional scores, and send certificate emails.
+          Kelola nilai sertifikasi, edit nilai tambahan, dan kirim email sertifikat.
         </p>
       </div>
 
@@ -251,24 +219,24 @@ export default function CertificationPage() {
       {/* Email Result */}
       {emailResult && (
         <div className="bg-white rounded-2xl shadow-sm border border-green-200 p-5">
-          <h3 className="text-sm font-bold text-green-700 mb-3">Email Sent Successfully</h3>
+          <h3 className="text-sm font-bold text-green-700 mb-3">Email Berhasil Dikirim</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
             <div>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">To</p>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Ke</p>
               <p className="text-slate-900 font-medium mt-0.5">{emailResult.to}</p>
             </div>
             <div>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Name</p>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Nama</p>
               <p className="text-slate-900 font-medium mt-0.5">{emailResult.fullName}</p>
             </div>
             <div>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Download URL</p>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">URL Unduhan</p>
               <a href={emailResult.downloadUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium mt-0.5 hover:underline flex items-center gap-1">
-                Open <ExternalLink size={12} />
+                Buka <ExternalLink size={12} />
               </a>
             </div>
           </div>
-          <Button variant="ghost" onClick={() => setEmailResult(null)} className="mt-3 text-xs text-slate-400 hover:text-slate-600">Dismiss</Button>
+          <Button variant="ghost" onClick={() => setEmailResult(null)} className="mt-3 text-xs text-slate-400 hover:text-slate-600">Tutup</Button>
         </div>
       )}
 
@@ -276,7 +244,7 @@ export default function CertificationPage() {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
         <form onSubmit={handleFilter} className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">Filter by Exam Submission ID</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Filter berdasarkan ID Pengumpulan</label>
             <input
               type="text"
               value={filterSubmissionId}
@@ -284,6 +252,19 @@ export default function CertificationPage() {
               placeholder="Enter exam submission UUID..."
               className="w-full px-4 py-3 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300"
             />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Filter berdasarkan Ujian</label>
+            <select
+              value={filterExamTitle}
+              onChange={(e) => setFilterExamTitle(e.target.value)}
+              className="w-full px-4 py-3 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all bg-white"
+            >
+              <option value="">Semua Ujian</option>
+              {uniqueExams.map(exam => (
+                <option key={exam as string} value={exam as string}>{exam as string}</option>
+              ))}
+            </select>
           </div>
           <div className="flex items-end gap-2">
             <Button
@@ -301,7 +282,7 @@ export default function CertificationPage() {
                 className="flex items-center gap-2 px-5 py-3 font-bold text-sm rounded-xl transition-all"
               >
                 <X size={16} />
-                Clear
+                Bersihkan
               </Button>
             )}
           </div>
@@ -310,16 +291,16 @@ export default function CertificationPage() {
 
       {/* Scores Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        {scores.length === 0 ? (
+        {filteredScores.length === 0 ? (
           <div className="p-12 flex flex-col items-center text-center">
             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
               <Award size={32} className="text-slate-300" />
             </div>
-            <h3 className="text-lg font-bold text-slate-700 mb-2">No Certification Scores</h3>
+            <h3 className="text-lg font-bold text-slate-700 mb-2">Tidak Ada Nilai Sertifikasi</h3>
             <p className="text-slate-400 text-sm max-w-sm">
               {appliedFilter
-                ? 'No scores found for this submission ID. Try a different filter.'
-                : 'Certification scores will appear here after users complete exams.'}
+                ? 'Tidak ada nilai ditemukan untuk ID pengumpulan ini. Coba filter lain.'
+                : 'Nilai sertifikasi akan muncul di sini setelah pengguna menyelesaikan ujian.'}
             </p>
           </div>
         ) : (
@@ -327,16 +308,17 @@ export default function CertificationPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-slate-700 font-medium border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-3.5">User</th>
-                  <th className="px-6 py-3.5">Exam Submission</th>
-                  <th className="px-6 py-3.5">Raw Exam Score</th>
-                  <th className="px-6 py-3.5">Additional Scores</th>
-                  <th className="px-6 py-3.5">Exam Override</th>
-                  <th className="px-6 py-3.5 text-right">Actions</th>
+                  <th className="px-6 py-3.5">Pengguna</th>
+                  <th className="px-6 py-3.5">Ujian</th>
+                  <th className="px-6 py-3.5">Nilai Asli</th>
+                  <th className="px-6 py-3.5">Nilai Tambahan</th>
+                  <th className="px-6 py-3.5">Timpa</th>
+                  <th className="px-6 py-3.5">Nilai Akhir</th>
+                  <th className="px-6 py-3.5 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {scores.map((score) => (
+                {filteredScores.map((score: any) => (
                   <tr key={score.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div>
@@ -346,17 +328,17 @@ export default function CertificationPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div>
-                        <p className="font-medium text-slate-700 text-xs font-mono truncate max-w-[180px]" title={score.examSubmissionId}>
-                          {score.examSubmissionId}
-                        </p>
-                        {score.examSubmission?.exam?.title && (
-                          <p className="text-xs text-slate-400 mt-0.5">{score.examSubmission.exam.title}</p>
+                        <p className="font-bold text-slate-800">{score.exam?.title || '—'}</p>
+                        {score.examSubmission?.startedAt && (
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            {new Date(score.examSubmission.startedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
                         )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg">
-                        {score.rawExamScore !== undefined ? score.rawExamScore : '—'}
+                        {score.originalExamScore !== undefined && score.originalExamScore !== null ? Number(score.originalExamScore).toFixed(1) : '—'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -364,12 +346,12 @@ export default function CertificationPage() {
                         <div className="flex flex-wrap gap-1">
                           {Object.entries(score.additionalScore).map(([key, val]) => (
                             <span key={key} className="inline-flex items-center px-2 py-0.5 bg-blue-50 text-blue-700 text-[11px] font-bold rounded-md">
-                              {key}: {val}
+                              {key}: {String(val)}
                             </span>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-slate-300 text-xs">Not set</span>
+                        <span className="text-slate-300 text-xs">Belum diatur</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -378,7 +360,16 @@ export default function CertificationPage() {
                           {score.examScoreOverride}
                         </span>
                       ) : (
-                        <span className="text-slate-300 text-xs">Auto</span>
+                        <span className="text-slate-300 text-xs">Otomatis</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {score.finalScore !== undefined && score.finalScore !== null ? (
+                        <span className="inline-flex items-center px-3 py-1.5 bg-emerald-50 text-emerald-700 text-sm font-black rounded-lg">
+                          {Number(score.finalScore).toFixed(1)}
+                        </span>
+                      ) : (
+                        <span className="text-slate-300 text-xs">—</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -388,14 +379,14 @@ export default function CertificationPage() {
                           size="icon"
                           onClick={() => openEditModal(score)}
                           className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          title="Edit Scores"
+                          title="Edit Nilai"
                         >
                           <FileText size={18} />
                         </Button>
                         <button
                           onClick={() => handleDownload(score.id)}
                           className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
-                          title="Download PDF"
+                          title="Unduh PDF"
                         >
                           <Download size={16} />
                         </button>
@@ -406,20 +397,20 @@ export default function CertificationPage() {
                               disabled={emailLoading}
                               className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white text-xs font-bold rounded-lg transition-all"
                             >
-                              {emailLoading ? 'Sending...' : 'Confirm'}
+                              {emailLoading ? 'Mengirim...' : 'Konfirmasi'}
                             </button>
                             <button
                               onClick={() => setEmailConfirmId(null)}
                               className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-lg transition-all"
                             >
-                              Cancel
+                              Batal
                             </button>
                           </div>
                         ) : (
                           <button
                             onClick={() => setEmailConfirmId(score.id)}
                             className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
-                            title="Send Certificate Email"
+                            title="Kirim Email Sertifikat"
                           >
                             <Mail size={16} />
                           </button>
@@ -440,7 +431,7 @@ export default function CertificationPage() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Edit Certification Score</h3>
+                <h3 className="text-lg font-bold text-slate-900">Edit Nilai Sertifikasi</h3>
                 <p className="text-xs text-slate-400 mt-0.5">{editingScore.user?.fullName || `User #${editingScore.userId}`}</p>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setEditingScore(null)}>
@@ -452,13 +443,13 @@ export default function CertificationPage() {
               {/* Additional Scores */}
               {additionalScoreDefs.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Additional Scores</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Nilai Tambahan</p>
                   <div className="space-y-3">
                     {additionalScoreDefs.map(def => (
                       <div key={def.id} className="flex items-center gap-3">
                         <label className="text-sm font-medium text-slate-700 flex-1 min-w-0">
                           <span className="truncate block">{def.scoreName}</span>
-                          <span className="text-[10px] text-slate-400">weight: {def.weight}</span>
+                          <span className="text-[10px] text-slate-400">bobot: {def.weight}</span>
                         </label>
                         <input
                           type="number"
@@ -481,7 +472,7 @@ export default function CertificationPage() {
 
               {/* Exam Score Override */}
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Exam Score Override</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Timpa Nilai Ujian</p>
                 <div className="flex items-center gap-3 mb-2">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -490,7 +481,7 @@ export default function CertificationPage() {
                       onChange={(e) => setEditForm({ ...editForm, useOverride: e.target.checked })}
                       className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm text-slate-700 font-medium">Use manual override</span>
+                    <span className="text-sm text-slate-700 font-medium">Gunakan penimpaan manual</span>
                   </label>
                 </div>
                 {editForm.useOverride && (
@@ -506,13 +497,13 @@ export default function CertificationPage() {
                   />
                 )}
                 {!editForm.useOverride && (
-                  <p className="text-xs text-slate-400 italic">Using auto-calculated exam score from submission.</p>
+                  <p className="text-xs text-slate-400 italic">Menggunakan nilai ujian yang dihitung otomatis dari pengumpulan.</p>
                 )}
               </div>
 
               {/* Preview */}
               <div className="bg-blue-50/50 border-2 border-blue-100 rounded-xl p-4 text-center">
-                <p className="text-xs font-bold text-blue-500 uppercase tracking-wider mb-1">Preview Final Score</p>
+                <p className="text-xs font-bold text-blue-500 uppercase tracking-wider mb-1">Pratinjau Nilai Akhir</p>
                 <p className="text-3xl font-black text-blue-600">
                   {computePreviewScore() || '—'}
                 </p>
@@ -524,7 +515,7 @@ export default function CertificationPage() {
                 variant="secondary"
                 onClick={() => setEditingScore(null)}
               >
-                Cancel
+                Batal
               </Button>
               <Button
                 onClick={handleSaveEdit}
@@ -532,7 +523,7 @@ export default function CertificationPage() {
                 className="flex items-center gap-2"
               >
                 {editLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                Save Changes
+                Simpan Perubahan
               </Button>
             </div>
           </div>

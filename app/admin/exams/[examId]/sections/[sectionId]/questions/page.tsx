@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { MessageSquare, Plus, Pencil, Trash2, X, Save, AlertTriangle, Loader2, CheckCircle2, ArrowUp, ArrowDown, ArrowLeft, Image as ImageIcon, Volume2, ListChecks } from 'lucide-react';
+import { MessageSquare, Plus, Pencil, Trash2, X, Save, AlertTriangle, Loader2, CheckCircle2, ArrowUp, ArrowDown, ArrowLeft, Image as ImageIcon, Volume2, Mic, ListChecks } from 'lucide-react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { exam } from '@/src/api/exam';
@@ -16,6 +16,7 @@ interface Question {
   points: number;
   imageUrl?: string | null;
   audioUrl?: string | null;
+  questionAudioUrl?: string | null;
 }
 
 interface SectionData {
@@ -49,12 +50,15 @@ export default function AdminQuestionsPage() {
   // File State
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [questionAudioFile, setQuestionAudioFile] = useState<File | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
   const [removeAudio, setRemoveAudio] = useState(false);
+  const [removeQuestionAudio, setRemoveQuestionAudio] = useState(false);
   
   // Refs for file inputs
   const imageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
+  const questionAudioInputRef = useRef<HTMLInputElement>(null);
 
   const token = Cookies.get('token');
 
@@ -97,8 +101,10 @@ export default function AdminQuestionsPage() {
     setPoints(5);
     setImageFile(null);
     setAudioFile(null);
+    setQuestionAudioFile(null);
     setRemoveImage(false);
     setRemoveAudio(false);
+    setRemoveQuestionAudio(false);
     setError('');
     setSuccessMsg('');
     setIsModalOpen(true);
@@ -112,8 +118,10 @@ export default function AdminQuestionsPage() {
     setPoints(q.points || 5);
     setImageFile(null);
     setAudioFile(null);
+    setQuestionAudioFile(null);
     setRemoveImage(false);
     setRemoveAudio(false);
+    setRemoveQuestionAudio(false);
     setError('');
     setSuccessMsg('');
     setIsModalOpen(true);
@@ -137,6 +145,13 @@ export default function AdminQuestionsPage() {
     }
   };
 
+  const handleQuestionAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setQuestionAudioFile(e.target.files[0]);
+      setRemoveQuestionAudio(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
@@ -149,23 +164,28 @@ export default function AdminQuestionsPage() {
       fd.append('points', String(points));
       
       if (imageFile) {
-        fd.append('imageFile', imageFile);
+        fd.append('image', imageFile);
       }
       
-      if (type === 'speaking' && audioFile) {
-        fd.append('audioFile', audioFile);
+      if (audioFile) {
+        fd.append('audio', audioFile);
+      }
+
+      if (questionAudioFile) {
+        fd.append('questionAudio', questionAudioFile);
       }
 
       if (isEditing && editingId) {
         if (removeImage) fd.append('removeImage', 'true');
         if (removeAudio) fd.append('removeAudio', 'true');
-        fd.append('type', type);
+        if (removeQuestionAudio) fd.append('removeQuestionAudio', 'true');
+        fd.append('questionType', type);
         
         await exam.updateQuestion(editingId, fd, token);
         setSuccessMsg('Question updated successfully.');
       } else {
         fd.append('sectionId', sectionId);
-        fd.append('type', type);
+        fd.append('questionType', type);
         fd.append('order', String(questions.length)); // Append to bottom
         
         await exam.createQuestion(fd, token);
@@ -220,16 +240,16 @@ export default function AdminQuestionsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <Link href={`/admin/exams/${examId}/sections`} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-600 mb-2 transition-colors">
-            <ArrowLeft size={16} /> Back to Sections
+            <ArrowLeft size={16} /> Kembali ke Bagian
           </Link>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
             <div className="p-2 bg-emerald-50 rounded-xl">
               <MessageSquare size={22} className="text-emerald-600" />
             </div>
-            Manage Questions
+            Kelola Pertanyaan
           </h1>
           <p className="text-slate-500 mt-1 text-sm">
-            {sectionData ? `Questions for section: ${sectionData.title}` : 'Loading section info...'}
+            {sectionData ? `Pertanyaan untuk bagian: ${sectionData.title}` : 'Memuat info bagian...'}
           </p>
         </div>
         <button
@@ -237,7 +257,7 @@ export default function AdminQuestionsPage() {
           className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-sm"
         >
           <Plus size={18} />
-          Add Question
+          Tambah Pertanyaan
         </button>
       </div>
 
@@ -260,19 +280,19 @@ export default function AdminQuestionsPage() {
         {loading ? (
           <div className="p-12 flex flex-col items-center gap-4">
             <Loader2 size={40} className="text-emerald-500 animate-spin" />
-            <p className="text-slate-400 text-sm font-medium">Loading questions...</p>
+            <p className="text-slate-400 text-sm font-medium">Memuat pertanyaan...</p>
           </div>
         ) : sortedQuestions.length === 0 ? (
           <div className="p-12 flex flex-col items-center text-center">
             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
               <MessageSquare size={32} className="text-slate-300" />
             </div>
-            <h3 className="text-lg font-bold text-slate-700 mb-2">No Questions Found</h3>
+            <h3 className="text-lg font-bold text-slate-700 mb-2">Pertanyaan Tidak Ditemukan</h3>
             <p className="text-slate-400 text-sm max-w-sm mb-6">
-              This section doesn't have any questions yet.
+              Bagian ini belum memiliki pertanyaan apapun.
             </p>
             <button onClick={openCreateModal} className="text-emerald-600 font-bold hover:underline">
-              + Add First Question
+              + Tambah Pertanyaan Pertama
             </button>
           </div>
         ) : (
@@ -281,10 +301,10 @@ export default function AdminQuestionsPage() {
               <thead className="bg-slate-50 text-slate-700 font-medium border-b border-slate-100">
                 <tr>
                   <th className="px-6 py-4 w-20 text-center">No.</th>
-                  <th className="px-6 py-4 min-w-[300px]">Question Text</th>
+                  <th className="px-6 py-4 min-w-[300px]">Teks Pertanyaan</th>
                   <th className="px-6 py-4">Media</th>
-                  <th className="px-6 py-4">Points</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4">Poin</th>
+                  <th className="px-6 py-4 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -324,10 +344,15 @@ export default function AdminQuestionsPage() {
                         )}
                         {q.audioUrl && (
                           <div className="flex items-center gap-1.5 text-xs text-purple-600 font-medium">
-                            <Volume2 size={14} /> Audio
+                            <Volume2 size={14} /> Context Audio
                           </div>
                         )}
-                        {!q.imageUrl && !q.audioUrl && (
+                        {q.questionAudioUrl && (
+                          <div className="flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+                            <Mic size={14} /> Question Audio
+                          </div>
+                        )}
+                        {!q.imageUrl && !q.audioUrl && !q.questionAudioUrl && (
                           <span className="text-slate-300 text-xs">-</span>
                         )}
                       </div>
@@ -340,21 +365,21 @@ export default function AdminQuestionsPage() {
                         <Link
                           href={`/admin/exams/${examId}/sections/${sectionId}/questions/${q.id}/options`}
                           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-all border border-amber-200"
-                          title="Manage Options"
+                          title="Kelola Opsi"
                         >
-                          Manage Options
+                          Kelola Opsi
                         </Link>
                         <button
                           onClick={() => openEditModal(q)}
                           className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                          title="Edit Question"
+                          title="Edit Pertanyaan"
                         >
                           <Pencil size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(q.id)}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                          title="Delete Question"
+                          title="Hapus Pertanyaan"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -375,10 +400,10 @@ export default function AdminQuestionsPage() {
             <div className="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <div>
                 <h3 className="text-xl font-bold text-slate-900">
-                  {isEditing ? 'Edit Question' : 'Add New Question'}
+                  {isEditing ? 'Edit Pertanyaan' : 'Tambah Pertanyaan Baru'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Section: {sectionData?.title}
+                  Bagian: {sectionData?.title}
                 </p>
               </div>
               <button onClick={closeModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
@@ -388,34 +413,34 @@ export default function AdminQuestionsPage() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-5 flex-1">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Question Type <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Tipe Pertanyaan <span className="text-red-500">*</span></label>
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                   className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all bg-white"
                 >
-                  <option value="mcq">MCQ (Multiple Choice)</option>
+                  <option value="mcq">MCQ (Pilihan Ganda)</option>
                   <option value="speaking">Speaking</option>
-                  <option value="essay">Essay / Writing</option>
-                  <option value="listening">Listening</option>
+                  <option value="essay">Esai / Menulis</option>
+                  <option value="listening">Mendengarkan</option>
                 </select>
-                <p className="text-[11px] text-slate-400 mt-1">Ensure this matches the section's intended format.</p>
+                <p className="text-[11px] text-slate-400 mt-1">Pastikan ini sesuai dengan format bagian yang dituju.</p>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Question Text <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Teks Pertanyaan <span className="text-red-500">*</span></label>
                 <textarea
                   required
                   rows={4}
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="Type your question here..."
+                  placeholder="Ketik pertanyaan Anda di sini..."
                   className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Points <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Poin <span className="text-red-500">*</span></label>
                 <input
                   type="number"
                   required
@@ -428,12 +453,12 @@ export default function AdminQuestionsPage() {
 
               {/* File Uploads */}
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
-                <h4 className="text-sm font-bold text-slate-800">Media Attachments</h4>
+                <h4 className="text-sm font-bold text-slate-800">Lampiran Media</h4>
                 
                 {/* Image */}
                 <div>
                   <label className="block text-xs font-bold text-slate-600 mb-1.5 flex items-center gap-1.5">
-                    <ImageIcon size={14} /> Image File (Optional)
+                    <ImageIcon size={14} /> File Gambar (Opsional)
                   </label>
                   <input
                     type="file"
@@ -451,40 +476,67 @@ export default function AdminQuestionsPage() {
                           onChange={(e) => setRemoveImage(e.target.checked)}
                           className="rounded border-slate-300 text-red-600 focus:ring-red-500"
                         />
-                        <span className="font-medium text-red-600">Remove existing image from server</span>
+                        <span className="font-medium text-red-600">Hapus gambar yang ada dari server</span>
                       </label>
                     </div>
                   )}
                 </div>
 
-                {/* Audio */}
-                {type === 'speaking' && (
-                  <div className="pt-4 border-t border-slate-200">
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5 flex items-center gap-1.5">
-                      <Volume2 size={14} /> Audio File
-                    </label>
-                    <input
-                      type="file"
-                      accept="audio/*"
-                      ref={audioInputRef}
-                      onChange={handleAudioChange}
-                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 transition-all cursor-pointer"
-                    />
-                    {isEditing && !audioFile && (
-                      <div className="mt-2 flex items-center gap-2">
-                        <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={removeAudio}
-                            onChange={(e) => setRemoveAudio(e.target.checked)}
-                            className="rounded border-slate-300 text-red-600 focus:ring-red-500"
-                          />
-                          <span className="font-medium text-red-600">Remove existing audio from server</span>
-                        </label>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {/* Context Audio */}
+                <div className="pt-4 border-t border-slate-200">
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5 flex items-center gap-1.5">
+                    <Volume2 size={14} /> Audio Konteks (Opsional)
+                  </label>
+                  <p className="text-[11px] text-slate-400 mb-2">Audio konteks percakapan / listening passage yang didengarkan sebelum menjawab.</p>
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    ref={audioInputRef}
+                    onChange={handleAudioChange}
+                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 transition-all cursor-pointer"
+                  />
+                  {isEditing && !audioFile && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={removeAudio}
+                          onChange={(e) => setRemoveAudio(e.target.checked)}
+                          className="rounded border-slate-300 text-red-600 focus:ring-red-500"
+                        />
+                        <span className="font-medium text-red-600">Hapus audio konteks yang ada dari server</span>
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                {/* Question Audio */}
+                <div className="pt-4 border-t border-slate-200">
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5 flex items-center gap-1.5">
+                    <Mic size={14} /> Audio Pertanyaan (Opsional)
+                  </label>
+                  <p className="text-[11px] text-slate-400 mb-2">Audio pertanyaan itu sendiri. Gunakan jika pertanyaan disampaikan dalam bentuk audio, bukan teks.</p>
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    ref={questionAudioInputRef}
+                    onChange={handleQuestionAudioChange}
+                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 transition-all cursor-pointer"
+                  />
+                  {isEditing && !questionAudioFile && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={removeQuestionAudio}
+                          onChange={(e) => setRemoveQuestionAudio(e.target.checked)}
+                          className="rounded border-slate-300 text-red-600 focus:ring-red-500"
+                        />
+                        <span className="font-medium text-red-600">Hapus audio pertanyaan yang ada dari server</span>
+                      </label>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="pt-6 border-t border-slate-100 flex items-center justify-end gap-3 mt-6">
@@ -493,7 +545,7 @@ export default function AdminQuestionsPage() {
                   onClick={closeModal}
                   className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl transition-all"
                 >
-                  Cancel
+                  Batal
                 </button>
                 <button
                   type="submit"
@@ -501,7 +553,7 @@ export default function AdminQuestionsPage() {
                   className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold text-sm rounded-xl transition-all"
                 >
                   {formLoading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                  {isEditing ? 'Save Changes' : 'Create Question'}
+                  {isEditing ? 'Simpan Perubahan' : 'Buat Pertanyaan'}
                 </button>
               </div>
             </form>

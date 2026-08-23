@@ -62,13 +62,30 @@ export default function AdminExamSectionsPage() {
 
       setExamData(examRes);
       
+      let rawSections = [];
       if (sectionsRes && sectionsRes.data) {
-        setSections(sectionsRes.data);
+        rawSections = sectionsRes.data;
       } else if (Array.isArray(sectionsRes)) {
-        setSections(sectionsRes);
-      } else {
-        setSections([]);
+        rawSections = sectionsRes;
       }
+
+      // Fetch questions for each section to determine type and totalQuestions dynamically
+      const augmentedSections = await Promise.all(
+        rawSections.map(async (sec: any) => {
+          try {
+            const questionsRes = await exam.getQuestionsBySectionId(sec.id, token);
+            const questions = Array.isArray(questionsRes) ? questionsRes : (questionsRes?.data || []);
+            const totalQuestions = questions.length;
+            // Determine type based on the first question, fallback to 'Unknown' if no questions
+            const type = totalQuestions > 0 ? (questions[0].questionType || 'mcq') : 'No Questions Yet';
+            return { ...sec, totalQuestions, type };
+          } catch (err) {
+            return { ...sec, totalQuestions: 0, type: 'Unknown' };
+          }
+        })
+      );
+      
+      setSections(augmentedSections);
     } catch (err: any) {
       setError(err.response?.data?.message || err.response?.data?.error || 'Failed to load sections.');
     } finally {
@@ -180,16 +197,16 @@ export default function AdminExamSectionsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <Link href="/admin/exams" className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-2 transition-colors">
-            <ArrowLeft size={16} /> Back to Exams
+            <ArrowLeft size={16} /> Kembali ke Ujian
           </Link>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
             <div className="p-2 bg-indigo-50 rounded-xl">
               <Layers size={22} className="text-indigo-600" />
             </div>
-            Manage Sections
+            Kelola Bagian
           </h1>
           <p className="text-slate-500 mt-1 text-sm">
-            {examData ? `Editing sections for: ${examData.title}` : 'Loading exam info...'}
+            {examData ? `Mengedit bagian untuk: ${examData.title}` : 'Memuat info ujian...'}
           </p>
         </div>
         <button
@@ -197,7 +214,7 @@ export default function AdminExamSectionsPage() {
           className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition-all shadow-sm"
         >
           <Plus size={18} />
-          Create New Section
+          Buat Bagian Baru
         </button>
       </div>
 
@@ -220,19 +237,19 @@ export default function AdminExamSectionsPage() {
         {loading ? (
           <div className="p-12 flex flex-col items-center gap-4">
             <Loader2 size={40} className="text-indigo-500 animate-spin" />
-            <p className="text-slate-400 text-sm font-medium">Loading sections...</p>
+            <p className="text-slate-400 text-sm font-medium">Memuat bagian...</p>
           </div>
         ) : sortedSections.length === 0 ? (
           <div className="p-12 flex flex-col items-center text-center">
             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
               <Layers size={32} className="text-slate-300" />
             </div>
-            <h3 className="text-lg font-bold text-slate-700 mb-2">No Sections Found</h3>
+            <h3 className="text-lg font-bold text-slate-700 mb-2">Bagian Tidak Ditemukan</h3>
             <p className="text-slate-400 text-sm max-w-sm mb-6">
-              This exam doesn't have any sections yet.
+              Ujian ini belum memiliki bagian apapun.
             </p>
             <button onClick={openCreateModal} className="text-indigo-600 font-bold hover:underline">
-              + Add First Section
+              + Tambah Bagian Pertama
             </button>
           </div>
         ) : (
@@ -240,11 +257,11 @@ export default function AdminExamSectionsPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-slate-700 font-medium border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4 w-20 text-center">Order</th>
-                  <th className="px-6 py-4">Section Details</th>
-                  <th className="px-6 py-4">Type</th>
-                  <th className="px-6 py-4">Configuration</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4 w-20 text-center">Urutan</th>
+                  <th className="px-6 py-4">Detail Bagian</th>
+                  <th className="px-6 py-4">Tipe</th>
+                  <th className="px-6 py-4">Konfigurasi</th>
+                  <th className="px-6 py-4 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -280,8 +297,8 @@ export default function AdminExamSectionsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1 text-xs text-slate-600">
-                        <span>Duration: <span className="font-bold">{s.durationMinutes}m</span></span>
-                        <span>Questions: <span className="font-bold">{s.totalQuestions}</span></span>
+                        <span>Durasi: <span className="font-bold">{s.durationMinutes}m</span></span>
+                        <span>Pertanyaan: <span className="font-bold">{s.totalQuestions}</span></span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -289,21 +306,21 @@ export default function AdminExamSectionsPage() {
                         <Link
                           href={`/admin/exams/${examId}/sections/${s.id}/questions`}
                           className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                          title="Manage Questions"
+                          title="Kelola Pertanyaan"
                         >
                           <MessageSquare size={18} />
                         </Link>
                         <button
                           onClick={() => openEditModal(s)}
                           className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                          title="Edit Section"
+                          title="Edit Bagian"
                         >
                           <Pencil size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(s.id)}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                          title="Delete Section"
+                          title="Hapus Bagian"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -324,10 +341,10 @@ export default function AdminExamSectionsPage() {
             <div className="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <div>
                 <h3 className="text-xl font-bold text-slate-900">
-                  {isEditing ? 'Edit Section' : 'Create New Section'}
+                  {isEditing ? 'Edit Bagian' : 'Buat Bagian Baru'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Configure the section details for this exam.
+                  Konfigurasikan detail bagian untuk ujian ini.
                 </p>
               </div>
               <button onClick={closeModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
@@ -337,7 +354,7 @@ export default function AdminExamSectionsPage() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-5 flex-1">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Section Title <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Judul Bagian <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   name="title"
@@ -350,53 +367,26 @@ export default function AdminExamSectionsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Description</label>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Deskripsi</label>
                 <textarea
                   name="description"
                   rows={3}
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Instructions or details for this section..."
+                  placeholder="Instruksi atau detail untuk bagian ini..."
                   className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all resize-none"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 gap-5">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Type <span className="text-red-500">*</span></label>
-                  <select
-                    name="type"
-                    required
-                    value={formData.type}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-white"
-                  >
-                    <option value="mcq">MCQ (Multiple Choice)</option>
-                    <option value="speaking">Speaking</option>
-                    <option value="essay">Essay / Writing</option>
-                    <option value="listening">Listening</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Duration (m) <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Durasi (Menit) <span className="text-red-500">*</span></label>
                   <input
                     type="number"
                     name="durationMinutes"
                     required
                     min="1"
                     value={formData.durationMinutes}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Total Questions <span className="text-red-500">*</span></label>
-                  <input
-                    type="number"
-                    name="totalQuestions"
-                    required
-                    min="0"
-                    value={formData.totalQuestions}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
                   />
@@ -409,7 +399,7 @@ export default function AdminExamSectionsPage() {
                   onClick={closeModal}
                   className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl transition-all"
                 >
-                  Cancel
+                  Batal
                 </button>
                 <button
                   type="submit"
@@ -417,7 +407,7 @@ export default function AdminExamSectionsPage() {
                   className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold text-sm rounded-xl transition-all"
                 >
                   {formLoading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                  {isEditing ? 'Save Changes' : 'Create Section'}
+                  {isEditing ? 'Simpan Perubahan' : 'Buat Bagian'}
                 </button>
               </div>
             </form>

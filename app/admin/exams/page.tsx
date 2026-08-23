@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { FileText, Plus, Pencil, Trash2, X, Save, AlertTriangle, Loader2, CheckCircle2, Search, Layers, ListFilter } from 'lucide-react';
+import { FileText, Plus, Pencil, Trash2, X, AlertTriangle, Loader2, CheckCircle2, Search, ListFilter } from 'lucide-react';
 import Button from '@/src/components/ui/Button';
 import Cookies from 'js-cookie';
 import { exam } from '@/src/api/exam';
@@ -10,14 +10,14 @@ import { exam } from '@/src/api/exam';
 interface Exam {
   id: string;
   title: string;
-  description: string;
-  category: string;
-  status: string;
-  durationMinutes: number;
-  passingScore: number;
-  totalSections: number;
-  totalQuestions: number;
-  createdAt: string;
+  type: string;
+  isOnce?: boolean;
+  durationMinutes?: number;
+  passingScore?: number;
+  status?: string;
+  category?: string;
+  totalSections?: number;
+  totalQuestions?: number;
 }
 
 export default function AdminExamsPage() {
@@ -33,14 +33,11 @@ export default function AdminExamsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
 
-  // Form Data
+  // Form Data - only fields that exist in the DB schema
   const initialFormState = {
     title: '',
-    description: '',
-    category: '',
-    status: 'draft',
-    durationMinutes: 90,
-    passingScore: 60,
+    type: '',
+    isOnce: false,
   };
   const [formData, setFormData] = useState(initialFormState);
 
@@ -51,14 +48,25 @@ export default function AdminExamsPage() {
       setLoading(true);
       setError('');
       const res = await exam.getAllExams(token);
-      // Backend returns { data: [...], total: ... }
+      let examList: Exam[] = [];
       if (res && res.data) {
-        setExams(res.data);
+        examList = res.data;
       } else if (Array.isArray(res)) {
-        setExams(res);
-      } else {
-        setExams([]);
+        examList = res;
       }
+
+      // Fetch detail for each exam to get any extra fields
+      const detailedExams = await Promise.all(
+        examList.map(async (e: Exam) => {
+          try {
+            const detail = await exam.getExamById(e.id, token);
+            return { ...e, ...detail };
+          } catch {
+            return e;
+          }
+        })
+      );
+      setExams(detailedExams);
     } catch (err: any) {
       setError(err.response?.data?.message || err.response?.data?.error || 'Failed to load exams.');
     } finally {
@@ -84,11 +92,8 @@ export default function AdminExamsPage() {
     setEditingId(examData.id);
     setFormData({
       title: examData.title || '',
-      description: examData.description || '',
-      category: examData.category || '',
-      status: examData.status || 'draft',
-      durationMinutes: examData.durationMinutes || 90,
-      passingScore: examData.passingScore || 60,
+      type: examData.type || '',
+      isOnce: examData.isOnce || false,
     });
     setError('');
     setSuccessMsg('');
@@ -103,7 +108,7 @@ export default function AdminExamsPage() {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? Number(value) : value,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -114,11 +119,17 @@ export default function AdminExamsPage() {
     setSuccessMsg('');
 
     try {
+      const payload = {
+        title: formData.title || null,
+        type: formData.type || null,
+        isOnce: formData.isOnce,
+      };
+
       if (isEditing && editingId) {
-        await exam.updateExam(editingId, formData, token);
+        await exam.updateExam(editingId, payload, token);
         setSuccessMsg('Exam updated successfully.');
       } else {
-        await exam.createExam(formData, token);
+        await exam.createExam(payload, token);
         setSuccessMsg('Exam created successfully.');
       }
       closeModal();
@@ -147,7 +158,7 @@ export default function AdminExamsPage() {
 
   const filteredExams = exams.filter(e => 
     e.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    e.category?.toLowerCase().includes(searchQuery.toLowerCase())
+    e.type?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -159,10 +170,10 @@ export default function AdminExamsPage() {
             <div className="p-2 bg-blue-50 rounded-xl">
               <FileText size={22} className="text-blue-600" />
             </div>
-            Manage Exams
+            Kelola Ujian
           </h1>
           <p className="text-slate-500 mt-1 text-sm">
-            Create, edit, and manage all examination packages.
+            Buat, edit, dan kelola semua paket ujian.
           </p>
         </div>
         <Button
@@ -170,7 +181,7 @@ export default function AdminExamsPage() {
           className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all shadow-sm"
         >
           <Plus size={18} />
-          Create New Exam
+          Buat Ujian Baru
         </Button>
       </div>
 
@@ -194,7 +205,7 @@ export default function AdminExamsPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search exams..."
+            placeholder="Cari ujian..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-sm text-slate-900 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-400"
@@ -207,20 +218,20 @@ export default function AdminExamsPage() {
         {loading ? (
           <div className="p-12 flex flex-col items-center gap-4">
             <Loader2 size={40} className="text-blue-500 animate-spin" />
-            <p className="text-slate-400 text-sm font-medium">Loading exams...</p>
+            <p className="text-slate-400 text-sm font-medium">Memuat ujian...</p>
           </div>
         ) : filteredExams.length === 0 ? (
           <div className="p-12 flex flex-col items-center text-center">
             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
               <FileText size={32} className="text-slate-300" />
             </div>
-            <h3 className="text-lg font-bold text-slate-700 mb-2">No Exams Found</h3>
+            <h3 className="text-lg font-bold text-slate-700 mb-2">Ujian Tidak Ditemukan</h3>
             <p className="text-slate-400 text-sm max-w-sm mb-6">
-              {searchQuery ? 'No exams matched your search query.' : 'Get started by creating your first exam package.'}
+              {searchQuery ? 'Tidak ada ujian yang cocok dengan pencarian Anda.' : 'Mulai dengan membuat paket ujian pertama Anda.'}
             </p>
             {!searchQuery && (
               <Button variant="ghost" onClick={openCreateModal} className="text-blue-600 font-bold">
-                + Create Exam
+                + Buat Ujian
               </Button>
             )}
           </div>
@@ -229,37 +240,52 @@ export default function AdminExamsPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-slate-700 font-medium border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4">Title & Details</th>
-                  <th className="px-6 py-4">Category</th>
-                  <th className="px-6 py-4">Settings</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4">Judul</th>
+                  <th className="px-6 py-4">Tipe</th>
+                  <th className="px-6 py-4">Pengaturan</th>
+                  <th className="px-6 py-4 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredExams.map((e) => (
                   <tr key={e.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <p className="font-bold text-slate-900">{e.title}</p>
-                      <p className="text-xs text-slate-500 mt-1 truncate max-w-xs">{e.description}</p>
+                      <p className="font-bold text-slate-900">{e.title || '—'}</p>
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-lg uppercase tracking-wider">
-                        {e.category}
+                        {e.type || '—'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1 text-xs text-slate-600">
-                        <span>Duration: <span className="font-bold">{e.durationMinutes}m</span></span>
-                        <span>Pass Score: <span className="font-bold">{e.passingScore}</span></span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {e.isOnce ? (
+                          <span className="inline-flex px-2 py-0.5 bg-amber-50 text-amber-600 text-[11px] font-bold rounded-md">
+                            Satu percobaan
+                          </span>
+                        ) : (
+                          <span className="inline-flex px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[11px] font-bold rounded-md">
+                            Banyak percobaan
+                          </span>
+                        )}
+                        {e.durationMinutes && (
+                          <span className="inline-flex px-2 py-0.5 bg-blue-50 text-blue-600 text-[11px] font-bold rounded-md">
+                            {e.durationMinutes} min
+                          </span>
+                        )}
+                        {e.passingScore !== undefined && e.passingScore !== null && (
+                          <span className="inline-flex px-2 py-0.5 bg-purple-50 text-purple-600 text-[11px] font-bold rounded-md">
+                            Lulus: {e.passingScore}
+                          </span>
+                        )}
+                        {e.status && (
+                          <span className={`inline-flex px-2 py-0.5 text-[11px] font-bold rounded-md capitalize ${
+                            e.status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                          }`}>
+                            {e.status}
+                          </span>
+                        )}
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex px-2.5 py-1 font-bold text-xs rounded-lg uppercase tracking-wider ${
-                        e.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {e.status}
-                      </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -305,10 +331,10 @@ export default function AdminExamsPage() {
             <div className="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <div>
                 <h3 className="text-xl font-bold text-slate-900">
-                  {isEditing ? 'Edit Exam' : 'Create New Exam'}
+                  {isEditing ? 'Edit Ujian' : 'Buat Ujian Baru'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Fill in the exam details below.
+                  Isi detail ujian di bawah ini.
                 </p>
               </div>
               <Button variant="ghost" size="icon" onClick={closeModal}>
@@ -318,11 +344,10 @@ export default function AdminExamsPage() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-5 flex-1">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Exam Title <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Judul Ujian</label>
                 <input
                   type="text"
                   name="title"
-                  required
                   value={formData.title}
                   onChange={handleInputChange}
                   placeholder="e.g. TOEFL iBT Practice Test"
@@ -331,70 +356,29 @@ export default function AdminExamsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Description</label>
-                <textarea
-                  name="description"
-                  rows={3}
-                  value={formData.description}
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Tipe</label>
+                <input
+                  type="text"
+                  name="type"
+                  value={formData.type}
                   onChange={handleInputChange}
-                  placeholder="Brief description of the exam..."
-                  className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none"
+                  placeholder="e.g. TOEFL, IELTS, CERTIFICATION"
+                  className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Category <span className="text-red-500">*</span></label>
+              <div>
+                <label className="flex items-center gap-2.5 cursor-pointer py-1">
                   <input
-                    type="text"
-                    name="category"
-                    required
-                    value={formData.category}
+                    type="checkbox"
+                    name="isOnce"
+                    checked={formData.isOnce}
                     onChange={handleInputChange}
-                    placeholder="e.g. TOEFL, IELTS"
-                    className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Status <span className="text-red-500">*</span></label>
-                  <select
-                    name="status"
-                    required
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all bg-white"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Duration (Minutes) <span className="text-red-500">*</span></label>
-                  <input
-                    type="number"
-                    name="durationMinutes"
-                    required
-                    min="1"
-                    value={formData.durationMinutes}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Passing Score <span className="text-red-500">*</span></label>
-                  <input
-                    type="number"
-                    name="passingScore"
-                    required
-                    min="0"
-                    value={formData.passingScore}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-                  />
-                </div>
+                  <span className="text-sm font-bold text-slate-700">Hanya satu kali percobaan</span>
+                </label>
+                <p className="text-xs text-slate-400 mt-1 ml-7">Jika dicentang, pengguna hanya dapat mengikuti ujian ini satu kali.</p>
               </div>
 
               <div className="pt-6 border-t border-slate-100 flex items-center justify-end gap-3 mt-6">
@@ -403,7 +387,7 @@ export default function AdminExamsPage() {
                   onClick={closeModal}
                   variant="secondary"
                 >
-                  Cancel
+                  Batal
                 </Button>
                 <Button
                   type="submit"
@@ -411,8 +395,8 @@ export default function AdminExamsPage() {
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
                 >
                   {formLoading ? (
-                    <><Loader2 size={16} className="animate-spin" /> Saving...</>
-                  ) : isEditing ? 'Save Changes' : 'Create Exam'}
+                    <><Loader2 size={16} className="animate-spin" /> Menyimpan...</>
+                  ) : isEditing ? 'Simpan Perubahan' : 'Buat Ujian'}
                 </Button>
               </div>
             </form>

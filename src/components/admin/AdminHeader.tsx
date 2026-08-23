@@ -13,7 +13,7 @@ const AdminHeader = ({ onMenuClick }: AdminHeaderProps) => {
         <button onClick={onMenuClick} className="md:hidden text-gray-500 hover:text-gray-700">
           <Menu size={20} />
         </button>
-        <h2 className="text-lg font-bold text-slate-800 hidden md:block">Admin Overview</h2>
+        <h2 className="text-lg font-bold text-slate-800 hidden md:block">Ikhtisar Admin</h2>
       </div>
 
       <div className="flex items-center gap-4">
