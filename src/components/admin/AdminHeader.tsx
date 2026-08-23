@@ -2,11 +2,15 @@
 
 import { Menu, Bell, UserCircle } from 'lucide-react';
 
-const AdminHeader = () => {
+interface AdminHeaderProps {
+  onMenuClick?: () => void;
+}
+
+const AdminHeader = ({ onMenuClick }: AdminHeaderProps) => {
   return (
     <header className="h-16 px-6 bg-white border-b border-gray-200 flex items-center justify-between sticky top-0 z-30 shadow-sm">
       <div className="flex items-center gap-4">
-        <button className="md:hidden text-gray-500 hover:text-gray-700">
+        <button onClick={onMenuClick} className="md:hidden text-gray-500 hover:text-gray-700">
           <Menu size={20} />
         </button>
         <h2 className="text-lg font-bold text-slate-800 hidden md:block">Admin Overview</h2>

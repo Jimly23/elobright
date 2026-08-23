@@ -186,7 +186,7 @@ export default function ListeningQuestionDisplay({
   const rightSrc = resolveMediaUrl(question.questionAudioUrl);
 
   return (
-    <div className="flex-1 flex items-center justify-center p-0 md:p-6 mt-[72px] md:mt-20 relative z-10 w-full font-sans">
+    <div className="flex-1 flex items-center justify-center p-0 md:p-6 pt-[72px] md:pt-20 relative z-10 w-full font-sans">
       <ExamCard className="max-w-6xl min-h-[600px] flex-1 md:flex-none" contentClassName="p-0 flex-col md:flex-row">
         {/* Left Side: Context Audio Player */}
         <div className="flex-1 p-6 md:p-12 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col justify-center bg-white shrink-0">

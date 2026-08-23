@@ -280,6 +280,7 @@ export default function ExamIntroductionPage() {
       <ExamCard
         title="Welcome"
         subtitle="You are about to start the test"
+        className="flex-1 w-full md:flex-none md:w-auto max-w-none md:max-w-3xl md:max-h-[90vh]"
       >
         {/* Test Icons Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">

@@ -75,7 +75,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-6 mt-[72px] md:mt-20 relative z-10 w-full">
+    <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-6 pt-[72px] md:pt-20 relative z-10 w-full">
       <ExamCard className="max-w-4xl flex-1 md:flex-none" contentClassName="p-6 md:p-16">
 
         <div className="mb-5 shrink-0">

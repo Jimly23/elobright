@@ -18,7 +18,7 @@ export default function ExamCard({
   contentClassName = "p-6 md:p-8", // default content padding
 }: ExamCardProps) {
   return (
-    <div className={`relative z-10 w-full bg-white/40 backdrop-blur-xl border border-white/60 md:rounded-[28px] shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] overflow-hidden flex flex-col h-full ${className}`}>
+    <div className={`relative z-10 w-full bg-white/40 backdrop-blur-xl border-none md:border border-white/60 rounded-none md:rounded-[28px] shadow-none md:shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] overflow-hidden flex flex-col h-full ${className}`}>
       
       {/* Card Header: Sky Image & Text */}
       {(title || subtitle) && (

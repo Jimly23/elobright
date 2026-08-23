@@ -91,8 +91,8 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 mt-8 relative z-10 w-full">
-      <ExamCard className="max-w-4xl" contentClassName="p-12 text-left md:text-center">
+    <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-6 pt-[72px] md:pt-20 relative z-10 w-full">
+      <ExamCard className="max-w-4xl flex-1 md:flex-none" contentClassName="p-12 text-left md:text-center">
 
         <div className="mb-6 flex md:justify-center">
           <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-5 py-2 rounded-full uppercase tracking-[0.2em] border border-blue-100">
