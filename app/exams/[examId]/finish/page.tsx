@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Award, Target, Brain, BarChart, CheckCircle2, BookOpen, Headphones, Edit3, Mic, ClipboardCheck } from "lucide-react";
+import { CheckCircle2, MailCheck } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { exam } from "@/src/api/exam";
+import Button from '@/src/components/ui/Button';
+import ExamCard from '@/src/components/Exams/ExamCard';
 
 const getCookie = (name: string) => {
   if (typeof document === "undefined") return null;
@@ -14,18 +16,7 @@ const getCookie = (name: string) => {
   return null;
 };
 
-const getSectionIcon = (title: string) => {
-  const t = title.toLowerCase();
-  if (t.includes('usability') || t.includes('feedback')) return <ClipboardCheck size={18} />;
-  if (t.includes('listen')) return <Headphones size={18} />;
-  if (t.includes('read')) return <BookOpen size={18} />;
-  if (t.includes('writ')) return <Edit3 size={18} />;
-  if (t.includes('speak')) return <Mic size={18} />;
-  return <Brain size={18} />;
-};
-
 export default function ExamFinishPage() {
-  const [finishData, setFinishData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const finishAttempt = useRef(false);
 
@@ -39,9 +30,7 @@ export default function ExamFinishPage() {
         const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
 
         if (sessionId) {
-          const data = await exam.finishExam(sessionId, token);
-          console.log('finishExam response:', data);
-          setFinishData(data);
+          await exam.finishExam(sessionId, token);
         }
       } catch (error) {
         console.error("Failed to finish exam", error);
@@ -56,30 +45,6 @@ export default function ExamFinishPage() {
     };
     finishExam();
   }, []);
-
-  // Build score details from the actual API response
-  // Filter out Usability Testing section (it's a feedback section, not scored)
-  const sectionSubmissions = finishData?.sectionSubmissions || [];
-  const scoredSubmissions = sectionSubmissions.filter((sub: any) => {
-    const title = (sub.section?.title || '').toLowerCase();
-    return !title.includes('usability') && !title.includes('feedback');
-  });
-  
-  const scoreDetails = scoredSubmissions.map((sub: any) => {
-    const sectionTitle = sub.section?.title || 'Section';
-    const isPending = sub.totalScore === 0 && (sectionTitle.toLowerCase().includes('speak') || sectionTitle.toLowerCase().includes('writ'));
-    
-    return {
-      label: sectionTitle,
-      max: sub.allScore || 0,
-      achieved: isPending ? 'pending' : sub.totalScore || 0,
-      icon: getSectionIcon(sectionTitle),
-    };
-  });
-
-  // Calculate total score (only from scored sections)
-  const totalScore = scoredSubmissions.reduce((sum: number, sub: any) => sum + (sub.totalScore || 0), 0);
-  const totalMax = scoredSubmissions.reduce((sum: number, sub: any) => sum + (sub.allScore || 0), 0);
 
   if (loading) {
     return (
@@ -119,97 +84,35 @@ export default function ExamFinishPage() {
         </div>
       </header>
 
-      {/* Main Card */}
-      <div className="relative z-10 w-full max-w-lg bg-white rounded-[40px] shadow-2xl shadow-blue-200/50 overflow-hidden mx-6 mt-10">
-        {/* Card Header */}
-        <div className="pt-12 bg-gradient-to-b from-blue-200 to-white relative flex flex-col items-center justify-end pb-8">
-          <div
-            className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/clouds.png')]"
-            style={{
-              backgroundRepeat: "repeat-x",
-              backgroundPosition: "center",
-            }}
-          />
-          <div className="w-20 h-20 bg-green-500 text-white rounded-full flex items-center justify-center mb-6 shadow-xl shadow-green-200 relative z-10">
-            <CheckCircle2 size={40} />
+      <ExamCard
+        className="max-w-lg mx-6 mt-10"
+        headerClassName="pt-12 pb-8 h-auto"
+        contentClassName="p-10 pt-4 text-center"
+        title={
+          <div className="flex flex-col items-center">
+            <div className="w-20 h-20 bg-green-500 text-white rounded-full flex items-center justify-center mb-6 shadow-xl shadow-green-200">
+              <CheckCircle2 size={40} />
+            </div>
+            <span>Ujian Selesai!</span>
           </div>
-
-          <h1 className="text-4xl font-extrabold text-slate-800 relative z-10">
-            Test Finished!
-          </h1>
-          <p className="text-slate-500 font-medium mt-2 relative z-10">
-            Great job! Here is your preliminary result
+        }
+        subtitle="Kerja bagus! Sertifikasi Anda sedang diproses."
+      >
+        <div className="flex flex-col items-center py-6">
+          <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
+            <MailCheck size={32} />
+          </div>
+          <p className="text-slate-600 font-medium leading-relaxed mb-10 px-4">
+            Selamat telah menyelesaikan sertifikasi bahasa inggris, jawaban Anda akan direview dan sertifikat akan dikirim melalui email Anda. Silakan cek email secara berkala.
           </p>
-        </div>
 
-        {/* Card Content Area (Scores) */}
-        <div className="p-10 pt-4">
-          {/* Total Score Highlight */}
-          <div className="bg-blue-50/50 border-2 border-blue-100 rounded-3xl p-6 flex flex-col items-center mb-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Award size={100} />
-            </div>
-            <span className="text-blue-500 font-bold uppercase tracking-wider text-xs mb-2 relative z-10">
-              Estimated Score
-            </span>
-            <div className="text-5xl font-black text-blue-600 relative z-10">
-              {totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0}%
-            </div>
-            <span className="text-slate-400 text-xs mt-2 relative z-10">
-              ({totalScore} / {totalMax} Correct)
-            </span>
-          </div>
-
-          {/* Section Breakdown Grid */}
-          <div className="grid grid-cols-2 gap-4 mb-10">
-            {scoreDetails.map((s: any, idx: number) => {
-              const isPending = s.achieved === "pending";
-              return (
-                <div
-                  key={idx}
-                  className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col relative overflow-hidden"
-                >
-                  <div className="flex items-center gap-2 text-slate-500 mb-3 relative z-10">
-                    <div className="p-1.5 bg-white rounded-lg shadow-sm text-blue-500">
-                      {s.icon}
-                    </div>
-                    <span className="font-bold text-xs p-1">{s.label}</span>
-                  </div>
-
-                  <div className="flex items-baseline gap-1 relative z-10 p-1">
-                    {isPending ? (
-                      <span className="text-sm font-bold text-orange-400">
-                        Under Review
-                      </span>
-                    ) : (
-                      <>
-                        <span className="text-2xl font-black text-slate-800">
-                          {s.max > 0 ? Math.round((s.achieved / s.max) * 100) : 0}%
-                        </span>
-                        <span className="text-xs font-bold text-slate-400">
-                          ({s.achieved}/{s.max})
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <Link href="/dashboard" className="block w-full">
-            <button className="w-full py-4.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-xl shadow-slate-200 transition-all active:scale-[0.98] outline-none">
-              Back to Dashboard
-            </button>
+          <Link href="/" className="block w-full">
+            <Button variant="primary" size="lg" className="w-full shadow-xl shadow-blue-200">
+              Kembali ke Halaman Utama
+            </Button>
           </Link>
         </div>
-      </div>
-
-      <footer className="relative z-10 mt-10 py-2.5 px-8 bg-white/80 backdrop-blur-sm rounded-full border border-white/50 shadow-sm mb-10">
-        <p className="text-slate-400 text-xs font-medium">
-          © 2026 Elobright. Scores may adjust after human review.
-        </p>
-      </footer>
+      </ExamCard>
     </div>
   );
 }

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { FileText, Plus, Pencil, Trash2, X, Save, AlertTriangle, Loader2, CheckCircle2, Search, Layers } from 'lucide-react';
+import { FileText, Plus, Pencil, Trash2, X, Save, AlertTriangle, Loader2, CheckCircle2, Search, Layers, ListFilter } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 import Cookies from 'js-cookie';
 import { exam } from '@/src/api/exam';
 
@@ -164,13 +165,13 @@ export default function AdminExamsPage() {
             Create, edit, and manage all examination packages.
           </p>
         </div>
-        <button
+        <Button
           onClick={openCreateModal}
           className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all shadow-sm"
         >
           <Plus size={18} />
           Create New Exam
-        </button>
+        </Button>
       </div>
 
       {/* Alerts */}
@@ -218,9 +219,9 @@ export default function AdminExamsPage() {
               {searchQuery ? 'No exams matched your search query.' : 'Get started by creating your first exam package.'}
             </p>
             {!searchQuery && (
-              <button onClick={openCreateModal} className="text-blue-600 font-bold hover:underline">
+              <Button variant="ghost" onClick={openCreateModal} className="text-blue-600 font-bold">
                 + Create Exam
-              </button>
+              </Button>
             )}
           </div>
         ) : (
@@ -262,27 +263,31 @@ export default function AdminExamsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/admin/exams/${e.id}/sections`}
-                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                          title="Manage Sections"
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         >
-                          <Layers size={18} />
-                        </Link>
-                        <button
+                          <Link href={`/admin/exams/${e.id}/sections`}>
+                            <ListFilter size={18} />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => openEditModal(e)}
-                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                          title="Edit Exam"
+                          className="text-slate-400 hover:text-blue-600 hover:bg-blue-50"
                         >
                           <Pencil size={18} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleDelete(e.id)}
-                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                          title="Delete Exam"
+                          className="text-slate-400 hover:text-red-600 hover:bg-red-50"
                         >
                           <Trash2 size={18} />
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -306,9 +311,9 @@ export default function AdminExamsPage() {
                   Fill in the exam details below.
                 </p>
               </div>
-              <button onClick={closeModal} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+              <Button variant="ghost" size="icon" onClick={closeModal}>
                 <X size={20} />
-              </button>
+              </Button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-5 flex-1">
@@ -393,21 +398,22 @@ export default function AdminExamsPage() {
               </div>
 
               <div className="pt-6 border-t border-slate-100 flex items-center justify-end gap-3 mt-6">
-                <button
+                <Button
                   type="button"
                   onClick={closeModal}
-                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl transition-all"
+                  variant="secondary"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={formLoading}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold text-sm rounded-xl transition-all"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
                 >
-                  {formLoading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                  {isEditing ? 'Save Changes' : 'Create Exam'}
-                </button>
+                  {formLoading ? (
+                    <><Loader2 size={16} className="animate-spin" /> Saving...</>
+                  ) : isEditing ? 'Save Changes' : 'Create Exam'}
+                </Button>
               </div>
             </form>
           </div>

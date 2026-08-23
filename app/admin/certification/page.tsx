@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Award, Search, Pencil, Mail, Download, X, Save, AlertTriangle, Loader2, CheckCircle2, ExternalLink } from 'lucide-react';
+import { Award, Search, Pencil, Mail, Download, X, Save, AlertTriangle, Loader2, CheckCircle2, ExternalLink, FileText, Layers } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 import Cookies from 'js-cookie';
 import { certificationService, CertificationScore, CertificationAdditionalScore } from '@/src/api/certification';
 import { examService } from '@/src/api/exam';
@@ -267,7 +268,7 @@ export default function CertificationPage() {
               </a>
             </div>
           </div>
-          <button onClick={() => setEmailResult(null)} className="mt-3 text-xs text-slate-400 hover:text-slate-600">Dismiss</button>
+          <Button variant="ghost" onClick={() => setEmailResult(null)} className="mt-3 text-xs text-slate-400 hover:text-slate-600">Dismiss</Button>
         </div>
       )}
 
@@ -285,22 +286,23 @@ export default function CertificationPage() {
             />
           </div>
           <div className="flex items-end gap-2">
-            <button
+            <Button
               type="submit"
               className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all"
             >
               <Search size={16} />
               Filter
-            </button>
+            </Button>
             {appliedFilter && (
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={handleClearFilter}
-                className="flex items-center gap-2 px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm rounded-xl transition-all"
+                className="flex items-center gap-2 px-5 py-3 font-bold text-sm rounded-xl transition-all"
               >
                 <X size={16} />
                 Clear
-              </button>
+              </Button>
             )}
           </div>
         </form>
@@ -381,13 +383,15 @@ export default function CertificationPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => openEditModal(score)}
-                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                           title="Edit Scores"
                         >
-                          <Pencil size={16} />
-                        </button>
+                          <FileText size={18} />
+                        </Button>
                         <button
                           onClick={() => handleDownload(score.id)}
                           className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
@@ -439,9 +443,9 @@ export default function CertificationPage() {
                 <h3 className="text-lg font-bold text-slate-900">Edit Certification Score</h3>
                 <p className="text-xs text-slate-400 mt-0.5">{editingScore.user?.fullName || `User #${editingScore.userId}`}</p>
               </div>
-              <button onClick={() => setEditingScore(null)} className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+              <Button variant="ghost" size="icon" onClick={() => setEditingScore(null)}>
                 <X size={18} />
-              </button>
+              </Button>
             </div>
 
             <div className="p-6 space-y-5">
@@ -516,20 +520,20 @@ export default function CertificationPage() {
             </div>
 
             <div className="p-6 border-t border-slate-100 flex items-center justify-end gap-3">
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => setEditingScore(null)}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm rounded-xl transition-all"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleSaveEdit}
                 disabled={editLoading}
-                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold text-sm rounded-xl transition-all"
+                className="flex items-center gap-2"
               >
                 {editLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 Save Changes
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 
 const testCards = [
   {
@@ -64,9 +65,9 @@ export default function FeaturedSection() {
               </p>
 
               {/* Black Button */}
-              <button className="flex items-center gap-2 px-8 py-3 bg-[#222] hover:bg-black text-white text-sm font-bold rounded-xl shadow-lg transition-all active:scale-95">
+              <Button variant="dark" className="px-8 py-3 text-sm rounded-xl">
                 Get Started <ArrowRight size={16} />
-              </button>
+              </Button>
             </div>
           ))}
         </div>

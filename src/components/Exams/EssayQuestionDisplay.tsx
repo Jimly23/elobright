@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { exam } from '@/src/api/exam';
 import QuestionFeaturedResources from '@/src/components/Exams/QuestionFeaturedResources';
+import ExamCard from '@/src/components/Exams/ExamCard';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -54,7 +55,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-6 mt-[72px] md:mt-20 relative z-10 w-full">
-      <div className="w-full max-w-4xl bg-white rounded-none md:rounded-[32px] shadow-none md:shadow-2xl md:shadow-blue-200/40 p-6 md:p-16 border-0 md:border md:border-slate-200 mt-0 md:mt-10 flex-1 md:flex-none flex flex-col">
+      <ExamCard className="max-w-4xl flex-1 md:flex-none" contentClassName="p-6 md:p-16">
 
         {/* Question Badge */}
         <div className="flex md:justify-center mb-10 shrink-0">
@@ -116,7 +117,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
             {submitting ? 'Submitting...' : 'Continue'}
           </button>
         </div>
-      </div>
+      </ExamCard>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ListChecks, Plus, Pencil, Trash2, X, Save, AlertTriangle, Loader2 } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 import Cookies from 'js-cookie';
 import { certificationService, CertificationAdditionalScore } from '@/src/api/certification';
 
@@ -129,13 +130,13 @@ export default function ScoreDefinitionsPage() {
             Define additional score components and their weights for certification.
           </p>
         </div>
-        <button
+        <Button
           onClick={() => { setShowForm(true); setEditingId(null); setFormData({ scoreName: '', weight: '' }); setError(''); setSuccessMsg(''); }}
           className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
         >
           <Plus size={16} />
           Add Score
-        </button>
+        </Button>
       </div>
 
       {/* Alerts */}
@@ -188,9 +189,9 @@ export default function ScoreDefinitionsPage() {
             <h3 className="text-lg font-bold text-slate-900">
               {editingId ? 'Edit Score Definition' : 'New Score Definition'}
             </h3>
-            <button onClick={handleCancel} className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+            <Button variant="ghost" size="icon" onClick={handleCancel}>
               <X size={18} />
-            </button>
+            </Button>
           </div>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
@@ -219,14 +220,14 @@ export default function ScoreDefinitionsPage() {
               />
             </div>
             <div className="flex items-end">
-              <button
+              <Button
                 type="submit"
                 disabled={formLoading}
                 className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold text-sm rounded-xl transition-all"
               >
                 {formLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 {editingId ? 'Update' : 'Create'}
-              </button>
+              </Button>
             </div>
           </form>
         </div>
@@ -264,36 +265,42 @@ export default function ScoreDefinitionsPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => handleEdit(score)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                        className="text-slate-400 hover:text-blue-600 hover:bg-blue-50"
                         title="Edit"
                       >
                         <Pencil size={16} />
-                      </button>
+                      </Button>
                       {deleteConfirmId === score.id ? (
                         <div className="flex items-center gap-1">
-                          <button
+                          <Button
+                            variant="danger"
                             onClick={() => handleDelete(score.id)}
-                            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-lg transition-all"
+                            className="px-3 py-1.5 text-xs rounded-lg"
                           >
                             Confirm
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="secondary"
                             onClick={() => setDeleteConfirmId(null)}
-                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-lg transition-all"
+                            className="px-3 py-1.5 text-xs rounded-lg"
                           >
                             Cancel
-                          </button>
+                          </Button>
                         </div>
                       ) : (
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => setDeleteConfirmId(score.id)}
-                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          className="text-slate-400 hover:text-red-500 hover:bg-red-50"
                           title="Delete"
                         >
                           <Trash2 size={16} />
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </td>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Check, Sparkles } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
@@ -37,7 +38,7 @@ export default function InfoSection({
   const descText = description || `Certify all your English skills at once: speaking, writing, listening and reading. All four skills will be shown on your Elobright certificate.`;
 
   const handleStartTest = () => {
-    const token = Cookies.get('token');
+    const token = Cookies.get('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
     if (!token) {
       router.push(`/signin?callbackUrl=${encodeURIComponent(url)}`);
     } else {
@@ -98,13 +99,14 @@ export default function InfoSection({
 
             {/* CTA Button */}
             <div className="pt-4">
-              <button
+              <Button
                 onClick={handleStartTest}
-                className="group flex items-center gap-3 px-10 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95"
+                size="lg"
+                className="group hover:-translate-y-1"
               >
                 Start Test
                 <Sparkles size={20} fill="currentColor" className="group-hover:animate-pulse" />
-              </button>
+              </Button>
             </div>
           </div>
 

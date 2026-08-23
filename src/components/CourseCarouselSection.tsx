@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 
 const courses = [
   {
@@ -75,18 +76,22 @@ export default function CourseCarouselSection() {
 
           {/* Navigation Buttons */}
           <div className="flex gap-3">
-            <button 
+            <Button 
               onClick={() => scroll('left')}
-              className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-200 text-slate-400 hover:bg-slate-900 hover:text-white transition-all active:scale-95"
+              variant="ghost"
+              size="iconLg"
+              className="w-12 h-12 border border-gray-200 text-slate-400 hover:bg-slate-900 hover:text-white"
             >
               <ChevronLeft size={24} />
-            </button>
-            <button 
+            </Button>
+            <Button 
               onClick={() => scroll('right')}
-              className="w-12 h-12 flex items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-lg active:scale-95"
+              variant="dark"
+              size="iconLg"
+              className="w-12 h-12 shadow-lg"
             >
               <ChevronRight size={24} />
-            </button>
+            </Button>
           </div>
         </div>
 

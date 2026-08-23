@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 
 export default function PreFooterCTASection() {
   return (
@@ -25,10 +26,10 @@ export default function PreFooterCTASection() {
 
         {/* Action Button */}
         {/* <div className="flex justify-center mb-20">
-          <button className="group flex items-center gap-3 px-12 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-2xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95">
+          <Button size="lg" className="group px-12 hover:-translate-y-1">
             Get Access 
             <Sparkles size={20} className="group-hover:animate-pulse" />
-          </button>
+          </Button>
         </div> */}
       </div>
 

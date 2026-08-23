@@ -1,6 +1,7 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 import Image from 'next/image';
+import Button from '@/src/components/ui/Button';
 
 const EloClubSection = () => {
   const benefits = [
@@ -70,9 +71,9 @@ const EloClubSection = () => {
                    <div className="w-6 h-6 bg-slate-200 rounded-md flex items-center justify-center text-[10px]">👤</div>
                    <span className="text-xs font-bold text-slate-600">Cuts Labor Costs By Over 90%</span>
                 </div>
-                <button className="w-full sm:w-auto px-8 py-3 bg-slate-900 hover:bg-black text-white text-sm font-bold rounded-2xl shadow-lg transition-all active:scale-95">
+                <Button variant="dark" className="w-full sm:w-auto px-8 py-3 text-sm rounded-2xl shadow-lg">
                   Join Club Now
-                </button>
+                </Button>
               </div>
             </div>
 

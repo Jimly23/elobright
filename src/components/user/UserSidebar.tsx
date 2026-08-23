@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, BookOpen, Clock, Settings, LogOut, Trophy } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 
 const UserSidebar = () => {
   const pathname = usePathname();
@@ -43,10 +44,10 @@ const UserSidebar = () => {
       </div>
 
       <div className="p-4 border-t border-gray-100">
-        <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-red-500 hover:bg-red-50">
+        <Button variant="ghost" className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-red-500 hover:bg-red-50 justify-start">
           <LogOut size={18} />
           Logout
-        </button>
+        </Button>
       </div>
     </aside>
   );

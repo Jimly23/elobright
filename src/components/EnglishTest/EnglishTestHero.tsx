@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import { Play, Sparkles } from 'lucide-react';
+import { Play, Sparkles, Clock, Calendar } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
@@ -24,7 +25,7 @@ const EnglishTestHero = ({ title = 'TOEFL', url = '#', examData }: EnglishTestHe
   const duration = examData ? `${examData.durationMinutes} mins` : '120 mins';
 
   const handleStartTest = () => {
-    const token = Cookies.get('token');
+    const token = Cookies.get('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
     if (!token) {
       router.push(`/signin?callbackUrl=${encodeURIComponent(url)}`);
     } else {
@@ -80,12 +81,13 @@ const EnglishTestHero = ({ title = 'TOEFL', url = '#', examData }: EnglishTestHe
 
               {/* CTA Buttons */}
               <div className="flex items-center justify-center mt-10">
-                <button
+                <Button
                   onClick={handleStartTest}
-                  className="flex items-center justify-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95"
+                  size="lg"
+                  className="group hover:-translate-y-1"
                 >
                   Start Test <Sparkles size={18} fill="currentColor" />
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -112,9 +114,9 @@ const EnglishTestHero = ({ title = 'TOEFL', url = '#', examData }: EnglishTestHe
 
               {/* Play Button */}
               <div className="flex justify-center mb-8">
-                <button className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-xl shadow-blue-200 hover:scale-110 transition-transform">
+                <Button size="iconLg" className="w-20 h-20 bg-blue-500 text-white shadow-xl shadow-blue-200 hover:scale-110 transform">
                   <Play size={32} fill="currentColor" className="ml-1" />
-                </button>
+                </Button>
               </div>
 
               {/* Test Guidelines */}

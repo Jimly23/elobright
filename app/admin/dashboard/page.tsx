@@ -1,3 +1,5 @@
+import Button from '@/src/components/ui/Button';
+
 export default function AdminDashboard() {
   return (
     <div className="space-y-6">
@@ -42,7 +44,7 @@ export default function AdminDashboard() {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 min-h-[400px]">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-slate-900">Recent User Registrations</h3>
-          <button className="text-sm text-blue-600 font-medium hover:text-blue-700">View All</button>
+          <Button variant="ghost" className="text-sm text-blue-600 font-medium hover:text-blue-700">View All</Button>
         </div>
         
         {/* Placeholder for table */}

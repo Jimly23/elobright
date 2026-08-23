@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { exam } from '@/src/api/exam';
+import ExamCard from '@/src/components/Exams/ExamCard';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -67,7 +68,7 @@ export default function LikertQuestionDisplay({
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-6 mt-[72px] md:mt-20 relative z-10 w-full">
-      <div className="w-full max-w-3xl bg-white rounded-none md:rounded-[32px] shadow-none md:shadow-2xl md:shadow-teal-200/40 p-6 md:p-14 border-0 md:border md:border-slate-200 flex-1 md:flex-none flex flex-col">
+      <ExamCard className="max-w-3xl flex-1 md:flex-none" contentClassName="p-6 md:p-14">
 
         {/* Section badge */}
         <div className="mb-5 shrink-0">
@@ -82,7 +83,7 @@ export default function LikertQuestionDisplay({
         </h2>
 
         {/* Likert Scale Options */}
-        <div className="mb-8 flex-1 overflow-y-auto">
+        <div className="mb-8 flex-1">
           {/* Desktop: Horizontal scale */}
           <div className="hidden md:flex items-stretch justify-between gap-3">
             {LIKERT_OPTIONS.map((option) => {
@@ -161,7 +162,7 @@ export default function LikertQuestionDisplay({
                 : 'Lanjutkan'}
           </button>
         </div>
-      </div>
+      </ExamCard>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import {
   HLSAudioElement,
 } from "@/src/components/Exams/AudioElements";
 import QuestionFeaturedResources from "./QuestionFeaturedResources";
+import ExamCard from '@/src/components/Exams/ExamCard';
 
 const getCookie = (name: string) => {
   if (typeof document === "undefined") return null;
@@ -186,7 +187,7 @@ export default function ListeningQuestionDisplay({
 
   return (
     <div className="flex-1 flex items-center justify-center p-0 md:p-6 mt-[72px] md:mt-20 relative z-10 w-full font-sans">
-      <div className="w-full max-w-6xl bg-white rounded-none md:rounded-[32px] shadow-none md:shadow-2xl md:shadow-blue-200/40 border-0 md:border md:border-slate-200 flex flex-col md:flex-row overflow-hidden min-h-[600px] flex-1 md:flex-none">
+      <ExamCard className="max-w-6xl min-h-[600px] flex-1 md:flex-none" contentClassName="p-0 flex-col md:flex-row">
         {/* Left Side: Context Audio Player */}
         <div className="flex-1 p-6 md:p-12 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col justify-center bg-white shrink-0">
           <div className="mb-8 shrink-0">
@@ -224,7 +225,7 @@ export default function ListeningQuestionDisplay({
 
         {/* Right Side: Question & Options */}
         <div className="flex-[1.2] p-6 md:p-12 bg-slate-50/30 flex flex-col justify-between flex-1">
-          <div className="flex flex-col flex-1 overflow-y-auto">
+          <div className="flex flex-col flex-1">
             <div className="mb-6 flex items-center justify-between shrink-0">
               <span className="bg-blue-100/50 text-blue-600 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest">
                 Question {currentIndex + 1}
@@ -355,7 +356,7 @@ export default function ListeningQuestionDisplay({
             </button>
           </div>
         </div>
-      </div>
+      </ExamCard>
     </div>
   );
 }

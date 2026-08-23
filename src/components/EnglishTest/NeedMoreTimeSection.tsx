@@ -1,5 +1,6 @@
 import React from 'react';
 import { Zap } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 
 export default function NeedMoreTimeSection() {
   return (
@@ -18,10 +19,10 @@ export default function NeedMoreTimeSection() {
 
         {/* Dark Glassy CTA Button */}
         <div className="flex justify-center">
-          <button className="group flex items-center gap-3 px-10 py-4 bg-slate-900 hover:bg-black text-white font-bold rounded-2xl shadow-2xl transition-all hover:-translate-y-1 active:scale-95">
+          <Button variant="dark" size="lg" className="group px-10 hover:-translate-y-1">
             Get Access 
             <Zap size={18} fill="currentColor" className="text-white group-hover:animate-pulse" />
-          </button>
+          </Button>
         </div>
       </div>
 

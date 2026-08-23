@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { exam } from '@/src/api/exam';
 import QuestionFeaturedResources from '@/src/components/Exams/QuestionFeaturedResources';
+import ExamCard from '@/src/components/Exams/ExamCard';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -75,7 +76,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-6 mt-[72px] md:mt-20 relative z-10 w-full">
-      <div className="w-full max-w-4xl bg-white rounded-none md:rounded-[32px] shadow-none md:shadow-2xl md:shadow-blue-200/40 p-6 md:p-16 border-0 md:border md:border-slate-200 flex-1 md:flex-none flex flex-col">
+      <ExamCard className="max-w-4xl flex-1 md:flex-none" contentClassName="p-6 md:p-16">
 
         <div className="mb-5 shrink-0">
           <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-4 py-2 rounded-full uppercase tracking-[0.15em] border border-blue-100">
@@ -89,7 +90,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
           {question.questionText || 'No question found.'}
         </h2>
 
-        <div className="space-y-4 mb-5 overflow-y-auto">
+        <div className="space-y-4 mb-5">
           {loading ? (
             <div className="text-slate-400">Loading options...</div>
           ) : (
@@ -141,7 +142,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
             {submitting ? 'Submitting...' : 'Continue'}
           </button>
         </div>
-      </div>
+      </ExamCard>
     </div>
   );
 }

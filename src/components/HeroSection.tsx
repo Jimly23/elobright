@@ -1,7 +1,8 @@
-import { BookOpen, Check, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import { Sparkles, Check, BookOpen } from 'lucide-react'
+import Button from '@/src/components/ui/Button'
 
 const HeroSection = () => {
   return (
@@ -51,14 +52,14 @@ const HeroSection = () => {
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
           <Link href="/signup">
-            <button className="group w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1">
+            <Button size="lg" className="group w-full sm:w-auto hover:-translate-y-1">
               Get Access <Sparkles size={18} className="group-hover:animate-pulse" />
-            </button>
+            </Button>
           </Link>
           {/* <Link href="/sertification/english-test">
-            <button className="w-full sm:w-auto px-10 py-4 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded-2xl border border-gray-200 shadow-sm transition-all">
+            <Button variant="secondary" size="lg" className="w-full sm:w-auto">
               Try Now
-            </button>
+            </Button>
           </Link> */}
         </div>
 
@@ -95,9 +96,9 @@ const HeroSection = () => {
 
               {/* Play Button Overlay */}
               <div className="absolute z-10 inset-0 flex items-center justify-center pointer-events-none">
-                <button className="w-20 h-20 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-blue-300 pointer-events-auto transform hover:scale-110 transition-transform">
+                <Button size="iconLg" className="bg-blue-500 text-white shadow-2xl shadow-blue-300 pointer-events-auto transform hover:scale-110">
                   <div className="ml-1 w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-white border-b-[12px] border-b-transparent" />
-                </button>
+                </Button>
               </div>
 
               {/* Options List */}

@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Button from '@/src/components/ui/Button';
 import { BookOpen, Headphones, PenTool, Mic2, ClipboardCheck } from 'lucide-react';
 
 interface SectionIntroPageProps {
@@ -71,12 +72,13 @@ export default function SectionIntroPage({ sectionName, duration, questionCount,
             ))}
           </ul>
 
-          <button
+          <Button
             onClick={onStart}
-            className={`w-full py-4 ${meta.color} hover:opacity-90 text-white font-bold rounded-2xl shadow-lg ${meta.shadow} transition-all active:scale-[0.98] text-lg`}
+            size="lg"
+            className={`w-full ${meta.color} ${meta.shadow} shadow-lg`}
           >
             Start {sectionName}
-          </button>
+          </Button>
         </div>
       </div>
 

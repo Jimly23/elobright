@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, ArrowRight, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Menu, X, ArrowRight, LayoutDashboard, ChevronDown } from 'lucide-react';
+import Button from '@/src/components/ui/Button';
 import Image from 'next/image';
 import { ESSAY_PRACTICE_ROUTES } from '@/src/constants/essayPractice';
 import { examService } from '../api/exam';
@@ -174,44 +175,46 @@ const Navbar = () => {
         {!isLoggedIn ? (
           <>
             <Link href="/signin">
-              <button className="px-6 py-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 border border-gray-200 rounded-xl transition-all">
+              <Button variant="secondary">
                 Login
-              </button>
+              </Button>
             </Link>
             <Link href="/signup">
-              <button className="flex items-center gap-2 px-6 py-2 text-[15px] font-semibold text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 rounded-xl shadow-md shadow-blue-100 transition-all">
+              <Button variant="primary">
                 Get Access
                 <ArrowRight size={18} />
-              </button>
+              </Button>
             </Link>
           </>
         ) : (
           <>
             <Link href="/dashboard">
-              <button className="flex items-center gap-2 px-6 py-2 text-[15px] font-semibold text-blue-600 hover:bg-blue-50 border border-blue-200 rounded-xl transition-all">
+              <Button className="text-blue-600 hover:bg-blue-50 border border-blue-200 bg-white">
                 <LayoutDashboard size={18} />
                 Dashboard
-              </button>
+              </Button>
             </Link>
-            <button 
+            <Button 
               onClick={handleLogout}
-              className="px-6 py-2 text-[15px] font-semibold text-red-600 hover:bg-red-50 border border-red-200 rounded-xl transition-all"
+              variant="danger"
             >
               Logout
-            </button>
+            </Button>
           </>
         )}
       </div>
 
       {/* Mobile Menu Button (Burger Icon) */}
       <div className="md:hidden flex items-center">
-        <button 
+        <Button 
           onClick={toggleMobileMenu} 
-          className="text-slate-700 hover:text-blue-600 focus:outline-none p-2 bg-slate-50 rounded-lg transition-colors border border-slate-100"
+          variant="ghost"
+          size="icon"
+          className="border-slate-100 bg-slate-50"
           aria-label="Toggle menu"
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        </Button>
       </div>
 
       {/* Mobile Menu Dropdown */}
@@ -266,32 +269,33 @@ const Navbar = () => {
             {!isLoggedIn ? (
               <>
                 <Link href="/signin" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
-                  <button className="w-full py-2.5 text-[15px] font-semibold text-slate-700 border border-gray-200 hover:bg-slate-50 rounded-xl transition-all shadow-sm">
+                  <Button variant="secondary" className="w-full py-2.5">
                     Login
-                  </button>
+                  </Button>
                 </Link>
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 text-[15px] font-semibold text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 rounded-xl shadow-md shadow-blue-100 transition-all">
+                <Button variant="primary" className="w-full py-2.5">
                   Get Access
                   <ArrowRight size={18} />
-                </button>
+                </Button>
               </>
             ) : (
               <>
                 <Link href="/dashboard" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
-                  <button className="flex items-center justify-center gap-2 w-full py-2.5 text-[15px] font-semibold text-blue-600 border border-blue-200 hover:bg-blue-50 rounded-xl transition-all shadow-sm">
+                  <Button className="w-full py-2.5 text-blue-600 border border-blue-200 hover:bg-blue-50 bg-white">
                     <LayoutDashboard size={18} />
                     Dashboard
-                  </button>
+                  </Button>
                 </Link>
-                <button 
+                <Button 
                   onClick={() => {
                     handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full py-2.5 text-[15px] font-semibold text-red-600 border border-red-200 hover:bg-red-50 rounded-xl transition-all shadow-sm"
+                  variant="danger"
+                  className="w-full py-2.5"
                 >
                   Logout
-                </button>
+                </Button>
               </>
             )}
           </div>

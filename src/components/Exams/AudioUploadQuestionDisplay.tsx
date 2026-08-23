@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import { Mic, Upload, StopCircle, Trash2, Send, Volume2 } from 'lucide-react';
 import { exam } from '@/src/api/exam';
 import QuestionFeaturedResources from '@/src/components/Exams/QuestionFeaturedResources';
+import ExamCard from '@/src/components/Exams/ExamCard';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -91,7 +92,7 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 mt-8 relative z-10 w-full">
-      <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl shadow-blue-200/40 p-12 border border-slate-50 text-left md:text-center">
+      <ExamCard className="max-w-4xl" contentClassName="p-12 text-left md:text-center">
 
         <div className="mb-6 flex md:justify-center">
           <span className="bg-blue-50 text-blue-500 text-[11px] font-black px-5 py-2 rounded-full uppercase tracking-[0.2em] border border-blue-100">
@@ -169,7 +170,7 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
             {submitting ? 'Submitting...' : 'Send Answer'}
           </button>
         </div>
-      </div>
+      </ExamCard>
     </div>
   );
 }

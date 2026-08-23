@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useGeneralExamContext } from '@/src/context/GeneralExamContext';
 import { useSectionContext } from '@/src/context/SectionContext';
+import ExamCard from "@/src/components/Exams/ExamCard";
+import Button from '@/src/components/ui/Button';
 
 export default function SectionOnboardingPage() {
   const params = useParams();
@@ -101,39 +103,38 @@ export default function SectionOnboardingPage() {
         </div>
       </div>
 
-      <div className="relative z-10 w-full max-w-md bg-white md:rounded-[40px] shadow-2xl shadow-blue-200/50 overflow-hidden min-h-[100dvh] md:min-h-0 md:h-auto md:max-h-[90vh] flex flex-col">
-        <div className="pt-10 bg-gradient-to-b from-blue-200 to-white relative flex flex-col items-center justify-end pb-6 shrink-0">
-          <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/clouds.png')]" />
-          <h1 className="text-3xl font-bold text-slate-900 relative z-10">Get Ready</h1>
-          <p className="text-slate-500 font-medium mt-1 text-sm relative z-10">Next section is starting</p>
+      <ExamCard
+        title="Get Ready"
+        subtitle="Next section is starting"
+        className="max-w-md min-h-[100dvh] md:min-h-0 md:h-auto md:max-h-[90vh]"
+        headerClassName="pt-10 pb-6"
+        contentClassName="p-10 flex flex-col items-center"
+      >
+        <div className={`w-20 h-20 ${(t.includes('usability') || t.includes('feedback')) ? 'bg-teal-500 shadow-teal-100' : 'bg-blue-500 shadow-blue-100'} text-white rounded-full flex items-center justify-center mb-4 shadow-xl shrink-0`}>
+          {getSectionIcon()}
         </div>
+        <h2 className="text-2xl font-extrabold text-slate-800 mb-1 capitalize text-center">{title}</h2>
+        <p className="text-slate-400 text-sm mb-1">{getDuration()}</p>
+        <p className="text-slate-400 text-sm mb-10">{questions.length} questions</p>
 
-        <div className="p-10 flex flex-col items-center flex-1">
-          <div className={`w-20 h-20 ${(t.includes('usability') || t.includes('feedback')) ? 'bg-teal-500 shadow-teal-100' : 'bg-blue-500 shadow-blue-100'} text-white rounded-full flex items-center justify-center mb-4 shadow-xl shrink-0`}>
-            {getSectionIcon()}
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-800 mb-1 capitalize text-center">{title}</h2>
-          <p className="text-slate-400 text-sm mb-1">{getDuration()}</p>
-          <p className="text-slate-400 text-sm mb-10">{questions.length} questions</p>
+        <ul className="space-y-2.5 w-full mb-10 overflow-y-auto">
+          {instructions.map((tip, i) => (
+            <li key={i} className="flex gap-3 text-slate-500 text-[12px] leading-relaxed">
+              <span className="mt-1.5 w-1.5 h-1.5 bg-slate-400 rounded-full flex-shrink-0" />
+              {tip}
+            </li>
+          ))}
+        </ul>
 
-          <ul className="space-y-2.5 w-full mb-10 overflow-y-auto">
-            {instructions.map((tip, i) => (
-              <li key={i} className="flex gap-3 text-slate-500 text-[12px] leading-relaxed">
-                <span className="mt-1.5 w-1.5 h-1.5 bg-slate-400 rounded-full flex-shrink-0" />
-                {tip}
-              </li>
-            ))}
-          </ul>
-
-          <Link href={nextTarget} className='w-full mt-auto shrink-0'>
-            <button
-              className={`w-full py-4 ${(t.includes('usability') || t.includes('feedback')) ? 'bg-teal-500 hover:bg-teal-600 shadow-teal-200' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'} text-white font-bold rounded-2xl shadow-lg transition-all active:scale-[0.98] text-lg disabled:bg-slate-300 disabled:shadow-none`}
-            >
-              Start
-            </button>
-          </Link>
-        </div>
-      </div>
+        <Link href={nextTarget} className='w-full mt-auto shrink-0'>
+          <Button
+            size="lg"
+            className="w-full bg-blue-500 text-white font-bold rounded-xl shadow-xl shadow-blue-200"
+          >
+            Start Section
+          </Button>
+        </Link>
+      </ExamCard>
     </div>
   )
 }
