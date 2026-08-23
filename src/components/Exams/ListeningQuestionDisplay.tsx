@@ -45,6 +45,7 @@ interface ListeningQuestionDisplayProps {
   onPrev?: () => void;
   isLastQuestion?: boolean;
   finishing?: boolean;
+  disabled?: boolean;
 }
 
 const AudioPlayer = ({
@@ -111,6 +112,7 @@ export default function ListeningQuestionDisplay({
   currentIndex,
   onNext,
   onPrev,
+  disabled,
 }: ListeningQuestionDisplayProps) {
   const [options, setOptions] = useState<any[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -349,7 +351,7 @@ export default function ListeningQuestionDisplay({
             )}
             <button
               onClick={handleSubmit}
-              disabled={!selectedOption || submitting || loading}
+              disabled={!selectedOption || submitting || loading || disabled}
               className="px-12 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100 disabled:shadow-none"
             >
               {submitting ? "Submitting..." : "Continue"}

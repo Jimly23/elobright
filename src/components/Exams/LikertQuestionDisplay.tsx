@@ -19,6 +19,7 @@ interface LikertQuestionDisplayProps {
   onPrev?: () => void;
   isLastQuestion?: boolean;
   finishing?: boolean;
+  disabled?: boolean;
 }
 
 const LIKERT_OPTIONS = [
@@ -36,6 +37,7 @@ export default function LikertQuestionDisplay({
   onPrev,
   isLastQuestion,
   finishing,
+  disabled,
 }: LikertQuestionDisplayProps) {
   const [selectedValue, setSelectedValue] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -91,7 +93,8 @@ export default function LikertQuestionDisplay({
               return (
                 <button
                   key={option.value}
-                  onClick={() => setSelectedValue(option.value)}
+                  onClick={() => !disabled && setSelectedValue(option.value)}
+                  disabled={disabled}
                   className={`flex-1 flex flex-col items-center gap-2 py-5 px-3 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${isSelected
                     ? 'border-teal-500 bg-teal-500 text-white shadow-lg shadow-teal-200 scale-[1.05]'
                     : 'border-slate-100 bg-white text-slate-600 hover:border-teal-200 hover:bg-teal-50/50 hover:scale-[1.02]'
@@ -118,7 +121,8 @@ export default function LikertQuestionDisplay({
               return (
                 <button
                   key={option.value}
-                  onClick={() => setSelectedValue(option.value)}
+                  onClick={() => !disabled && setSelectedValue(option.value)}
+                  disabled={disabled}
                   className={`w-full flex items-center gap-4 py-4 px-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${isSelected
                     ? 'border-teal-500 bg-teal-500 text-white shadow-lg shadow-teal-200'
                     : 'border-slate-100 bg-white text-slate-600 hover:border-teal-200 hover:bg-teal-50/50'
@@ -152,7 +156,7 @@ export default function LikertQuestionDisplay({
           )}
           <button
             onClick={handleSubmit}
-            disabled={selectedValue === null || submitting || finishing}
+            disabled={selectedValue === null || submitting || finishing || disabled}
             className="px-16 py-4 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-2xl shadow-xl shadow-teal-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:shadow-none disabled:active:scale-100"
           >
             {submitting || finishing

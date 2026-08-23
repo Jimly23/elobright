@@ -4,10 +4,11 @@ import Image from 'next/image';
 import { BookOpen, Headphones, PenTool, Mic2, Loader2, ClipboardCheck } from 'lucide-react';
 import { useGeneralExamContext } from '@/src/context/GeneralExamContext';
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { exam } from "@/src/api/exam";
 import ExamCard from "@/src/components/Exams/ExamCard";
 import Button from '@/src/components/ui/Button';
+import ExamCompletedDialog from "@/src/components/Exams/ExamCompletedDialog";
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -18,11 +19,44 @@ const getCookie = (name: string) => {
 };
 
 export default function ExamIntroductionPage() {
-  const { sections, setExamSessionId, setCurrentSectionSession } = useGeneralExamContext();
+  const { examData, sections, setExamSessionId, setCurrentSectionSession } = useGeneralExamContext();
   const params = useParams();
   const router = useRouter();
   const examId = params.examId as string;
   const [loading, setLoading] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isCheckingHistory, setIsCheckingHistory] = useState(true);
+
+  // Cek history jika exam isOnce
+  useEffect(() => {
+    const checkHistory = async () => {
+      if (!examData?.isOnce) {
+        setIsCheckingHistory(false);
+        return;
+      }
+      
+      try {
+        const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
+        const history = await exam.getExamHistory(token);
+        
+        // Cari submission yang sudah selesai untuk exam ini
+        const hasCompleted = history.some((sub: any) => 
+          sub.examId === examId && 
+          (sub.status === 'submitted' || sub.status === 'finished-late')
+        );
+        
+        if (hasCompleted) {
+          setIsCompleted(true);
+        }
+      } catch (err) {
+        console.error('Failed to fetch exam history:', err);
+      } finally {
+        setIsCheckingHistory(false);
+      }
+    };
+    
+    checkHistory();
+  }, [examId, examData?.isOnce]);
 
   // We map the dynamic sections array to the static display style
   const getSectionIcon = (title: string) => {
@@ -154,6 +188,12 @@ export default function ExamIntroductionPage() {
       router.push(`/exams/${examId}/section/${sections[0].id}`);
     } catch (e: any) {
       console.error('Failed to start exam:', e.response?.data || e);
+
+      // Handle 403 Forbidden - Exam can only be taken once
+      if (e.response?.status === 403 && e.response?.data?.message === 'Exam can only be taken once') {
+        setIsCompleted(true);
+        return;
+      }
 
       // Handle 409 Conflict — ongoing session
       if (e.response?.status === 409 && e.response?.data?.session) {
@@ -320,18 +360,26 @@ export default function ExamIntroductionPage() {
         <div className="w-full flex justify-center">
           <button
             onClick={handleStart}
-            disabled={sections.length === 0 || loading}
+            disabled={sections.length === 0 || loading || isCheckingHistory || isCompleted}
             className="w-full md:w-2/3 py-3.5 md:py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold text-sm md:text-base rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] focus:ring-4 focus:ring-blue-200 outline-none disabled:opacity-50 disabled:active:scale-100 disabled:shadow-none"
           >
-            {loading ? (
+            {loading || isCheckingHistory ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 size={18} className="animate-spin" />
-                Starting...
+                Memuat...
               </span>
-            ) : 'Start Exam'}
+            ) : isCompleted ? 'Ujian Selesai' : 'Start Exam'}
           </button>
         </div>
       </ExamCard>
+      
+      {isCompleted && (
+        <ExamCompletedDialog 
+          title="Ujian Telah Diselesaikan"
+          message="Anda telah selesai mengerjakan ujian ini dan tidak dapat mengulangnya. Jika belum mendapatkan sertifikat, silakan cek email secara berkala atau hubungi panitia."
+          homeUrl="/"
+        />
+      )}
     </div>
   );
 }

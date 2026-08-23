@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useGeneralExamContext } from '@/src/context/GeneralExamContext';
 import { useSectionContext } from '@/src/context/SectionContext';
@@ -11,6 +11,7 @@ import ListeningQuestionDisplay from '@/src/components/Exams/ListeningQuestionDi
 import EssayQuestionDisplay from '@/src/components/Exams/EssayQuestionDisplay';
 import AudioUploadQuestionDisplay from '@/src/components/Exams/AudioUploadQuestionDisplay';
 import LikertQuestionDisplay from '@/src/components/Exams/LikertQuestionDisplay';
+import TimeUpOverlay from '@/src/components/Exams/TimeUpOverlay';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -32,6 +33,18 @@ export default function QuestionPage() {
   const { questions, getNextQuestionId, getPrevQuestionId, getQuestionIndex } = useSectionContext();
 
   const [finishing, setFinishing] = useState(false);
+  const [isTimedOut, setIsTimedOut] = useState(false);
+
+  // Check on mount if time is already expired
+  useEffect(() => {
+    const endTimeStr = localStorage.getItem("currentSectionEndTimeLimit");
+    if (endTimeStr) {
+      const endTime = new Date(endTimeStr).getTime();
+      if (Date.now() >= endTime) {
+        setIsTimedOut(true);
+      }
+    }
+  }, []);
 
   // Save checkpoint to localStorage so the landing page can show a resume banner
   useEffect(() => {
@@ -57,6 +70,50 @@ export default function QuestionPage() {
   const currentQuestion = questions.find(q => q.id === questionId);
   const currentIndex = getQuestionIndex(questionId);
 
+  // Handler for when timer reaches zero
+  const handleTimeUp = useCallback(() => {
+    setIsTimedOut(true);
+  }, []);
+
+  // Handler for finishing section after time up (called by TimeUpOverlay)
+  const handleFinishAfterTimeUp = useCallback(async () => {
+    try {
+      const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
+      const sectionSessionId = localStorage.getItem('currentSectionSessionId');
+
+      if (sectionSessionId) {
+        const finishRes = await exam.finishSection(sectionSessionId, token);
+
+        if (finishRes && finishRes.nextSectionSubmission) {
+          const nextSession = finishRes.nextSectionSubmission;
+          setCurrentSectionSession(nextSession);
+          localStorage.setItem('currentSectionSessionId', nextSession.id);
+          localStorage.setItem('currentSectionEndTimeLimit', nextSession.endTimeLocale || nextSession.endTimeLimit);
+
+          const nextSectionId = getNextSectionId(sectionId);
+          if (nextSectionId) {
+            router.push(`/exams/${examId}/section/${nextSectionId}`);
+          } else {
+            router.push(`/exams/${examId}/finish`);
+          }
+        } else {
+          router.push(`/exams/${examId}/finish`);
+        }
+      } else {
+        router.push(`/exams/${examId}/finish`);
+      }
+    } catch (e) {
+      console.error('Error finishing section after time up:', e);
+      // Navigate anyway
+      const nextSectionId = getNextSectionId(sectionId);
+      if (nextSectionId) {
+        router.push(`/exams/${examId}/section/${nextSectionId}`);
+      } else {
+        router.push(`/exams/${examId}/finish`);
+      }
+    }
+  }, [examId, sectionId, router, getNextSectionId, setCurrentSectionSession]);
+
   // If questions are not yet loaded or wrong ID
   if (!currentQuestion) {
     return (
@@ -69,6 +126,9 @@ export default function QuestionPage() {
   const isLastQuestion = getNextQuestionId(questionId) === null;
 
   const handleNext = async () => {
+    // If timed out, don't allow navigation via normal flow
+    if (isTimedOut) return;
+
     const nextQuestionId = getNextQuestionId(questionId);
 
     if (nextQuestionId) {
@@ -170,6 +230,7 @@ export default function QuestionPage() {
         sectionName={sectionName}
         currentQuestion={currentIndex + 1}
         totalQuestions={questions.length}
+        onTimeUp={handleTimeUp}
       />
 
       <main className="relative flex-1 flex items-center justify-center w-full z-10 p-0 text-left">
@@ -181,8 +242,14 @@ export default function QuestionPage() {
           // onPrev={currentIndex > 0 ? handlePrev : undefined}
           isLastQuestion={isLastQuestion}
           finishing={finishing}
+          disabled={isTimedOut}
         />
       </main>
+
+      {/* Time Up Overlay */}
+      {isTimedOut && (
+        <TimeUpOverlay onFinishSection={handleFinishAfterTimeUp} />
+      )}
     </div>
   );
 }

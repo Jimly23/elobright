@@ -21,9 +21,10 @@ interface AudioUploadQuestionDisplayProps {
   onPrev?: () => void;
   isLastQuestion?: boolean;
   finishing?: boolean;
+  disabled?: boolean;
 }
 
-export default function AudioUploadQuestionDisplay({ question, currentIndex, onNext, onPrev }: AudioUploadQuestionDisplayProps) {
+export default function AudioUploadQuestionDisplay({ question, currentIndex, onNext, onPrev, disabled }: AudioUploadQuestionDisplayProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -162,7 +163,7 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
           )}
           <button
             onClick={handleSend}
-            disabled={!audioUrl || submitting}
+            disabled={!audioUrl || submitting || disabled}
             className={`px-10 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${audioUrl && !submitting ? 'bg-blue-500 text-white shadow-xl shadow-blue-200 hover:bg-blue-600 active:scale-[0.98]' : 'bg-slate-100 text-slate-400 cursor-not-allowed'
               }`}
           >

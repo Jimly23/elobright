@@ -20,9 +20,10 @@ interface McqQuestionDisplayProps {
   onPrev?: () => void;
   isLastQuestion?: boolean;
   finishing?: boolean;
+  disabled?: boolean;
 }
 
-export default function McqQuestionDisplay({ question, currentIndex, onNext, onPrev }: McqQuestionDisplayProps) {
+export default function McqQuestionDisplay({ question, currentIndex, onNext, onPrev, disabled }: McqQuestionDisplayProps) {
   const [options, setOptions] = useState<any[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -107,7 +108,8 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
                   name="mcq-test"
                   className="hidden"
                   checked={selectedOption === option.id}
-                  onChange={() => setSelectedOption(option.id)}
+                  onChange={() => !disabled && setSelectedOption(option.id)}
+                  disabled={disabled}
                 />
 
                 <div className={`w-6 h-6 min-w-6 min-h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${selectedOption === option.id ? 'border-white bg-white text-blue-500' : 'border-slate-300 bg-white'
@@ -136,7 +138,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
           )}
           <button
             onClick={handleSubmit}
-            disabled={!selectedOption || submitting || loading}
+            disabled={!selectedOption || submitting || loading || disabled}
             className="px-16 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100"
           >
             {submitting ? 'Submitting...' : 'Continue'}

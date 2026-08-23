@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { PlayCircle, Clock, X } from "lucide-react";
+import { PlayCircle, Clock, RotateCcw, AlertTriangle, Loader2 } from "lucide-react";
+import { exam } from "@/src/api/exam";
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -32,7 +33,7 @@ export default function ResumeExamBanner({ examId }: ResumeExamBannerProps) {
   const [checkpoint, setCheckpoint] = useState<CheckpointData | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [visible, setVisible] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [loading, setLoading] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for checkpoint data on mount
@@ -47,8 +48,9 @@ export default function ResumeExamBanner({ examId }: ResumeExamBannerProps) {
       if (examId && data.examId !== examId) return;
 
       // Only show if the checkpoint belongs to the current user
-      const currentUserId = getCookie('userId') || '';
-      if (!currentUserId || data.userId !== currentUserId) return;
+      const currentUserId = getCookie('userId') || (typeof window !== 'undefined' ? localStorage.getItem('userId') : null) || '';
+      // Fallback: if we can't get userId from cookie, we assume it matches for now
+      if (currentUserId && data.userId && data.userId !== currentUserId) return;
 
       // Check if the section end time hasn't passed yet
       if (data.endTimeLimit) {
@@ -118,66 +120,101 @@ export default function ResumeExamBanner({ examId }: ResumeExamBannerProps) {
     router.push(`/exams/${checkpoint.examId}/section/${checkpoint.sectionId}/question/${checkpoint.questionId}`);
   };
 
-  const handleDismiss = () => {
-    setVisible(false);
-    setTimeout(() => setDismissed(true), 300);
+  const handleRestart = async () => {
+    if (!checkpoint) return;
+    setLoading(true);
+
+    try {
+      const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
+      
+      // Finish the old exam session to clean up the backend state
+      if (checkpoint.examSessionId) {
+        await exam.finishExam(checkpoint.examSessionId, token);
+      }
+    } catch (e) {
+      console.error("Failed to finish old exam session", e);
+    } finally {
+      // Clean up local storage
+      localStorage.removeItem("currentExamSessionId");
+      localStorage.removeItem("currentSectionSessionId");
+      localStorage.removeItem("currentSectionEndTimeLimit");
+      localStorage.removeItem("examCheckpoint");
+      
+      setCheckpoint(null);
+      setVisible(false);
+      setLoading(false);
+      
+      // Navigate to introduction page to start fresh
+      router.push(`/exams/${checkpoint.examId}/introduction`);
+    }
   };
 
-  if (!checkpoint || dismissed) return null;
+  if (!checkpoint || !visible) return null;
 
   return (
-    <div
-      className={`w-full transition-all duration-500 ease-out overflow-hidden ${
-        visible ? "max-h-24 opacity-100" : "max-h-0 opacity-0"
-      }`}
-    >
-      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 relative">
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')]" />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-[fadeIn_0.3s_ease-out]">
+      <div className="bg-white rounded-[24px] shadow-2xl max-w-md w-full overflow-hidden animate-[scaleUp_0.3s_ease-out]">
+        
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-8 text-center relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')]" />
+          
+          <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20 relative z-10">
+            <PlayCircle size={32} className="text-white" />
+          </div>
+          <h2 className="text-2xl font-black text-white relative z-10">Ujian Belum Selesai</h2>
+          <p className="text-blue-100 mt-2 font-medium relative z-10 text-sm">
+            Anda memiliki sesi ujian yang sedang berjalan.
+          </p>
+        </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4">
-          {/* Left side: Info */}
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
-              <PlayCircle size={20} className="text-white" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-white font-bold text-sm truncate">
-                You have an ongoing exam!
-              </p>
-              <p className="text-white/70 text-xs font-medium truncate">
-                Continue where you left off
-              </p>
-            </div>
+        {/* Content */}
+        <div className="p-6 md:p-8">
+          <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6">
+            <AlertTriangle size={20} className="text-blue-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-blue-800 leading-relaxed">
+              Apakah Anda ingin melanjutkan ujian dari soal terakhir yang sedang dikerjakan?
+            </p>
           </div>
 
-          {/* Center: Timer */}
           {timeLeft && (
-            <div className="hidden sm:flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 flex-shrink-0">
-              <Clock size={14} className="text-white/80" />
-              <span className="text-white font-black text-sm tabular-nums">{timeLeft}</span>
-              <span className="text-white/60 text-[10px] font-bold">left</span>
+            <div className="flex items-center justify-center gap-2 mb-8">
+              <Clock size={16} className="text-slate-400" />
+              <span className="text-slate-500 text-sm font-medium">Sisa waktu:</span>
+              <span className="text-slate-800 font-black tabular-nums">{timeLeft}</span>
             </div>
           )}
 
-          {/* Right side: Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="space-y-3">
             <button
               onClick={handleResume}
-              className="px-5 py-2 bg-white text-orange-600 font-bold text-sm rounded-xl hover:bg-orange-50 transition-all active:scale-95 shadow-lg shadow-orange-600/20"
+              disabled={loading}
+              className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:active:scale-100"
             >
-              Resume
+              Ya, Lanjutkan
             </button>
             <button
-              onClick={handleDismiss}
-              className="p-1.5 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              aria-label="Dismiss"
+              onClick={handleRestart}
+              disabled={loading}
+              className="w-full py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:active:scale-100"
             >
-              <X size={18} />
+              {loading ? <Loader2 size={18} className="animate-spin" /> : <RotateCcw size={18} />}
+              Tidak, Mulai Ulang
             </button>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scaleUp {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,20 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BookOpen, Timer, Headphones, Edit3, Mic, ClipboardCheck } from "lucide-react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { BookOpen, Timer, Headphones, Edit3, Mic, ClipboardCheck, AlertTriangle } from "lucide-react";
 
 interface EnglishTestNavbarProps {
     sectionName?: string;
     currentQuestion?: number;
     totalQuestions?: number;
+    onTimeUp?: () => void;
 }
 
 export default function EnglishTestNavbar({
     sectionName = "Reading",
     currentQuestion = 0,
-    totalQuestions = 0
+    totalQuestions = 0,
+    onTimeUp,
 }: EnglishTestNavbarProps) {
     const [timeLeft, setTimeLeft] = useState<string>("0.00 min");
+    const [isExpired, setIsExpired] = useState(false);
+    const [isWarning, setIsWarning] = useState(false);
+    const hasCalledTimeUp = useRef(false);
+
+    const handleTimeUp = useCallback(() => {
+        if (!hasCalledTimeUp.current && onTimeUp) {
+            hasCalledTimeUp.current = true;
+            onTimeUp();
+        }
+    }, [onTimeUp]);
 
     useEffect(() => {
         // Read the section-level end time limit from localStorage
@@ -29,10 +41,15 @@ export default function EnglishTestNavbar({
 
             if (difference <= 0) {
                 setTimeLeft("0.00 min");
+                setIsExpired(true);
+                setIsWarning(false);
+                handleTimeUp();
             } else {
                 const minutes = Math.floor(difference / 1000 / 60);
                 const seconds = Math.floor((difference / 1000) % 60);
                 setTimeLeft(`${minutes}.${seconds.toString().padStart(2, '0')} min`);
+                // Warning when under 60 seconds
+                setIsWarning(difference <= 60000);
             }
         };
 
@@ -42,7 +59,7 @@ export default function EnglishTestNavbar({
         const interval = setInterval(updateTimer, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [handleTimeUp]);
 
     const isUsability = sectionName.toLowerCase().includes('usability') || sectionName.toLowerCase().includes('feedback');
 
@@ -87,13 +104,16 @@ export default function EnglishTestNavbar({
                 )}
 
                 {/* Timer right */}
-                <div className="flex items-center justify-end gap-3 md:border-l px-6 border-slate-200 w-48">
-                    <div className="text-[#0080FF]">
-                        <Timer size={28} />
+                <div className={`flex items-center justify-end gap-3 md:border-l px-6 border-slate-200 w-48 ${isWarning ? 'animate-pulse' : ''}`}>
+                    <div className={isExpired ? 'text-red-500' : isWarning ? 'text-red-500' : 'text-[#0080FF]'}>
+                        {isExpired ? <AlertTriangle size={28} /> : <Timer size={28} />}
                     </div>
                     <div className="flex gap-x-1 items-center">
-                        <span className="text-sm font-bold text-slate-800 leading-none">{timeLeft}</span>
-                        {/* <span className="text-[9px] text-red-500 font-bold">time left</span> */}
+                        {isExpired ? (
+                            <span className="text-sm font-black text-red-500 leading-none">Waktu Habis</span>
+                        ) : (
+                            <span className={`text-sm font-bold leading-none ${isWarning ? 'text-red-500 font-black' : 'text-slate-800'}`}>{timeLeft}</span>
+                        )}
                     </div>
                 </div>
             </div>

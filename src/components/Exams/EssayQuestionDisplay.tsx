@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { Play, Pause, Volume2 } from 'lucide-react';
 import { exam } from '@/src/api/exam';
 import QuestionFeaturedResources from '@/src/components/Exams/QuestionFeaturedResources';
 import ExamCard from '@/src/components/Exams/ExamCard';
@@ -13,6 +14,14 @@ const getCookie = (name: string) => {
   return null;
 };
 
+// Helper to resolve media URLs (Prefix with API base if relative)
+const resolveMediaUrl = (url: string | null) => {
+  if (!url) return "";
+  if (url.startsWith("http") || url.startsWith("blob:") || url.startsWith("data:")) return url;
+  const baseUrl = (url.includes("cdn") ? process.env.NEXT_PUBLIC_API_URL_CDN : process.env.NEXT_PUBLIC_API_URL) || "http://localhost:3001";
+  return `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
+};
+
 interface EssayQuestionDisplayProps {
   question: any;
   currentIndex: number;
@@ -20,15 +29,53 @@ interface EssayQuestionDisplayProps {
   onPrev?: () => void;
   isLastQuestion?: boolean;
   finishing?: boolean;
+  disabled?: boolean;
 }
 
-export default function EssayQuestionDisplay({ question, currentIndex, onNext, onPrev }: EssayQuestionDisplayProps) {
+// Simple inline audio player for essay context/question audio
+function SimpleAudioPlayer({ src, label }: { src: string; label: string }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
+
+  const togglePlay = () => {
+    if (!audioEl) {
+      const audio = new Audio(src);
+      audio.onended = () => setIsPlaying(false);
+      audio.onerror = () => setIsPlaying(false);
+      setAudioEl(audio);
+      audio.play();
+      setIsPlaying(true);
+    } else if (isPlaying) {
+      audioEl.pause();
+      setIsPlaying(false);
+    } else {
+      audioEl.play();
+      setIsPlaying(true);
+    }
+  };
+
+  return (
+    <button
+      onClick={togglePlay}
+      className="flex items-center gap-3 px-5 py-3 rounded-2xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 transition-all text-left"
+    >
+      <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-200">
+        {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
+      </div>
+      <div>
+        <p className="text-blue-600 text-xs font-black uppercase tracking-wider">{label}</p>
+        <p className="text-slate-400 text-[11px] font-medium">{isPlaying ? 'Sedang memutar...' : 'Klik untuk memutar'}</p>
+      </div>
+    </button>
+  );
+}
+
+export default function EssayQuestionDisplay({ question, currentIndex, onNext, onPrev, disabled }: EssayQuestionDisplayProps) {
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const wordTarget = 45;
 
   const handleSubmit = async () => {
-    if (!text.trim()) return;
+    if (!text.trim() || disabled) return;
     setSubmitting(true);
 
     try {
@@ -50,8 +97,8 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
     }
   };
 
-  const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
-  const progressPercentage = Math.min((wordCount / wordTarget) * 100, 100);
+  const narrativeAudioUrl = question.audioUrl ? resolveMediaUrl(question.audioUrl) : null;
+  const questionAudioUrl = question.questionAudioUrl ? resolveMediaUrl(question.questionAudioUrl) : null;
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-6 pt-[72px] md:pt-20 relative z-10 w-full">
@@ -64,7 +111,20 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
           </span>
         </div>
 
+        {/* Featured resources: image & narrative text */}
         <QuestionFeaturedResources imageUrl={question.imageUrl} narrativeText={question.narrativeText} />
+
+        {/* Audio Players */}
+        {(narrativeAudioUrl || questionAudioUrl) && (
+          <div className="flex flex-wrap gap-3 mb-6 shrink-0">
+            {narrativeAudioUrl && (
+              <SimpleAudioPlayer src={narrativeAudioUrl} label="Audio Konteks" />
+            )}
+            {questionAudioUrl && (
+              <SimpleAudioPlayer src={questionAudioUrl} label="Audio Pertanyaan" />
+            )}
+          </div>
+        )}
 
         {/* Question Text */}
         <h2 className="text-xl md:text-2xl font-medium text-slate-700 text-left leading-relaxed mb-12 shrink-0">
@@ -74,26 +134,12 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
         {/* Writing Area */}
         <div className="relative mb-6 flex-1 flex flex-col min-h-[250px]">
           <textarea
-            className="w-full flex-1 p-6 rounded-2xl border-2 border-blue-100 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-600 leading-relaxed resize-none"
-            placeholder="Start writing your answer here..."
+            className="w-full flex-1 p-6 rounded-2xl border-2 border-blue-100 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all outline-none text-slate-600 leading-relaxed resize-none disabled:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            placeholder="Tulis jawaban Anda di sini..."
             value={text}
             onChange={(e) => setText(e.target.value)}
-            disabled={submitting}
+            disabled={submitting || disabled}
           />
-        </div>
-
-        {/* Word Count Progress Section */}
-        <div className="mb-8 shrink-0">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-slate-700 text-sm font-bold">Target : {wordTarget} words</span>
-            <span className="text-slate-400 text-sm font-medium">{wordCount} words</span>
-          </div>
-          <div className="w-full h-3 bg-orange-50 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-yellow-500 rounded-full transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
-            />
-          </div>
         </div>
 
         {/* Action Button */}
@@ -101,7 +147,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
           {onPrev ? (
             <button
               onClick={onPrev}
-              disabled={submitting}
+              disabled={submitting || disabled}
               className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95 disabled:opacity-50"
             >
               ← Previous
@@ -111,7 +157,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
           )}
           <button
             onClick={handleSubmit}
-            disabled={!text.trim() || submitting}
+            disabled={!text.trim() || submitting || disabled}
             className="px-16 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100"
           >
             {submitting ? 'Submitting...' : 'Continue'}
