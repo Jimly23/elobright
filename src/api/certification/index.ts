@@ -21,6 +21,8 @@ export interface CertificationScore {
   examSubmissionId: string;
   additionalScore: Record<string, number> | null;
   examScoreOverride: number | null;
+  originalExamScore?: number;
+  finalScore?: number;
   rawExamScore?: number;
   // Populated fields from backend (if included)
   user?: {

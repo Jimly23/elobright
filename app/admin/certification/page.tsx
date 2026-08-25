@@ -91,27 +91,50 @@ export default function CertificationPage() {
     setSuccessMsg('');
   };
 
-  const computePreviewScore = () => {
-    if (!editingScore) return null;
+  const calculateFinalScore = (
+    examScoreValue: number | string | undefined | null,
+    additionalScores: Record<string, number | string>,
+  ) => {
+    if (examScoreValue === null || examScoreValue === undefined || examScoreValue === '') return null;
 
-    const examScore = editForm.useOverride && editForm.examScoreOverride
-      ? parseFloat(editForm.examScoreOverride)
-      : null;
+    const examScore = Number(examScoreValue);
+    if (!Number.isFinite(examScore)) return null;
 
-    if (examScore === null) return 'Menggunakan nilai ujian yang dihitung otomatis';
-
-    const totalAdditionalWeight = additionalScoreDefs.reduce((sum, def) => sum + def.weight, 0);
+    const totalAdditionalWeight = additionalScoreDefs.reduce((sum, def) => sum + Number(def.weight), 0);
     const examWeight = Math.max(0, 1 - totalAdditionalWeight);
 
     let finalScore = examScore * examWeight;
     additionalScoreDefs.forEach(def => {
-      const val = parseFloat(editForm.additionalScores[def.scoreName] || '0');
-      if (!isNaN(val)) {
-        finalScore += val * def.weight;
+      const value = Number(additionalScores[def.scoreName] ?? 0);
+      if (Number.isFinite(value)) {
+        finalScore += value * Number(def.weight);
       }
     });
 
-    return finalScore.toFixed(1);
+    return finalScore;
+  };
+
+  const computePreviewScore = () => {
+    if (!editingScore) return null;
+
+    const examScore = editForm.useOverride
+      ? editForm.examScoreOverride
+      : editingScore.originalExamScore ?? editingScore.rawExamScore;
+
+    const finalScore = calculateFinalScore(examScore, editForm.additionalScores);
+    return finalScore === null ? null : finalScore.toFixed(1);
+  };
+
+  const getTableFinalScore = (score: CertificationScore) => {
+    const examScore = score.examScoreOverride
+      ?? score.originalExamScore
+      ?? score.rawExamScore;
+    const calculatedScore = calculateFinalScore(examScore, score.additionalScore ?? {});
+
+    if (calculatedScore !== null) return calculatedScore.toFixed(1);
+
+    const backendFinalScore = Number(score.finalScore);
+    return Number.isFinite(backendFinalScore) ? backendFinalScore.toFixed(1) : null;
   };
 
   const handleSaveEdit = async () => {
@@ -364,9 +387,9 @@ export default function CertificationPage() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      {score.finalScore !== undefined && score.finalScore !== null ? (
+                      {getTableFinalScore(score) !== null ? (
                         <span className="inline-flex items-center px-3 py-1.5 bg-emerald-50 text-emerald-700 text-sm font-black rounded-lg">
-                          {Number(score.finalScore).toFixed(1)}
+                          {getTableFinalScore(score)}
                         </span>
                       ) : (
                         <span className="text-slate-300 text-xs">—</span>
