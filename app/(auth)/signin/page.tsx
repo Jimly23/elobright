@@ -6,6 +6,11 @@ import { authService } from '@/src/api/auth';
 import CryptoJS from 'crypto-js';
 import Cookies from 'js-cookie';
 import { Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
+
+type LoginError = {
+  response?: { status?: number; data?: { message?: string } };
+};
 
 function SignInContent() {
   const router = useRouter();
@@ -31,7 +36,6 @@ function SignInContent() {
 
     try {
       const response = await authService.login(formData);
-      console.log('Login Response:', response);
 
       // Simpan token ke cookie
       if (response.token) {
@@ -49,10 +53,6 @@ function SignInContent() {
             Cookies.set('userId', response.user.id.toString(), { expires: 1, path: '/', sameSite: 'Lax' });
           }
 
-          // Dekripsi kembali data untuk membuktikan bahwa di sisi frontend data dapat kembali seperti semula
-          const decryptedBytes = CryptoJS.AES.decrypt(encryptedUser, secretKey);
-          const decryptedUser = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-          console.log("Decrypted User Data dari Cookie:", decryptedUser);
         }
 
         // Tetap simpan di localStorage jika aplikasi masih membutuhkan
@@ -77,9 +77,10 @@ function SignInContent() {
       } else {
         router.push(callbackUrl);
       }
-    } catch (err: any) {
-      const status = err.response?.status;
-      const errorMessage = err.response?.data?.message || 'Login failed. Please check your credentials.';
+    } catch (err: unknown) {
+      const loginError = err as LoginError;
+      const status = loginError.response?.status;
+      const errorMessage = loginError.response?.data?.message || 'Login failed. Please check your credentials.';
       
       if (status === 403 || errorMessage.toLowerCase().includes('not verified')) {
         setError('Email not verified. Please verify your email first.');
@@ -139,7 +140,7 @@ function SignInContent() {
         <div>
           <div className="flex justify-between items-center mb-2">
             <label className="block text-xs md:text-sm font-semibold text-slate-700">Password</label>
-            <a href="#" className="text-xs md:text-sm font-semibold text-blue-500 hover:text-blue-600 transition-colors">Forgot password?</a>
+            <Link href="/forgot-password" className="text-xs md:text-sm font-semibold text-blue-500 hover:text-blue-600 transition-colors">Forgot password?</Link>
           </div>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

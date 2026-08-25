@@ -39,6 +39,12 @@ export interface LoginResponse {
   user: User;
 }
 
+export interface ResetPasswordRequest {
+  token: string;
+  new_password: string;
+  confirm_password: string;
+}
+
 export const authService = {
   register: async (data: RegisterRequest) => {
     const response = await api.post('/auth/register', data);
@@ -52,6 +58,16 @@ export const authService = {
 
   resendVerification: async (data: ResendVerificationRequest) => {
     const response = await api.post('/auth/resend-verification', data);
+    return response.data;
+  },
+
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  resetPassword: async (data: ResetPasswordRequest): Promise<{ message: string }> => {
+    const response = await api.post('/auth/reset-password', data);
     return response.data;
   },
 
