@@ -20,32 +20,52 @@ export interface CertificationScore {
   userId: number;
   examSubmissionId: string;
   additionalScore: Record<string, number> | null;
-  examScoreOverride: number | null;
-  originalExamScore?: number;
-  finalScore?: number;
-  rawExamScore?: number;
-  sectionScores?: Record<string, number>;
-  // Populated fields from backend (if included)
-  user?: {
+  examScoreOverride: Record<string, number> | null;
+  scores: CertificationSectionScore[];
+  overrides: CertificationSectionOverride[];
+  originalExamScore: number;
+  totalScore: number;
+  user: {
     id: number;
     email: string;
     fullName: string;
-    studentId?: string;
-    student_id?: string;
-    nim?: string;
-    degreeProgram?: string | null;
+    role: string;
+    phoneNumber?: string | null;
   };
-  exam?: {
+  student?: {
+    studentId: string;
+    degreeProgram?: string | null;
+  } | null;
+  exam: {
+    id: string;
     title: string;
+    type: string;
+    isOnce: boolean;
   };
   examSubmission?: {
     id: string;
-    examId: string;
-    startedAt?: string;
+    examId?: string;
     exam?: {
+      id?: string;
       title: string;
+      type?: string;
+      isOnce?: boolean;
     };
   };
+}
+
+export interface CertificationSectionScore {
+  sectionId: string;
+  sectionName: string;
+  correctPoints: number;
+  fullPoints: number;
+  scaledScore: number;
+}
+
+export interface CertificationSectionOverride {
+  sectionId: string;
+  sectionName: string;
+  overriddenScore: number;
 }
 
 export interface BlastEmailResponse {
@@ -107,7 +127,7 @@ export const certificationService = {
     id: string,
     data: {
       additional_score?: Record<string, number> | null;
-      exam_score_override?: number | null;
+      exam_score_override?: Record<string, number> | null;
     },
     token?: string
   ): Promise<{ message: string; score: CertificationScore }> => {

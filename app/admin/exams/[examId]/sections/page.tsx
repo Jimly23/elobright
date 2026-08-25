@@ -15,6 +15,7 @@ interface ExamSection {
   type: string;
   order: number;
   durationMinutes: number;
+  weight: number | null;
   totalQuestions: number;
   createdAt?: string;
   updatedAt?: string;
@@ -44,6 +45,7 @@ export default function AdminExamSectionsPage() {
     type: 'mcq',
     durationMinutes: 60,
     totalQuestions: 30,
+    weight: null as number | null,
   };
   const [formData, setFormData] = useState(initialFormState);
 
@@ -115,6 +117,7 @@ export default function AdminExamSectionsPage() {
       type: section.type || 'mcq',
       durationMinutes: section.durationMinutes || 60,
       totalQuestions: section.totalQuestions || 30,
+      weight: section.weight ?? null,
     });
     setError('');
     setSuccessMsg('');
@@ -191,6 +194,11 @@ export default function AdminExamSectionsPage() {
     return orderA - orderB;
   });
 
+  const explicitWeight = sections.reduce((sum, section) => sum + (section.weight ?? 0), 0);
+  const automaticCount = sections.filter((section) => section.weight === null || section.weight === undefined).length;
+  const remainingWeight = Math.max(0, 1 - explicitWeight);
+  const automaticWeight = automaticCount > 0 ? remainingWeight / automaticCount : 0;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -233,6 +241,20 @@ export default function AdminExamSectionsPage() {
       )}
 
       {/* Sections List */}
+      {!loading && sections.length > 0 && (
+        <div className={`rounded-xl border p-4 text-sm ${explicitWeight > 1 ? 'border-red-200 bg-red-50 text-red-700' : 'border-indigo-200 bg-indigo-50 text-indigo-700'}`}>
+          <p className="font-bold">Total bobot eksplisit: {explicitWeight.toFixed(2)} ({(explicitWeight * 100).toFixed(0)}%)</p>
+          <p className="mt-1 text-xs">
+            {explicitWeight > 1
+              ? `Melebihi 1 sebesar ${(explicitWeight - 1).toFixed(2)}. Bagian otomatis tidak akan berkontribusi.`
+              : automaticCount > 0
+                ? `Sisa ${remainingWeight.toFixed(2)} dibagi rata ke ${automaticCount} bagian otomatis (${automaticWeight.toFixed(3)} per bagian).`
+                : remainingWeight > 0
+                  ? `Masih ada ${(remainingWeight * 100).toFixed(0)}% bobot yang belum dialokasikan.`
+                  : 'Seluruh bobot sudah dialokasikan.'}
+          </p>
+        </div>
+      )}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         {loading ? (
           <div className="p-12 flex flex-col items-center gap-4">
@@ -299,6 +321,7 @@ export default function AdminExamSectionsPage() {
                       <div className="flex flex-col gap-1 text-xs text-slate-600">
                         <span>Durasi: <span className="font-bold">{s.durationMinutes}m</span></span>
                         <span>Pertanyaan: <span className="font-bold">{s.totalQuestions}</span></span>
+                        <span>Bobot: <span className="font-bold">{s.weight == null ? `Otomatis (${automaticWeight.toFixed(3)})` : s.weight.toFixed(2)}</span></span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -390,6 +413,23 @@ export default function AdminExamSectionsPage() {
                     onChange={handleInputChange}
                     className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
                   />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-sm font-bold text-slate-700">Bobot Bagian</label>
+                    <button type="button" onClick={() => setFormData((prev) => ({ ...prev, weight: null }))} className="text-xs font-bold text-indigo-600 hover:underline">Gunakan otomatis</button>
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={formData.weight ?? ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, weight: e.target.value === '' ? null : Number(e.target.value) }))}
+                    placeholder="Otomatis (bagi rata sisa bobot)"
+                    className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">Rentang 0–1. Kosong berarti backend membagi sisa bobot secara rata.</p>
                 </div>
               </div>
 

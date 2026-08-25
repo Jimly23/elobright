@@ -85,6 +85,9 @@ function SignInContent() {
       if (status === 403 || errorMessage.toLowerCase().includes('not verified')) {
         setError('Email not verified. Please verify your email first.');
         setUnverifiedEmail(formData.email);
+      } else if (status === 401 || errorMessage.toLowerCase().includes('invalid email or password')) {
+        setError('Email or password is incorrect.');
+        setUnverifiedEmail('');
       } else {
         setError(errorMessage);
         setUnverifiedEmail('');
