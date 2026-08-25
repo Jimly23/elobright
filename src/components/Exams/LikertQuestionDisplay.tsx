@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { exam } from '@/src/api/exam';
 import ExamCard from '@/src/components/Exams/ExamCard';
+import { getCachedAnswer, setCachedAnswer } from '@/src/lib/examAnswerCache';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -41,6 +42,14 @@ export default function LikertQuestionDisplay({
 }: LikertQuestionDisplayProps) {
   const [selectedValue, setSelectedValue] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const sectionSessionId = typeof window !== 'undefined'
+    ? localStorage.getItem('currentSectionSessionId') || ''
+    : '';
+
+  useEffect(() => {
+    const cachedValue = getCachedAnswer(sectionSessionId, question.id)?.textResponse;
+    setSelectedValue(cachedValue ? Number(cachedValue) : null);
+  }, [question.id, sectionSessionId]);
 
   const handleSubmit = async () => {
     if (selectedValue === null) return;
@@ -51,17 +60,16 @@ export default function LikertQuestionDisplay({
       const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
 
       if (sectionSessionId) {
+        setCachedAnswer(sectionSessionId, question.id, { textResponse: String(selectedValue) });
         // Submit as essay/text response with the Likert scale value
         await exam.recordAnswerEssay(sectionSessionId, {
           questionId: question.id,
           textResponse: String(selectedValue),
         }, token);
       }
-      setSelectedValue(null);
       onNext();
     } catch (e) {
       console.error('Error submitting feedback:', e);
-      setSelectedValue(null);
       onNext(); // Proceed anyway for resilience
     } finally {
       setSubmitting(false);

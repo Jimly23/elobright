@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Play, Pause, Volume2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Play, Pause, Lock } from 'lucide-react';
 import { exam } from '@/src/api/exam';
 import QuestionFeaturedResources from '@/src/components/Exams/QuestionFeaturedResources';
 import ExamCard from '@/src/components/Exams/ExamCard';
+import { getCachedAnswer, setCachedAnswer } from '@/src/lib/examAnswerCache';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -33,18 +34,30 @@ interface EssayQuestionDisplayProps {
 }
 
 // Simple inline audio player for essay context/question audio
-function SimpleAudioPlayer({ src, label }: { src: string; label: string }) {
+function SimpleAudioPlayer({ src, label, playbackKey }: { src: string; label: string; playbackKey: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
+  const [hasPlayed, setHasPlayed] = useState(() => (
+    typeof window !== 'undefined' && localStorage.getItem(playbackKey) === 'played'
+  ));
+  const [startedHere, setStartedHere] = useState(false);
+
+  useEffect(() => () => audioEl?.pause(), [audioEl]);
 
   const togglePlay = () => {
+    if (hasPlayed && !startedHere) return;
     if (!audioEl) {
       const audio = new Audio(src);
-      audio.onended = () => setIsPlaying(false);
+      audio.onended = () => {
+        setIsPlaying(false);
+        setHasPlayed(true);
+        setStartedHere(false);
+      };
       audio.onerror = () => setIsPlaying(false);
       setAudioEl(audio);
-      audio.play();
-      setIsPlaying(true);
+      setStartedHere(true);
+      localStorage.setItem(playbackKey, 'played');
+      audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     } else if (isPlaying) {
       audioEl.pause();
       setIsPlaying(false);
@@ -57,14 +70,15 @@ function SimpleAudioPlayer({ src, label }: { src: string; label: string }) {
   return (
     <button
       onClick={togglePlay}
-      className="flex items-center gap-3 px-5 py-3 rounded-2xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 transition-all text-left"
+      disabled={hasPlayed && !startedHere}
+      className="flex items-center gap-3 px-5 py-3 rounded-2xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 transition-all text-left disabled:border-slate-200 disabled:bg-slate-50 disabled:cursor-not-allowed"
     >
       <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-200">
-        {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
+        {hasPlayed && !startedHere ? <Lock size={18} /> : isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
       </div>
       <div>
         <p className="text-blue-600 text-xs font-black uppercase tracking-wider">{label}</p>
-        <p className="text-slate-400 text-[11px] font-medium">{isPlaying ? 'Sedang memutar...' : 'Klik untuk memutar'}</p>
+        <p className="text-slate-400 text-[11px] font-medium">{hasPlayed && !startedHere ? 'Audio sudah pernah diputar' : isPlaying ? 'Sedang memutar...' : 'Klik untuk memutar'}</p>
       </div>
     </button>
   );
@@ -73,6 +87,13 @@ function SimpleAudioPlayer({ src, label }: { src: string; label: string }) {
 export default function EssayQuestionDisplay({ question, currentIndex, onNext, onPrev, disabled }: EssayQuestionDisplayProps) {
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const sectionSessionId = typeof window !== 'undefined'
+    ? localStorage.getItem('currentSectionSessionId') || ''
+    : '';
+
+  useEffect(() => {
+    setText(getCachedAnswer(sectionSessionId, question.id)?.textResponse ?? '');
+  }, [question.id, sectionSessionId]);
 
   const handleSubmit = async () => {
     if (!text.trim() || disabled) return;
@@ -83,6 +104,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
       const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
 
       if (sectionSessionId) {
+        setCachedAnswer(sectionSessionId, question.id, { textResponse: text });
         await exam.recordAnswerEssay(sectionSessionId, {
           questionId: question.id,
           textResponse: text
@@ -118,10 +140,10 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
         {(narrativeAudioUrl || questionAudioUrl) && (
           <div className="flex flex-wrap gap-3 mb-6 shrink-0">
             {narrativeAudioUrl && (
-              <SimpleAudioPlayer src={narrativeAudioUrl} label="Audio Konteks" />
+              <SimpleAudioPlayer src={narrativeAudioUrl} label="Audio Konteks" playbackKey={`exam-audio:${sectionSessionId}:${encodeURIComponent(narrativeAudioUrl)}`} />
             )}
             {questionAudioUrl && (
-              <SimpleAudioPlayer src={questionAudioUrl} label="Audio Pertanyaan" />
+              <SimpleAudioPlayer src={questionAudioUrl} label="Audio Pertanyaan" playbackKey={`exam-audio:${sectionSessionId}:${encodeURIComponent(questionAudioUrl)}`} />
             )}
           </div>
         )}

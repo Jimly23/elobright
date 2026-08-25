@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { PlayCircle, Clock, RotateCcw, AlertTriangle, Loader2 } from "lucide-react";
-import { exam } from "@/src/api/exam";
+import { PlayCircle, Clock, AlertTriangle } from "lucide-react";
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -33,7 +32,6 @@ export default function ResumeExamBanner({ examId }: ResumeExamBannerProps) {
   const [checkpoint, setCheckpoint] = useState<CheckpointData | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [visible, setVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for checkpoint data on mount
@@ -62,9 +60,11 @@ export default function ResumeExamBanner({ examId }: ResumeExamBannerProps) {
         }
       }
 
-      setCheckpoint(data);
       // Small delay before showing for smooth animation
-      setTimeout(() => setVisible(true), 100);
+      setTimeout(() => {
+        setCheckpoint(data);
+        setVisible(true);
+      }, 100);
     } catch {
       // Invalid data
     }
@@ -120,35 +120,6 @@ export default function ResumeExamBanner({ examId }: ResumeExamBannerProps) {
     router.push(`/exams/${checkpoint.examId}/section/${checkpoint.sectionId}/question/${checkpoint.questionId}`);
   };
 
-  const handleRestart = async () => {
-    if (!checkpoint) return;
-    setLoading(true);
-
-    try {
-      const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
-      
-      // Finish the old exam session to clean up the backend state
-      if (checkpoint.examSessionId) {
-        await exam.finishExam(checkpoint.examSessionId, token);
-      }
-    } catch (e) {
-      console.error("Failed to finish old exam session", e);
-    } finally {
-      // Clean up local storage
-      localStorage.removeItem("currentExamSessionId");
-      localStorage.removeItem("currentSectionSessionId");
-      localStorage.removeItem("currentSectionEndTimeLimit");
-      localStorage.removeItem("examCheckpoint");
-      
-      setCheckpoint(null);
-      setVisible(false);
-      setLoading(false);
-      
-      // Navigate to introduction page to start fresh
-      router.push(`/exams/${checkpoint.examId}/introduction`);
-    }
-  };
-
   if (!checkpoint || !visible) return null;
 
   return (
@@ -188,18 +159,9 @@ export default function ResumeExamBanner({ examId }: ResumeExamBannerProps) {
           <div className="space-y-3">
             <button
               onClick={handleResume}
-              disabled={loading}
-              className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:active:scale-100"
+              className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              Ya, Lanjutkan
-            </button>
-            <button
-              onClick={handleRestart}
-              disabled={loading}
-              className="w-full py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:active:scale-100"
-            >
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <RotateCcw size={18} />}
-              Tidak, Mulai Ulang
+              Lanjutkan
             </button>
           </div>
         </div>

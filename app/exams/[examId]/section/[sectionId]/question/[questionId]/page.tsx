@@ -235,11 +235,11 @@ export default function QuestionPage() {
 
       <main className="relative flex-1 flex items-center justify-center w-full z-10 p-0 text-left">
         <DisplayComponent
+          key={currentQuestion.id}
           question={currentQuestion}
           currentIndex={currentIndex}
           onNext={handleNext}
-          // onPrev temporarily disabled
-          // onPrev={currentIndex > 0 ? handlePrev : undefined}
+          onPrev={currentIndex > 0 && !isTimedOut ? handlePrev : undefined}
           isLastQuestion={isLastQuestion}
           finishing={finishing}
           disabled={isTimedOut}

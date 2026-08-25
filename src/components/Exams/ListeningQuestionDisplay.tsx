@@ -10,6 +10,7 @@ import {
 } from "@/src/components/Exams/AudioElements";
 import QuestionFeaturedResources from "./QuestionFeaturedResources";
 import ExamCard from '@/src/components/Exams/ExamCard';
+import { getCachedAnswer, setCachedAnswer } from '@/src/lib/examAnswerCache';
 
 const getCookie = (name: string) => {
   if (typeof document === "undefined") return null;
@@ -119,9 +120,13 @@ export default function ListeningQuestionDisplay({
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Use the new custom hook
-  const leftAudio = useAudioPlayback();
-  const rightAudio = useAudioPlayback();
+  const sectionSessionId = typeof window !== 'undefined'
+    ? localStorage.getItem('currentSectionSessionId') || ''
+    : '';
+  const leftSrc = resolveMediaUrl(question.audioUrl);
+  const rightSrc = resolveMediaUrl(question.questionAudioUrl);
+  const leftAudio = useAudioPlayback(`exam-audio:${sectionSessionId}:${encodeURIComponent(leftSrc)}`);
+  const rightAudio = useAudioPlayback(`exam-audio:${sectionSessionId}:${encodeURIComponent(rightSrc)}`);
 
   const formatTime = (seconds: number) => {
     if (isNaN(seconds) || !isFinite(seconds)) return "00:00";
@@ -152,10 +157,10 @@ export default function ListeningQuestionDisplay({
       }
     };
     fetchOptions();
-    setSelectedOption(null);
+    setSelectedOption(getCachedAnswer(sectionSessionId, question.id)?.selectedOptionId ?? null);
     leftAudio.reset();
     rightAudio.reset();
-  }, [question.id]);
+  }, [question.id, sectionSessionId]);
 
   const handleSubmit = async () => {
     if (!selectedOption) return;
@@ -166,6 +171,7 @@ export default function ListeningQuestionDisplay({
       const token = getCookie("token") || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || "";
 
       if (sectionSessionId) {
+        setCachedAnswer(sectionSessionId, question.id, { selectedOptionId: selectedOption });
         await exam.recordAnswerMCQ(
           sectionSessionId,
           {
@@ -183,9 +189,6 @@ export default function ListeningQuestionDisplay({
       setSubmitting(false);
     }
   };
-
-  const leftSrc = resolveMediaUrl(question.audioUrl);
-  const rightSrc = resolveMediaUrl(question.questionAudioUrl);
 
   return (
     <div className="flex-1 flex items-center justify-center p-0 md:p-6 pt-[72px] md:pt-20 relative z-10 w-full font-sans">

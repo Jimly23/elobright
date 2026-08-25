@@ -10,16 +10,22 @@ export interface AudioPlaybackState {
   hasPlayed: boolean; // true after audio has finished playing once
 }
 
-export function useAudioPlayback() {
+export function useAudioPlayback(playbackKey?: string) {
   const [state, setState] = useState<AudioPlaybackState>({
     isPlaying: false,
     progress: 0,
     duration: 0,
     error: false,
-    hasPlayed: false,
+    hasPlayed: Boolean(
+      playbackKey && typeof window !== 'undefined' && localStorage.getItem(playbackKey) === 'played'
+    ),
   });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const wasPreviouslyPlayed = useCallback(() => (
+    Boolean(playbackKey && typeof window !== 'undefined' && localStorage.getItem(playbackKey) === 'played')
+  ), [playbackKey]);
 
   const togglePlay = useCallback(() => {
     if (!audioRef.current || state.error) return;
@@ -30,12 +36,13 @@ export function useAudioPlayback() {
     if (state.isPlaying) {
       audioRef.current.pause();
     } else {
+      if (playbackKey) localStorage.setItem(playbackKey, 'played');
       audioRef.current.play().catch((e) => {
         console.error("Audio playback failed:", e);
         setState((s) => ({ ...s, error: true }));
       });
     }
-  }, [state.isPlaying, state.error, state.hasPlayed]);
+  }, [state.isPlaying, state.error, state.hasPlayed, playbackKey]);
 
   const handleTimeUpdate = useCallback(() => {
     if (audioRef.current) {
@@ -76,9 +83,9 @@ export function useAudioPlayback() {
       progress: 0,
       duration: 0,
       error: false,
-      hasPlayed: false,
+      hasPlayed: wasPreviouslyPlayed(),
     });
-  }, []);
+  }, [wasPreviouslyPlayed]);
 
   const handlers = useMemo(() => ({
     onTimeUpdate: handleTimeUpdate,

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
-import { CalendarDays, Clock3, ShieldCheck } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ArrowLeft, CalendarDays, Clock3, ShieldCheck } from "lucide-react";
 import CryptoJS from "crypto-js";
 
 const OPENING_TIME = new Date("2026-08-29T00:00:00+07:00").getTime();
@@ -46,7 +46,12 @@ function getCookieValue(name: string) {
   return decodeURIComponent(cookie.trim().slice(name.length + 1));
 }
 
-function getLoggedInUserRole() {
+type LoggedInUser = {
+  role?: string;
+  fullName?: string;
+};
+
+function getLoggedInUser(): LoggedInUser | null {
   const encryptedUserData = window.localStorage.getItem("userData") ?? getCookieValue("userData");
   if (!encryptedUserData) return null;
 
@@ -54,7 +59,10 @@ function getLoggedInUserRole() {
     const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY || "elobright_secret_key";
     const bytes = CryptoJS.AES.decrypt(encryptedUserData, secretKey);
     const user = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-    return typeof user?.role === "string" ? user.role.toLowerCase() : null;
+    return {
+      role: typeof user?.role === "string" ? user.role.toLowerCase() : undefined,
+      fullName: typeof user?.fullName === "string" ? user.fullName : undefined,
+    };
   } catch {
     return null;
   }
@@ -62,24 +70,29 @@ function getLoggedInUserRole() {
 
 export default function CountdownPopup() {
   const pathname = usePathname();
+  const router = useRouter();
   const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
   const [shouldBlock, setShouldBlock] = useState(false);
+  const [userName, setUserName] = useState("Pengguna");
 
   useEffect(() => {
     const isAuthRoute = AUTH_ROUTES.some(
       (route) => pathname === route || pathname.startsWith(`${route}/`),
     );
-    const userRole = getLoggedInUserRole();
-    const isExemptRole = userRole !== null && EXEMPT_ROLES.includes(userRole);
+    const loggedInUser = getLoggedInUser();
+    const isExemptRole = Boolean(loggedInUser?.role && EXEMPT_ROLES.includes(loggedInUser.role));
     const isBlocked = hasLoginToken()
       && !isAuthRoute
       && !isExemptRole
       && Date.now() < OPENING_TIME;
 
-    setShouldBlock(isBlocked);
-    setTimeLeft(isBlocked ? getTimeLeft() : null);
+    const initializationTimer = window.setTimeout(() => {
+      setShouldBlock(isBlocked);
+      setTimeLeft(isBlocked ? getTimeLeft() : null);
+      setUserName(loggedInUser?.fullName || "Pengguna");
+    }, 0);
 
-    if (!isBlocked) return;
+    if (!isBlocked) return () => window.clearTimeout(initializationTimer);
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -96,10 +109,23 @@ export default function CountdownPopup() {
     }, 1_000);
 
     return () => {
+      window.clearTimeout(initializationTimer);
       window.clearInterval(timer);
       document.body.style.overflow = previousOverflow;
     };
   }, [pathname]);
+
+  const handleBackToLogin = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("userId");
+    document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "userData=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "userId=; path=/; max-age=0; SameSite=Lax";
+    setShouldBlock(false);
+    router.push("/signin");
+    router.refresh();
+  };
 
   if (!shouldBlock || !timeLeft) return null;
 
@@ -129,6 +155,7 @@ export default function CountdownPopup() {
           <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
             <ShieldCheck size={13} /> Informasi Ujian
           </span>
+          <p className="mb-2 text-sm font-semibold text-blue-600">Selamat datang, {userName}</p>
           <h2 id="certification-countdown-title" className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
             Ujian Belum Dibuka
           </h2>
@@ -154,6 +181,14 @@ export default function CountdownPopup() {
             <Clock3 size={15} className="text-blue-500" />
             Halaman akan terbuka otomatis setelah hitung mundur selesai.
           </div>
+
+          <button
+            type="button"
+            onClick={handleBackToLogin}
+            className="mx-auto mt-6 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+          >
+            <ArrowLeft size={16} /> Kembali ke Login
+          </button>
         </div>
       </div>
     </div>

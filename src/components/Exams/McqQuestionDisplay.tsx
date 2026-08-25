@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { exam } from '@/src/api/exam';
 import QuestionFeaturedResources from '@/src/components/Exams/QuestionFeaturedResources';
 import ExamCard from '@/src/components/Exams/ExamCard';
+import { getCachedAnswer, setCachedAnswer } from '@/src/lib/examAnswerCache';
 
 const getCookie = (name: string) => {
   if (typeof document === 'undefined') return null;
@@ -49,7 +50,8 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
       }
     };
     fetchOptions();
-    setSelectedOption(null);
+    const sectionSessionId = localStorage.getItem('currentSectionSessionId') || '';
+    setSelectedOption(getCachedAnswer(sectionSessionId, question.id)?.selectedOptionId ?? null);
   }, [question.id]);
 
   const handleSubmit = async () => {
@@ -61,6 +63,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
       const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
 
       if (sectionSessionId) {
+        setCachedAnswer(sectionSessionId, question.id, { selectedOptionId: selectedOption });
         await exam.recordAnswerMCQ(sectionSessionId, {
           questionId: question.id,
           selectedOptionId: selectedOption

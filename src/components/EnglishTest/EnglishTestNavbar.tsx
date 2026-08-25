@@ -16,7 +16,7 @@ export default function EnglishTestNavbar({
     totalQuestions = 0,
     onTimeUp,
 }: EnglishTestNavbarProps) {
-    const [timeLeft, setTimeLeft] = useState<string>("0.00 min");
+    const [timeLeft, setTimeLeft] = useState<string>("00:00");
     const [isExpired, setIsExpired] = useState(false);
     const [isWarning, setIsWarning] = useState(false);
     const hasCalledTimeUp = useRef(false);
@@ -40,14 +40,14 @@ export default function EnglishTestNavbar({
             const difference = endTime - now;
 
             if (difference <= 0) {
-                setTimeLeft("0.00 min");
+                setTimeLeft("00:00");
                 setIsExpired(true);
                 setIsWarning(false);
                 handleTimeUp();
             } else {
                 const minutes = Math.floor(difference / 1000 / 60);
                 const seconds = Math.floor((difference / 1000) % 60);
-                setTimeLeft(`${minutes}.${seconds.toString().padStart(2, '0')} min`);
+                setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
                 // Warning when under 60 seconds
                 setIsWarning(difference <= 60000);
             }

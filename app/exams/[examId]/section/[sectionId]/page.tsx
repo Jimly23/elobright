@@ -47,7 +47,8 @@ export default function SectionOnboardingPage() {
     } else if (t.includes('listen')) {
       return [
         "Please listen to the audio carefully.",
-        "You cannot go back once you submit an answer.",
+        "Audio konteks dan audio pertanyaan hanya dapat diputar satu kali.",
+        "Anda dapat kembali ke soal sebelumnya selama waktu masih tersedia.",
         "Make sure your environment is quiet and distraction-free."
       ];
     } else if (t.includes('read')) {
@@ -74,9 +75,13 @@ export default function SectionOnboardingPage() {
     ];
   };
 
-  const instructions = currentSection?.instructions
+  const baseInstructions = currentSection?.instructions
     ? [currentSection.instructions]
     : getCustomInstructions();
+  const listeningAudioNotice = "Audio konteks dan audio pertanyaan hanya dapat diputar satu kali.";
+  const instructions = t.includes('listen') && !baseInstructions.includes(listeningAudioNotice)
+    ? [...baseInstructions, listeningAudioNotice]
+    : baseInstructions;
 
   // If questions are present, navigate to the first question, otherwise try jumping to the next section or finish.
   const nextSectionId = getNextSectionId(sectionId);

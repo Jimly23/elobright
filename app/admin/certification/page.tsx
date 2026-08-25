@@ -43,8 +43,10 @@ export default function CertificationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [filterSubmissionId, setFilterSubmissionId] = useState('');
-  const [appliedFilter, setAppliedFilter] = useState('');
+  const [filterNim, setFilterNim] = useState('');
+  const [appliedNim, setAppliedNim] = useState('');
+  const [filterGroup, setFilterGroup] = useState('');
+  const [appliedGroup, setAppliedGroup] = useState('');
   const [filterExamTitle, setFilterExamTitle] = useState('');
 
   // Edit modal state
@@ -63,6 +65,7 @@ export default function CertificationPage() {
 
   // Email state
   const [emailLoading, setEmailLoading] = useState(false);
+  const [bulkEmailLoading, setBulkEmailLoading] = useState(false);
   const [emailResult, setEmailResult] = useState<{ to: string; fullName: string; downloadUrl: string } | null>(null);
 
   const token = Cookies.get('token');
@@ -72,7 +75,7 @@ export default function CertificationPage() {
       setLoading(true);
       setError('');
       const [scoresData, defsData] = await Promise.all([
-        certificationService.getAllScores(token, appliedFilter || undefined),
+        certificationService.getAllScores(token),
         certificationService.getAllAdditionalScores(token),
       ]);
 
@@ -88,7 +91,7 @@ export default function CertificationPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, appliedFilter]);
+  }, [token]);
 
   useEffect(() => {
     fetchData();
@@ -96,19 +99,30 @@ export default function CertificationPage() {
 
   const handleFilter = (e: React.FormEvent) => {
     e.preventDefault();
-    setAppliedFilter(filterSubmissionId.trim());
+    setAppliedNim(filterNim.trim());
+    setAppliedGroup(filterGroup.trim());
   };
 
   const handleClearFilter = () => {
-    setFilterSubmissionId('');
-    setAppliedFilter('');
+    setFilterNim('');
+    setAppliedNim('');
+    setFilterGroup('');
+    setAppliedGroup('');
   };
 
   const uniqueExams = Array.from(new Set(
     scores.map(score => score.exam?.title).filter((title): title is string => Boolean(title)),
   ));
   const filteredScores = filterExamTitle
-    ? scores.filter(score => score.exam?.title === filterExamTitle)
+      ? scores.filter((score) => {
+        const matchesExam = score.exam?.title === filterExamTitle;
+        const studentId = score.user?.studentId ?? score.user?.student_id ?? score.user?.nim ?? '';
+        const matchesNim = !appliedNim
+          || studentId.toLowerCase().includes(appliedNim.toLowerCase());
+        const matchesGroup = !appliedGroup
+          || (score.user?.degreeProgram ?? '').toLowerCase().includes(appliedGroup.toLowerCase());
+        return matchesExam && matchesNim && matchesGroup;
+      })
     : [];
 
   // --- Edit ---
@@ -499,6 +513,43 @@ export default function CertificationPage() {
     }
   };
 
+  const handleSendAllCertificates = async () => {
+    if (filteredScores.length === 0) {
+      setError('Tidak ada peserta pada hasil filter yang dapat dikirimi sertifikat.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Kirim sertifikat kepada ${filteredScores.length} peserta ujian "${filterExamTitle}"?`,
+    );
+    if (!confirmed) return;
+
+    setBulkEmailLoading(true);
+    setError('');
+    setSuccessMsg('');
+    setEmailResult(null);
+    let successCount = 0;
+    let failureCount = 0;
+
+    for (const score of filteredScores) {
+      try {
+        await certificationService.blastEmail({
+          exam_submission_id: score.examSubmissionId,
+        }, token);
+        successCount += 1;
+      } catch {
+        failureCount += 1;
+      }
+    }
+
+    setBulkEmailLoading(false);
+    if (failureCount > 0) {
+      setError(`${successCount} sertifikat berhasil dikirim, ${failureCount} gagal dikirim.`);
+    } else {
+      setSuccessMsg(`${successCount} sertifikat berhasil dikirim kepada peserta yang terfilter.`);
+    }
+  };
+
   // --- Download ---
   const handleDownload = (id: string) => {
     const url = certificationService.getDownloadUrl(id);
@@ -599,18 +650,28 @@ export default function CertificationPage() {
 
       {/* Filter */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-        <form onSubmit={handleFilter} className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">Filter berdasarkan ID Pengumpulan</label>
+        <form onSubmit={handleFilter} className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Filter berdasarkan NIM</label>
             <input
               type="text"
-              value={filterSubmissionId}
-              onChange={(e) => setFilterSubmissionId(e.target.value)}
-              placeholder="Enter exam submission UUID..."
+              value={filterNim}
+              onChange={(e) => setFilterNim(e.target.value)}
+              placeholder="Masukkan NIM..."
               className="w-full px-4 py-3 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300"
             />
           </div>
-          <div className="flex-1">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Filter berdasarkan Kelompok</label>
+            <input
+              type="text"
+              value={filterGroup}
+              onChange={(e) => setFilterGroup(e.target.value)}
+              placeholder="Masukkan kelompok..."
+              className="w-full px-4 py-3 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300"
+            />
+          </div>
+          <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">Filter berdasarkan Ujian</label>
             <select
               value={filterExamTitle}
@@ -623,7 +684,7 @@ export default function CertificationPage() {
               ))}
             </select>
           </div>
-          <div className="flex items-end gap-2">
+          <div className="flex flex-wrap items-end gap-2">
             <Button
               type="submit"
               className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all"
@@ -631,7 +692,7 @@ export default function CertificationPage() {
               <Search size={16} />
               Filter
             </Button>
-            {appliedFilter && (
+            {(appliedNim || appliedGroup) && (
               <Button
                 type="button"
                 variant="secondary"
@@ -642,6 +703,16 @@ export default function CertificationPage() {
                 Bersihkan
               </Button>
             )}
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleSendAllCertificates}
+              disabled={bulkEmailLoading || filteredScores.length === 0}
+              className="flex items-center gap-2 px-5 py-3 font-bold text-sm rounded-xl transition-all text-purple-600 border-purple-200 hover:bg-purple-50"
+            >
+              {bulkEmailLoading ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
+              Kirim Semua ({filteredScores.length})
+            </Button>
           </div>
         </form>
       </div>
@@ -655,8 +726,8 @@ export default function CertificationPage() {
             </div>
             <h3 className="text-lg font-bold text-slate-700 mb-2">Tidak Ada Nilai Sertifikasi</h3>
             <p className="text-slate-400 text-sm max-w-sm">
-              {appliedFilter
-                ? 'Tidak ada nilai ditemukan untuk ID pengumpulan ini. Coba filter lain.'
+              {(appliedNim || appliedGroup)
+                ? 'Tidak ada peserta yang cocok dengan filter NIM atau kelompok.'
                 : 'Nilai sertifikasi akan muncul di sini setelah pengguna menyelesaikan ujian.'}
             </p>
           </div>
