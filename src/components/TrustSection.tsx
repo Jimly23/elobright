@@ -1,57 +1,55 @@
 import React from 'react';
 
 const brands = [
-  { name: 'Wildcrafted', logo: '🌐' },
-  { name: 'Codecraft_', logo: '🔲' },
-  { name: 'Nietzsche', logo: '☀️' },
-  { name: 'ImgCompress', logo: '✨' },
+  { name: 'Wildcrafted', logo: 'WC' },
+  { name: 'Codecraft_', logo: 'CC' },
+  { name: 'Nietzsche', logo: 'NI' },
+  { name: 'ImgCompress', logo: 'IC' },
   { name: 'Renaissance', logo: 'FR' },
-  { name: 'Renaissance', logo: 'FR' },
-  { name: 'Convergence', logo: '❄️' },
-  { name: 'Epicurious', logo: '🥞' },
+  { name: 'Convergence', logo: 'CV' },
+  { name: 'Epicurious', logo: 'EP' },
 ];
+
+function BrandRow({ hidden = false }: { hidden?: boolean }) {
+  return (
+    <div className="trust-marquee-group" aria-hidden={hidden || undefined}>
+      {brands.map((brand) => (
+        <div
+          key={brand.name}
+          className="group flex h-24 w-56 shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white px-6 shadow-[0_8px_30px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_14px_36px_rgba(37,99,235,0.10)]"
+        >
+          <div className="flex items-center gap-3 grayscale opacity-55 transition-all duration-300 group-hover:grayscale-0 group-hover:opacity-100">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-xs font-black text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600">
+              {brand.logo}
+            </span>
+            <span className="text-base font-bold tracking-tight text-slate-700">
+              {brand.name}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function TrustSection() {
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-5xl mx-auto px-4">
-        {/* Title */}
-        <h2 className="text-center text-xl md:text-2xl font-medium text-slate-800 mb-12">
+    <section className="overflow-hidden bg-white py-20">
+      <div className="mx-auto mb-10 max-w-5xl px-4">
+        <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.22em] text-blue-600">
+          Our trusted partners
+        </p>
+        <h2 className="text-center text-xl font-medium text-slate-800 md:text-2xl">
           Trusted by leading developers and enterprises
         </h2>
+      </div>
 
-        {/* Logo Grid Container */}
-        <div className="relative border-x border-dashed border-gray-200">
-          {/* Garis Horizontal Atas */}
-          <div className="absolute top-0 left-0 w-full border-t border-dashed border-gray-200" />
-          
-          <div className="grid grid-cols-2 md:grid-cols-4">
-            {brands.map((brand, index) => (
-              <div
-                key={index}
-                className={`
-                  group flex items-center justify-center p-8 h-32 
-                  border-b border-r border-dashed border-gray-200
-                  transition-colors hover:bg-slate-50/50
-                  /* Menghapus border kanan pada kolom terakhir di desktop (4 kolom) */
-                  ${(index + 1) % 4 === 0 ? 'md:border-r-0' : ''}
-                  /* Menghapus border kanan pada kolom terakhir di mobile (2 kolom) */
-                  ${(index + 1) % 2 === 0 ? 'border-r-0 md:border-r' : ''}
-                `}
-              >
-                <div className="flex items-center gap-2 grayscale opacity-50 group-hover:opacity-100 group-hover:grayscale-0 transition-all">
-                  <span className="text-2xl">{brand.logo}</span>
-                  <span className="text-lg font-bold text-slate-700 tracking-tight">
-                    {brand.name}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Decorative Corner Dots (Optional, untuk menambah estetika dashed) */}
-          <div className="absolute -top-1 -left-1 w-2 h-2 bg-white border border-gray-200 rounded-full" />
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-white border border-gray-200 rounded-full" />
+      <div className="trust-marquee relative" aria-label="Trusted companies">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent sm:w-32" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent sm:w-32" />
+        <div className="trust-marquee-track">
+          <BrandRow />
+          <BrandRow hidden />
         </div>
       </div>
     </section>

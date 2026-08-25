@@ -1,102 +1,159 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Clock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { CalendarDays, Clock3, ShieldCheck } from "lucide-react";
+import CryptoJS from "crypto-js";
+
+const OPENING_TIME = new Date("2025-08-29T00:00:00+07:00").getTime();
+const AUTH_ROUTES = ["/signin", "/signup", "/verify-email"];
+const EXEMPT_ROLES = ["admin", "superadmin"];
+
+type TimeLeft = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+function getTimeLeft(): TimeLeft | null {
+  const difference = OPENING_TIME - Date.now();
+  if (difference <= 0) return null;
+
+  return {
+    days: Math.floor(difference / 86_400_000),
+    hours: Math.floor((difference / 3_600_000) % 24),
+    minutes: Math.floor((difference / 60_000) % 60),
+    seconds: Math.floor((difference / 1_000) % 60),
+  };
+}
+
+function hasLoginToken() {
+  const localToken = window.localStorage.getItem("token");
+  const cookieToken = document.cookie
+    .split(";")
+    .some((cookie) => cookie.trim().startsWith("token="));
+
+  return Boolean(localToken || cookieToken);
+}
+
+function getCookieValue(name: string) {
+  const cookie = document.cookie
+    .split(";")
+    .find((item) => item.trim().startsWith(`${name}=`));
+
+  if (!cookie) return null;
+  return decodeURIComponent(cookie.trim().slice(name.length + 1));
+}
+
+function getLoggedInUserRole() {
+  const encryptedUserData = window.localStorage.getItem("userData") ?? getCookieValue("userData");
+  if (!encryptedUserData) return null;
+
+  try {
+    const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY || "elobright_secret_key";
+    const bytes = CryptoJS.AES.decrypt(encryptedUserData, secretKey);
+    const user = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+    return typeof user?.role === "string" ? user.role.toLowerCase() : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function CountdownPopup() {
-  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number } | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isClient, setIsClient] = useState(false);
+  const pathname = usePathname();
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
+  const [shouldBlock, setShouldBlock] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
-    
-    // Nonaktifkan scroll pada body saat popup muncul agar tidak bisa di-scroll ke bawah
-    if (isVisible) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
+    const isAuthRoute = AUTH_ROUTES.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`),
+    );
+    const userRole = getLoggedInUserRole();
+    const isExemptRole = userRole !== null && EXEMPT_ROLES.includes(userRole);
+    const isBlocked = hasLoginToken()
+      && !isAuthRoute
+      && !isExemptRole
+      && Date.now() < OPENING_TIME;
 
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const targetTime = new Date();
-      targetTime.setHours(19, 0, 0, 0); // Set ke jam 19:00:00 hari ini
+    setShouldBlock(isBlocked);
+    setTimeLeft(isBlocked ? getTimeLeft() : null);
 
-      const difference = targetTime.getTime() - now.getTime();
+    if (!isBlocked) return;
 
-      if (difference > 0) {
-        return {
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60),
-        };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const timer = window.setInterval(() => {
+      const nextTimeLeft = getTimeLeft();
+      setTimeLeft(nextTimeLeft);
+
+      if (!nextTimeLeft) {
+        setShouldBlock(false);
+        document.body.style.overflow = previousOverflow;
+        window.clearInterval(timer);
       }
-      return null;
-    };
-
-    const initialTimeLeft = calculateTimeLeft();
-    if (initialTimeLeft) {
-      setTimeLeft(initialTimeLeft);
-      setIsVisible(true);
-    }
-
-    const timer = setInterval(() => {
-      const newTimeLeft = calculateTimeLeft();
-      if (newTimeLeft) {
-        setTimeLeft(newTimeLeft);
-      } else {
-        clearInterval(timer);
-        setIsVisible(false); // Sembunyikan jika waktu sudah lewat jam 7 malam
-      }
-    }, 1000);
+    }, 1_000);
 
     return () => {
-      clearInterval(timer);
-      document.body.style.overflow = "auto";
+      window.clearInterval(timer);
+      document.body.style.overflow = previousOverflow;
     };
-  }, [isVisible]);
+  }, [pathname]);
 
-  // Hindari hydration mismatch dan jangan tampilkan jika tidak perlu
-  if (!isClient || !isVisible || !timeLeft) return null;
+  if (!shouldBlock || !timeLeft) return null;
+
+  const countdownItems = [
+    { label: "Hari", value: timeLeft.days },
+    { label: "Jam", value: timeLeft.hours },
+    { label: "Menit", value: timeLeft.minutes },
+    { label: "Detik", value: timeLeft.seconds },
+  ];
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4 animate-in fade-in duration-300">
-      <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative text-center border border-gray-100 animate-in zoom-in-95 duration-300 select-none">
-        <div className="mb-6 mx-auto flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-blue-600">
-          <Clock size={32} />
-        </div>
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-slate-950/90 p-4 backdrop-blur-lg"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="certification-countdown-title"
+    >
+      <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-white/15 bg-white p-6 text-center shadow-2xl sm:p-10">
+        <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-100/70 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-20 h-52 w-52 rounded-full bg-cyan-100/70 blur-2xl" />
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Akses Belum Dibuka</h2>
-        <p className="text-gray-600 mb-8">
-          Website ini sedang dipersiapkan dan baru dapat diakses secara penuh pada jam 7 malam.
-        </p>
+        <div className="relative">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-blue-200">
+            <CalendarDays size={30} />
+          </div>
 
-        <div className="flex justify-center gap-4 text-gray-800">
-          <div className="flex flex-col items-center">
-            <div className="bg-slate-50 border border-slate-100 rounded-xl w-16 h-16 flex items-center justify-center text-2xl font-bold font-mono shadow-sm">
-              {timeLeft.hours.toString().padStart(2, '0')}
-            </div>
-            <span className="text-[10px] text-slate-500 mt-2 font-semibold uppercase tracking-wider">Jam</span>
-          </div>
-          <div className="text-2xl font-bold mt-3 text-slate-300">:</div>
-          <div className="flex flex-col items-center">
-            <div className="bg-slate-50 border border-slate-100 rounded-xl w-16 h-16 flex items-center justify-center text-2xl font-bold font-mono shadow-sm">
-              {timeLeft.minutes.toString().padStart(2, '0')}
-            </div>
-            <span className="text-[10px] text-slate-500 mt-2 font-semibold uppercase tracking-wider">Menit</span>
-          </div>
-          <div className="text-2xl font-bold mt-3 text-slate-300">:</div>
-          <div className="flex flex-col items-center">
-            <div className="bg-slate-50 border border-slate-100 rounded-xl w-16 h-16 flex items-center justify-center text-2xl font-bold font-mono shadow-sm text-blue-600">
-              {timeLeft.seconds.toString().padStart(2, '0')}
-            </div>
-            <span className="text-[10px] text-slate-500 mt-2 font-semibold uppercase tracking-wider">Detik</span>
-          </div>
-        </div>
+          <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
+            <ShieldCheck size={13} /> Informasi Ujian
+          </span>
+          <h2 id="certification-countdown-title" className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+            Ujian Belum Dibuka
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-600 sm:text-base">
+            Ujian sertifikasi bahasa Inggris akan dibuka pada tanggal{" "}
+            <strong className="text-slate-900">29 Agustus 2026 pukul 00.00 WIB</strong>.
+          </p>
 
-        <div className="mt-8 text-sm text-slate-400">
-          Mohon menunggu hingga waktu hitung mundur selesai.
+          <div className="my-7 grid grid-cols-4 gap-2 sm:gap-3" aria-label="Waktu menuju pembukaan ujian">
+            {countdownItems.map((item) => (
+              <div key={item.label} className="rounded-2xl border border-slate-200 bg-slate-50 px-1 py-3 sm:py-4">
+                <div className="font-mono text-2xl font-black tabular-nums text-blue-600 sm:text-3xl">
+                  {item.value.toString().padStart(2, "0")}
+                </div>
+                <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-slate-500 sm:text-[10px]">
+                  {item.label}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-center gap-2 text-xs font-medium text-slate-500 sm:text-sm">
+            <Clock3 size={15} className="text-blue-500" />
+            Halaman akan terbuka otomatis setelah hitung mundur selesai.
+          </div>
         </div>
       </div>
     </div>

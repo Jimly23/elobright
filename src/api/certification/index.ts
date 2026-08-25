@@ -29,10 +29,17 @@ export interface CertificationScore {
     id: number;
     email: string;
     fullName: string;
+    studentId?: string;
+    student_id?: string;
+    nim?: string;
+  };
+  exam?: {
+    title: string;
   };
   examSubmission?: {
     id: string;
     examId: string;
+    startedAt?: string;
     exam?: {
       title: string;
     };
