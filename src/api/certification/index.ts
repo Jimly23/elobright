@@ -24,6 +24,7 @@ export interface CertificationScore {
   originalExamScore?: number;
   finalScore?: number;
   rawExamScore?: number;
+  sectionScores?: Record<string, number>;
   // Populated fields from backend (if included)
   user?: {
     id: number;
@@ -32,6 +33,7 @@ export interface CertificationScore {
     studentId?: string;
     student_id?: string;
     nim?: string;
+    degreeProgram?: string | null;
   };
   exam?: {
     title: string;

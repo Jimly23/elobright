@@ -62,7 +62,6 @@ export default function CertificationPage() {
   const [importRows, setImportRows] = useState<ImportRow[] | null>(null);
 
   // Email state
-  const [emailConfirmId, setEmailConfirmId] = useState<string | null>(null);
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailResult, setEmailResult] = useState<{ to: string; fullName: string; downloadUrl: string } | null>(null);
 
@@ -80,6 +79,10 @@ export default function CertificationPage() {
       const rawScores = Array.isArray(scoresData) ? scoresData : [];
       setScores(rawScores);
       setAdditionalScoreDefs(Array.isArray(defsData) ? defsData : []);
+      const examTitles = Array.from(new Set(
+        rawScores.map(score => score.exam?.title).filter((title): title is string => Boolean(title)),
+      ));
+      setFilterExamTitle(current => examTitles.includes(current) ? current : examTitles[0] ?? '');
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to load certification data.'));
     } finally {
@@ -99,18 +102,14 @@ export default function CertificationPage() {
   const handleClearFilter = () => {
     setFilterSubmissionId('');
     setAppliedFilter('');
-    setFilterExamTitle('');
   };
 
   const uniqueExams = Array.from(new Set(
     scores.map(score => score.exam?.title).filter((title): title is string => Boolean(title)),
   ));
-  const filteredScores = scores.filter((score) => {
-    if (filterExamTitle && score.exam?.title !== filterExamTitle) {
-      return false;
-    }
-    return true;
-  });
+  const filteredScores = filterExamTitle
+    ? scores.filter(score => score.exam?.title === filterExamTitle)
+    : [];
 
   // --- Edit ---
   const openEditModal = (score: CertificationScore) => {
@@ -181,6 +180,14 @@ export default function CertificationPage() {
     ?? score.user?.nim
     ?? '—'
   );
+
+  const getSectionScore = (score: CertificationScore, aliases: string[]) => {
+    const entry = Object.entries(score.sectionScores ?? {}).find(([sectionName]) => {
+      const normalizedName = sectionName.toLowerCase();
+      return aliases.some(alias => normalizedName.includes(alias));
+    });
+    return entry ? Number(entry[1]).toFixed(1) : '—';
+  };
 
   const handleExportExcel = async () => {
     if (filteredScores.length === 0) {
@@ -485,10 +492,8 @@ export default function CertificationPage() {
       }, token);
       setEmailResult({ to: result.to, fullName: result.fullName, downloadUrl: result.downloadUrl });
       setSuccessMsg(`Certificate email sent to ${result.to}`);
-      setEmailConfirmId(null);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to send certificate email.'));
-      setEmailConfirmId(null);
     } finally {
       setEmailLoading(false);
     }
@@ -612,7 +617,7 @@ export default function CertificationPage() {
               onChange={(e) => setFilterExamTitle(e.target.value)}
               className="w-full px-4 py-3 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all bg-white"
             >
-              <option value="">Semua Ujian</option>
+              <option value="" disabled>Pilih Ujian</option>
               {uniqueExams.map(exam => (
                 <option key={exam as string} value={exam as string}>{exam as string}</option>
               ))}
@@ -660,14 +665,16 @@ export default function CertificationPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-slate-700 font-medium border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-3.5">Pengguna</th>
+                  <th className="px-6 py-3.5">Nama</th>
                   <th className="px-6 py-3.5">NIM</th>
+                  <th className="px-6 py-3.5">Kelompok</th>
                   <th className="px-6 py-3.5">Ujian</th>
-                  <th className="px-6 py-3.5">Nilai Asli</th>
-                  <th className="px-6 py-3.5">Nilai Tambahan</th>
-                  <th className="px-6 py-3.5">Timpa</th>
+                  <th className="px-6 py-3.5">Listening</th>
+                  <th className="px-6 py-3.5">Grammar</th>
+                  <th className="px-6 py-3.5">Reading</th>
+                  <th className="px-6 py-3.5">Writing</th>
+                  <th className="px-6 py-3.5">Speaking</th>
                   <th className="px-6 py-3.5">Nilai Akhir</th>
-                  <th className="px-6 py-3.5 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -677,12 +684,20 @@ export default function CertificationPage() {
                       <div>
                         <p className="font-bold text-slate-900">{score.user?.fullName || `User #${score.userId}`}</p>
                         <p className="text-xs text-slate-400">{score.user?.email || ''}</p>
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <button onClick={() => openEditModal(score)} className="text-blue-500 hover:text-blue-700" title="Edit Nilai"><FileText size={13} /></button>
+                          <button onClick={() => handleDownload(score.id)} className="text-green-500 hover:text-green-700" title="Unduh PDF"><Download size={13} /></button>
+                          <button onClick={() => handleSendEmail(score)} disabled={emailLoading} className="text-purple-500 hover:text-purple-700 disabled:opacity-40" title="Kirim Email Sertifikat"><Mail size={13} /></button>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-mono text-xs font-bold text-slate-600">
                         {getStudentId(score)}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-xs font-medium text-slate-600">
+                      {score.user?.degreeProgram || '—'}
                     </td>
                     <td className="px-6 py-4">
                       <div>
@@ -694,33 +709,11 @@ export default function CertificationPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg">
-                        {score.originalExamScore !== undefined && score.originalExamScore !== null ? Number(score.originalExamScore).toFixed(1) : '—'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {score.additionalScore && Object.keys(score.additionalScore).length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {Object.entries(score.additionalScore).map(([key, val]) => (
-                            <span key={key} className="inline-flex items-center px-2 py-0.5 bg-blue-50 text-blue-700 text-[11px] font-bold rounded-md">
-                              {key}: {String(val)}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-slate-300 text-xs">Belum diatur</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {score.examScoreOverride !== null && score.examScoreOverride !== undefined ? (
-                        <span className="inline-flex items-center px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg">
-                          {score.examScoreOverride}
-                        </span>
-                      ) : (
-                        <span className="text-slate-300 text-xs">Otomatis</span>
-                      )}
-                    </td>
+                    <td className="px-6 py-4 font-bold text-slate-700">{getSectionScore(score, ['listening'])}</td>
+                    <td className="px-6 py-4 font-bold text-slate-700">{getSectionScore(score, ['grammar', 'structure'])}</td>
+                    <td className="px-6 py-4 font-bold text-slate-700">{getSectionScore(score, ['reading'])}</td>
+                    <td className="px-6 py-4 font-bold text-slate-700">{getSectionScore(score, ['writing'])}</td>
+                    <td className="px-6 py-4 font-bold text-slate-700">{getSectionScore(score, ['speaking'])}</td>
                     <td className="px-6 py-4">
                       {getTableFinalScore(score) !== null ? (
                         <span className="inline-flex items-center px-3 py-1.5 bg-emerald-50 text-emerald-700 text-sm font-black rounded-lg">
@@ -729,51 +722,6 @@ export default function CertificationPage() {
                       ) : (
                         <span className="text-slate-300 text-xs">—</span>
                       )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEditModal(score)}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          title="Edit Nilai"
-                        >
-                          <FileText size={18} />
-                        </Button>
-                        <button
-                          onClick={() => handleDownload(score.id)}
-                          className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
-                          title="Unduh PDF"
-                        >
-                          <Download size={16} />
-                        </button>
-                        {emailConfirmId === score.id ? (
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => handleSendEmail(score)}
-                              disabled={emailLoading}
-                              className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white text-xs font-bold rounded-lg transition-all"
-                            >
-                              {emailLoading ? 'Mengirim...' : 'Konfirmasi'}
-                            </button>
-                            <button
-                              onClick={() => setEmailConfirmId(null)}
-                              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-lg transition-all"
-                            >
-                              Batal
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setEmailConfirmId(score.id)}
-                            className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
-                            title="Kirim Email Sertifikat"
-                          >
-                            <Mail size={16} />
-                          </button>
-                        )}
-                      </div>
                     </td>
                   </tr>
                 ))}
