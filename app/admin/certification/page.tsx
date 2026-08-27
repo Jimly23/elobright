@@ -619,6 +619,7 @@ export default function CertificationPage() {
                   <th className="px-5 py-4">Nama</th>
                   <th className="px-5 py-4">NIM</th>
                   <th className="px-5 py-4">Program Studi</th>
+                  <th className="px-5 py-4">Kelompok</th>
                   <th className="px-5 py-4">Ujian</th>
                   {sectionColumns.map((section) => (
                     <th key={section.id} className="px-5 py-4 text-center">
@@ -669,7 +670,10 @@ export default function CertificationPage() {
                       {score.student?.studentId || "—"}
                     </td>
                     <td className="px-5 py-4 text-slate-600">
-                      {score.student?.degreeProgram || "—"}
+                      {score.degreeProgram || score.student?.degreeProgram || "—"}
+                    </td>
+                    <td className="px-5 py-4 text-slate-600">
+                      {score.groupNumber || "—"}
                     </td>
                     <td className="px-5 py-4 font-bold text-slate-900">
                       {getExam(score).title}

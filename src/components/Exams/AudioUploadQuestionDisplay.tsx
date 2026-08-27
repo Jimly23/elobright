@@ -154,7 +154,7 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
             <button
               onClick={onPrev}
               disabled={submitting}
-              className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95 disabled:opacity-50"
+              className="px-4 py-2.5 text-xs md:px-8 md:py-4 md:text-base bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-lg md:rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95 disabled:opacity-50"
             >
               ← Previous
             </button>
@@ -164,7 +164,7 @@ export default function AudioUploadQuestionDisplay({ question, currentIndex, onN
           <button
             onClick={handleSend}
             disabled={!audioUrl || submitting || disabled}
-            className={`px-10 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${audioUrl && !submitting ? 'bg-blue-500 text-white shadow-xl shadow-blue-200 hover:bg-blue-600 active:scale-[0.98]' : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+            className={`px-6 py-2.5 text-xs md:px-10 md:py-4 md:text-base rounded-lg md:rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${audioUrl && !submitting ? 'bg-blue-500 text-white shadow-xl shadow-blue-200 hover:bg-blue-600 active:scale-[0.98]' : 'bg-slate-100 text-slate-400 cursor-not-allowed'
               }`}
           >
             <Send size={18} />

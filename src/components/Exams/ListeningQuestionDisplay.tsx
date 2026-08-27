@@ -66,11 +66,11 @@ const AudioPlayer = ({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const isDisabled = state.error || state.hasPlayed;
+  const isDisabled = state.error;
 
   return (
     <div
-      className={`flex items-center gap-6 p-6 rounded-3xl border transition-colors ${state.error ? "bg-red-50 border-red-100" : state.hasPlayed ? "bg-slate-50 border-slate-200" : "bg-blue-50/50 border-blue-100"}`}
+      className={`flex items-center gap-6 p-6 rounded-3xl border transition-colors ${state.error ? "bg-red-50 border-red-100" : "bg-blue-50/50 border-blue-100"}`}
     >
       {isHLS ? (
         <HLSAudioElement src={src} audioRef={audioRef} handlers={handlers} />
@@ -80,12 +80,10 @@ const AudioPlayer = ({
       <button
         onClick={togglePlay}
         disabled={isDisabled}
-        className={`w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-lg ${state.error ? "bg-slate-300 cursor-not-allowed" : state.hasPlayed ? "bg-slate-300 cursor-not-allowed text-white" : "bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 shadow-blue-200"}`}
+        className={`w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-lg ${state.error ? "bg-slate-300 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 shadow-blue-200"}`}
       >
         {state.error ? (
           <AlertCircle />
-        ) : state.hasPlayed ? (
-          <Lock size={22} />
         ) : state.isPlaying ? (
           <Pause fill="currentColor" />
         ) : (
@@ -94,11 +92,11 @@ const AudioPlayer = ({
       </button>
       <div>
         <p
-          className={`${state.error ? "text-red-500" : state.hasPlayed ? "text-slate-400" : "text-blue-600"} text-xs font-black uppercase tracking-wider mb-1`}
+          className={`${state.error ? "text-red-500" : "text-blue-600"} text-xs font-black uppercase tracking-wider mb-1`}
         >
-          {state.error ? "Playback Error" : state.hasPlayed ? "Played" : label}
+          {state.error ? "Playback Error" : label}
         </p>
-        <p className={`font-black text-xl tabular-nums ${state.hasPlayed ? "text-slate-400" : "text-slate-800"}`}>
+        <p className={`font-black text-xl tabular-nums text-slate-800`}>
           {state.error
             ? "--:--"
             : `${formatTime(state.progress)} / ${formatTime(state.duration)}`}
@@ -191,7 +189,7 @@ export default function ListeningQuestionDisplay({
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center p-0 md:p-6 pt-[72px] md:pt-20 relative z-10 w-full font-sans">
+    <div className="flex-1 flex flex-col items-center justify-center p-0 md:p-6 pt-[72px] md:pt-20 relative z-10 w-full font-sans">
       <ExamCard className="max-w-6xl min-h-[600px] flex-1 md:flex-none" contentClassName="p-0 flex-col md:flex-row">
         {/* Left Side: Context Audio Player */}
         <div className="flex-1 p-6 md:p-12 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col justify-center bg-white shrink-0">
@@ -206,8 +204,8 @@ export default function ListeningQuestionDisplay({
           </h3>
 
           <p className="text-slate-500 font-medium mb-10 text-sm leading-relaxed shrink-0">
-            Please listen to the conversation or lecture carefully. You will
-            hear it only once. After the audio ends, answer the questions on the
+            Please listen to the conversation or lecture carefully. You can
+            listen to the audio multiple times. After the audio ends, answer the questions on the
             right.
           </p>
 
@@ -295,41 +293,43 @@ export default function ListeningQuestionDisplay({
             {/* Options */}
             <div className="space-y-3 mt-4">
               {loading ? (
-                <div className="animate-pulse space-y-3">
+                <div className="animate-pulse space-y-4">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-16 bg-slate-100 rounded-2xl" />
+                    <div key={i} className="h-[56px] w-full bg-slate-100/70 rounded-2xl" />
                   ))}
                 </div>
               ) : (
                 options.map((option) => (
                   <label
                     key={option.id}
-                    className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${selectedOption === option.id
-                      ? "border-blue-500 bg-blue-500 text-white shadow-lg shadow-blue-100 scale-[1.02]"
-                      : "border-white bg-white text-slate-600 hover:border-blue-100 hover:bg-white"
+                    className={`flex items-center gap-4 py-3 px-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${selectedOption === option.id
+                      ? "border-blue-500 bg-blue-500 text-white shadow-lg shadow-blue-100"
+                      : "border-slate-100 bg-white text-slate-600 hover:border-blue-200 hover:bg-slate-50"
                       }`}
                   >
                     <input
                       type="radio"
-                      name="listening-test"
+                      name="listening-mcq-test"
                       className="hidden"
                       checked={selectedOption === option.id}
-                      onChange={() => setSelectedOption(option.id)}
+                      onChange={() => !disabled && setSelectedOption(option.id)}
+                      disabled={disabled}
                     />
-
                     <div
                       className={`w-6 h-6 min-w-6 min-h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${selectedOption === option.id
                         ? "border-white bg-white text-blue-500"
-                        : "border-slate-200 bg-white"
+                        : "border-slate-300 bg-white"
                         }`}
                     >
                       {selectedOption === option.id && (
                         <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />
                       )}
                     </div>
-
                     <span
-                      className={`text-base font-bold text-left ${selectedOption === option.id ? "text-white" : "text-slate-700"}`}
+                      className={`font-bold text-left ${selectedOption === option.id
+                        ? "text-white"
+                        : "text-slate-600"
+                        }`}
                     >
                       {option.optionText || option.label}
                     </span>
@@ -337,29 +337,29 @@ export default function ListeningQuestionDisplay({
                 ))
               )}
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <div className="mt-auto pt-12 flex items-center justify-between shrink-0">
-            {onPrev ? (
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-between mt-auto pt-10 shrink-0">
+              {onPrev ? (
+                <button
+                  onClick={onPrev}
+                  className="px-4 py-2.5 text-xs md:px-8 md:py-4 md:text-base bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-lg md:rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95"
+                >
+                  ← Previous
+                </button>
+              ) : (
+                <div />
+              )}
               <button
-                onClick={onPrev}
-                disabled={submitting}
-                className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95 disabled:opacity-50"
+                onClick={handleSubmit}
+                disabled={
+                  !selectedOption || submitting || loading || disabled
+                }
+                className="px-8 py-2.5 text-xs md:px-16 md:py-4 md:text-base bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg md:rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100"
               >
-                ← Previous
+                {submitting ? "Submitting..." : "Continue"}
               </button>
-            ) : (
-              <div />
-            )}
-            <button
-              onClick={handleSubmit}
-              disabled={!selectedOption || submitting || loading || disabled}
-              className="px-12 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100 disabled:shadow-none"
-            >
-              {submitting ? "Submitting..." : "Continue"}
-            </button>
-          </div>
+            </div>  </div>
         </div>
       </ExamCard>
     </div>

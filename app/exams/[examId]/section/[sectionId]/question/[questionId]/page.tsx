@@ -196,22 +196,37 @@ export default function QuestionPage() {
   };
 
   // Determine component based on question_type or section title mapping
-  let DisplayComponent = McqQuestionDisplay;
+  let DisplayComponent = McqQuestionDisplay as any;
 
   const type = currentQuestion.questionType?.toLowerCase();
 
-  if (sectionTitleLower.includes('usability') || sectionTitleLower.includes('feedback')) {
-    DisplayComponent = LikertQuestionDisplay as any;
-  } else if (type === 'audio_upload' || type === 'speaking' || sectionTitleLower.includes('speak')) {
-    DisplayComponent = AudioUploadQuestionDisplay as any;
-  } else if (type === 'essay' || type === 'writing' || sectionTitleLower.includes('writ')) {
-    DisplayComponent = EssayQuestionDisplay as any;
-  } else if (type === 'listening_mcq' || sectionTitleLower.includes('listen')) {
+  if (type === 'mcq') {
+    DisplayComponent = McqQuestionDisplay as any;
+  } else if (type === 'listening_mcq') {
     DisplayComponent = ListeningQuestionDisplay as any;
+  } else if (type === 'essay' || type === 'writing') {
+    DisplayComponent = EssayQuestionDisplay as any;
+  } else if (type === 'audio_upload' || type === 'speaking') {
+    DisplayComponent = AudioUploadQuestionDisplay as any;
+  } else if (type === 'likert') {
+    DisplayComponent = LikertQuestionDisplay as any;
+  } else {
+    // Fallback mapping based on section title if type is not strictly matched
+    if (sectionTitleLower.includes('usability') || sectionTitleLower.includes('feedback')) {
+      DisplayComponent = LikertQuestionDisplay as any;
+    } else if (sectionTitleLower.includes('speak')) {
+      DisplayComponent = AudioUploadQuestionDisplay as any;
+    } else if (sectionTitleLower.includes('writ')) {
+      DisplayComponent = EssayQuestionDisplay as any;
+    } else if (sectionTitleLower.includes('listen')) {
+      DisplayComponent = ListeningQuestionDisplay as any;
+    } else {
+      DisplayComponent = McqQuestionDisplay as any;
+    }
   }
 
   return (
-    <div className="min-h-screen relative flex flex-col font-sans overflow-hidden bg-white">
+    <div className="min-h-[100dvh] relative flex flex-col font-sans overflow-hidden bg-white">
       {/* Background Layer: Gradient & Grid (Consistent Theme) */}
       <div className="absolute inset-0 z-0 flex flex-col">
         <div className="h-1/2 bg-white" />
@@ -233,7 +248,7 @@ export default function QuestionPage() {
         onTimeUp={handleTimeUp}
       />
 
-      <main className="relative flex-1 flex items-center justify-center w-full z-10 p-0 text-left">
+      <main className="relative flex-1 flex flex-col items-center justify-center w-full z-10 p-0 text-left">
         <DisplayComponent
           key={currentQuestion.id}
           question={currentQuestion}

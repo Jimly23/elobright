@@ -26,6 +26,11 @@ export default function ExamIntroductionPage() {
   const [loading, setLoading] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isCheckingHistory, setIsCheckingHistory] = useState(true);
+  
+  const [studyProgram, setStudyProgram] = useState('');
+  const [groupNumber, setGroupNumber] = useState('');
+  const [formError, setFormError] = useState('');
+  const [showIntro, setShowIntro] = useState(false);
 
   // Cek history jika exam isOnce
   useEffect(() => {
@@ -136,6 +141,8 @@ export default function ExamIntroductionPage() {
     const freshRes = await exam.startExam({
       userId: userId,
       examId: examId,
+      group_number: groupNumber.trim(),
+      study_program: studyProgram.trim(),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
     }, token);
 
@@ -145,6 +152,10 @@ export default function ExamIntroductionPage() {
 
   const handleStart = async () => {
     if (sections.length === 0) return;
+
+    const trimmedStudyProgram = studyProgram.trim();
+    const trimmedGroupNumber = groupNumber.trim();
+
     setLoading(true);
     try {
       const token = getCookie('token') || (typeof window !== 'undefined' ? localStorage.getItem('token') : null) || '';
@@ -154,6 +165,8 @@ export default function ExamIntroductionPage() {
       let res = await exam.startExam({
         userId: userId,
         examId: examId,
+        group_number: trimmedGroupNumber,
+        study_program: trimmedStudyProgram,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
       }, token);
 
@@ -357,6 +370,8 @@ export default function ExamIntroductionPage() {
           </ul>
         </div>
 
+        {/* User Info Form - REMOVED: now in popup */}
+
         <div className="w-full flex justify-center">
           <button
             onClick={handleStart}
@@ -379,6 +394,69 @@ export default function ExamIntroductionPage() {
           message="Anda telah selesai mengerjakan ujian ini dan tidak dapat mengulangnya. Jika belum mendapatkan sertifikat, silakan cek email secara berkala atau hubungi panitia."
           homeUrl="/"
         />
+      )}
+
+      {/* ── Popup Modal: Program Studi & Kelompok ── */}
+      {!showIntro && !isCheckingHistory && !isCompleted && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-5 md:px-8 md:py-6">
+              <h2 className="text-lg md:text-xl font-bold text-white">Informasi Peserta</h2>
+              <p className="text-blue-100 text-xs md:text-sm mt-1 font-medium">Lengkapi data berikut sebelum memulai ujian</p>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-6 md:px-8 md:py-8">
+              {formError && (
+                <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs md:text-sm font-medium">
+                  {formError}
+                </div>
+              )}
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs md:text-sm font-semibold text-slate-700 mb-2">Program Studi</label>
+                  <input 
+                    type="text"
+                    value={studyProgram}
+                    onChange={(e) => setStudyProgram(e.target.value)}
+                    placeholder="Contoh: Informatika"
+                    required
+                    className="w-full px-4 py-3 text-sm md:text-base text-slate-700 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs md:text-sm font-semibold text-slate-700 mb-2">Kelompok / Kelas</label>
+                  <input 
+                    type="text"
+                    value={groupNumber}
+                    onChange={(e) => setGroupNumber(e.target.value)}
+                    placeholder="Contoh: A1"
+                    required
+                    className="w-full px-4 py-3 text-sm md:text-base text-slate-700 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setFormError('');
+                  const trimSP = studyProgram.trim();
+                  const trimGN = groupNumber.trim();
+                  if (!trimSP) { setFormError('Program Studi wajib diisi'); return; }
+                  if (trimSP.length > 255) { setFormError('Program Studi maksimal 255 karakter'); return; }
+                  if (!trimGN) { setFormError('Kelompok/Kelas wajib diisi'); return; }
+                  if (trimGN.length > 50) { setFormError('Kelompok/Kelas maksimal 50 karakter'); return; }
+                  setShowIntro(true);
+                }}
+                className="w-full mt-6 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold text-sm md:text-base rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] focus:ring-4 focus:ring-blue-200 outline-none"
+              >
+                Lanjutkan
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

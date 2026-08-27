@@ -96,7 +96,11 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
 
         <div className="space-y-4 mb-5">
           {loading ? (
-            <div className="text-slate-400">Loading options...</div>
+            <div className="animate-pulse space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-[56px] w-full bg-slate-100/70 rounded-2xl" />
+              ))}
+            </div>
           ) : (
             options.map((option) => (
               <label
@@ -132,7 +136,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
           {onPrev ? (
             <button
               onClick={onPrev}
-              className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95"
+              className="px-4 py-2.5 text-xs md:px-8 md:py-4 md:text-base bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-lg md:rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95"
             >
               ← Previous
             </button>
@@ -142,7 +146,7 @@ export default function McqQuestionDisplay({ question, currentIndex, onNext, onP
           <button
             onClick={handleSubmit}
             disabled={!selectedOption || submitting || loading || disabled}
-            className="px-16 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100"
+            className="px-8 py-2.5 text-xs md:px-16 md:py-4 md:text-base bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg md:rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100"
           >
             {submitting ? 'Submitting...' : 'Continue'}
           </button>

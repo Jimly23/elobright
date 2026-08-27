@@ -170,7 +170,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
             <button
               onClick={onPrev}
               disabled={submitting || disabled}
-              className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95 disabled:opacity-50"
+              className="px-4 py-2.5 text-xs md:px-8 md:py-4 md:text-base bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-lg md:rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95 disabled:opacity-50"
             >
               ← Previous
             </button>
@@ -180,7 +180,7 @@ export default function EssayQuestionDisplay({ question, currentIndex, onNext, o
           <button
             onClick={handleSubmit}
             disabled={!text.trim() || submitting || disabled}
-            className="px-16 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100"
+            className="px-8 py-2.5 text-xs md:px-16 md:py-4 md:text-base bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg md:rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:active:scale-100"
           >
             {submitting ? 'Submitting...' : 'Continue'}
           </button>

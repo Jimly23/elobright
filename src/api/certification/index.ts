@@ -32,6 +32,8 @@ export interface CertificationScore {
     role: string;
     phoneNumber?: string | null;
   };
+  groupNumber?: string | null;
+  degreeProgram?: string | null;
   student?: {
     studentId: string;
     degreeProgram?: string | null;

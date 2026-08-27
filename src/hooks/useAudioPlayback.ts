@@ -16,27 +16,23 @@ export function useAudioPlayback(playbackKey?: string) {
     progress: 0,
     duration: 0,
     error: false,
-    hasPlayed: Boolean(
-      playbackKey && typeof window !== 'undefined' && localStorage.getItem(playbackKey) === 'played'
-    ),
+    hasPlayed: false,
   });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const wasPreviouslyPlayed = useCallback(() => (
-    Boolean(playbackKey && typeof window !== 'undefined' && localStorage.getItem(playbackKey) === 'played')
-  ), [playbackKey]);
+  const wasPreviouslyPlayed = useCallback(() => false, []);
 
   const togglePlay = useCallback(() => {
     if (!audioRef.current || state.error) return;
 
-    // Block playback if audio has already been played once
-    if (state.hasPlayed) return;
-
     if (state.isPlaying) {
       audioRef.current.pause();
     } else {
-      if (playbackKey) localStorage.setItem(playbackKey, 'played');
+      // Jika sebelumnya audio sudah selesai (hasPlayed true), putar kembali dari awal
+      if (state.hasPlayed) {
+        audioRef.current.currentTime = 0;
+      }
       audioRef.current.play().catch((e) => {
         console.error("Audio playback failed:", e);
         setState((s) => ({ ...s, error: true }));

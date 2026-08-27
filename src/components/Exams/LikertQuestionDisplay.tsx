@@ -155,7 +155,7 @@ export default function LikertQuestionDisplay({
           {onPrev ? (
             <button
               onClick={onPrev}
-              className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95"
+              className="px-4 py-2.5 text-xs md:px-8 md:py-4 md:text-base bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-lg md:rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-95"
             >
               ← Sebelumnya
             </button>
@@ -165,7 +165,7 @@ export default function LikertQuestionDisplay({
           <button
             onClick={handleSubmit}
             disabled={selectedValue === null || submitting || finishing || disabled}
-            className="px-16 py-4 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-2xl shadow-xl shadow-teal-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:shadow-none disabled:active:scale-100"
+            className="px-8 py-2.5 text-xs md:px-16 md:py-4 md:text-base bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-lg md:rounded-2xl shadow-xl shadow-teal-200 transition-all active:scale-95 disabled:bg-slate-300 disabled:shadow-none disabled:active:scale-100"
           >
             {submitting || finishing
               ? 'Mengirim...'

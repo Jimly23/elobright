@@ -110,7 +110,7 @@ export const examService = {
   },
 
   // --- EXAM SESSIONS ---
-  startExam: async (data: { userId: number | string; examId: string; timezone?: string }, token?: string) => {
+  startExam: async (data: { userId: number | string; examId: string; group_number: string; study_program: string; timezone?: string }, token?: string) => {
     const response = await api.post('/exam-sessions/start', data, getConfig(token));
     return response.data;
   },
