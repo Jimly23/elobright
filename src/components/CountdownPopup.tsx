@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock3, ShieldCheck } from "lucide-react";
 import CryptoJS from "crypto-js";
 
-const OPENING_TIME = new Date("2026-08-29T00:00:00+07:00").getTime();
+const OPENING_TIME = new Date("2026-08-29T09:00:00+07:00").getTime();
 const AUTH_ROUTES = ["/signin", "/signup", "/verify-email", "/forgot-password", "/reset-password"];
 const EXEMPT_ROLES = ["admin", "superadmin"];
 

@@ -254,9 +254,7 @@ export default function CertificationPage() {
         "program_studi",
         "kelompok",
         "ujian",
-        ...sectionColumns.map(
-          (section) => `section:${section.id}:${section.name}`,
-        ),
+        ...sectionColumns.map((section) => section.name),
         ...definitions.map((def) => `additional:${def.scoreName}`),
         "nilai_akhir",
       ];
@@ -305,7 +303,7 @@ export default function CertificationPage() {
         ["PETUNJUK EDIT NILAI SERTIFIKASI"],
         ["1. Jangan mengubah certification_score_id dan exam_submission_id."],
         [
-          "2. Ubah kolom section:... untuk membuat override nilai section (0–100).",
+          "2. Ubah kolom section (mis. Listening, Reading, atau Speaking) untuk membuat override nilai section (0–100).",
         ],
         [
           "3. Kosongkan kolom section untuk menghapus override section tersebut.",
