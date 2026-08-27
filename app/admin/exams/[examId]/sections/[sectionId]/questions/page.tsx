@@ -17,6 +17,7 @@ interface Question {
   imageUrl?: string | null;
   audioUrl?: string | null;
   questionAudioUrl?: string | null;
+  narrativeText?: string | null;
 }
 
 interface SectionData {
@@ -44,7 +45,8 @@ export default function AdminQuestionsPage() {
 
   // Form State
   const [text, setText] = useState('');
-  const [type, setType] = useState('mcq');
+  const [narrativeText, setNarrativeText] = useState('');
+  const [type, setType] = useState('McQ');
   const [points, setPoints] = useState(5);
   
   // File State
@@ -97,7 +99,8 @@ export default function AdminQuestionsPage() {
     setIsEditing(false);
     setEditingId(null);
     setText('');
-    setType(sectionData?.type || 'mcq');
+    setNarrativeText('');
+    setType(sectionData?.type || 'McQ');
     setPoints(5);
     setImageFile(null);
     setAudioFile(null);
@@ -114,7 +117,8 @@ export default function AdminQuestionsPage() {
     setIsEditing(true);
     setEditingId(q.id);
     setText(q.questionText || '');
-    setType(q.type || sectionData?.type || 'mcq');
+    setNarrativeText(q.narrativeText || '');
+    setType(q.type || sectionData?.type || 'McQ');
     setPoints(q.points || 5);
     setImageFile(null);
     setAudioFile(null);
@@ -161,6 +165,7 @@ export default function AdminQuestionsPage() {
     try {
       const fd = new FormData();
       fd.append('questionText', text);
+      fd.append('narrativeText', narrativeText);
       fd.append('points', String(points));
       
       if (imageFile) {
@@ -419,12 +424,22 @@ export default function AdminQuestionsPage() {
                   onChange={(e) => setType(e.target.value)}
                   className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all bg-white"
                 >
-                  <option value="mcq">MCQ (Pilihan Ganda)</option>
-                  <option value="speaking">Speaking</option>
+                  <option value="McQ">MCQ (Pilihan Ganda)</option>
                   <option value="essay">Esai / Menulis</option>
-                  <option value="listening">Mendengarkan</option>
+                  <option value="audio">Speaking / Audio</option>
                 </select>
                 <p className="text-[11px] text-slate-400 mt-1">Pastikan ini sesuai dengan format bagian yang dituju.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Teks Narasi (Opsional)</label>
+                <textarea
+                  rows={3}
+                  value={narrativeText}
+                  onChange={(e) => setNarrativeText(e.target.value)}
+                  placeholder="Ketik teks narasi/bacaan di sini..."
+                  className="w-full px-4 py-2.5 text-sm text-slate-900 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all resize-none"
+                />
               </div>
 
               <div>

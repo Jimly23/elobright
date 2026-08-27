@@ -25,6 +25,7 @@ import {
   CertificationAdditionalScore,
   CertificationScore,
 } from "@/src/api/certification";
+import { ImportScoreModal } from "@/src/components/admin/ImportScoreModal";
 
 type ApiError = { response?: { data?: { error?: string; message?: string } } };
 type ImportItem = {
@@ -116,7 +117,7 @@ const normalizeStudent = (score: CertificationScore) => {
 
 export default function CertificationPage() {
   const token = Cookies.get("token");
-  const importRef = useRef<HTMLInputElement>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [scores, setScores] = useState<CertificationScore[]>([]);
   const [definitions, setDefinitions] = useState<
     CertificationAdditionalScore[]
@@ -250,6 +251,7 @@ export default function CertificationPage() {
         "nama",
         "email",
         "nim",
+        "program_studi",
         "kelompok",
         "ujian",
         ...sectionColumns.map(
@@ -266,7 +268,8 @@ export default function CertificationPage() {
           score.user.fullName,
           score.user.email,
           score.student?.studentId ?? "",
-          score.student?.degreeProgram ?? "",
+          score.degreeProgram || score.student?.degreeProgram || "",
+          score.groupNumber || "",
           getExam(score).title,
           ...sectionColumns.map(
             (section) => effectiveScore(score, section.id) ?? "",
@@ -329,122 +332,14 @@ export default function CertificationPage() {
     }
   };
 
-  const importExcel = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".xlsx")) {
-      setError("Gunakan file Excel berformat .xlsx.");
-      return;
-    }
-    try {
-      setExcelLoading(true);
-      setError("");
-      setSuccess("");
-      const ExcelJS = await import("exceljs");
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(await file.arrayBuffer());
-      const sheet =
-        workbook.getWorksheet("Nilai Sertifikasi") ?? workbook.worksheets[0];
-      if (!sheet || sheet.rowCount < 2)
-        throw new Error("File tidak memiliki data.");
-      const headers = new Map<number, string>();
-      sheet
-        .getRow(1)
-        .eachCell((cell, column) => headers.set(column, cellText(cell.value)));
-      const idColumn = [...headers].find(
-        ([, value]) => value === "certification_score_id",
-      )?.[0];
-      if (!idColumn)
-        throw new Error(
-          "Kolom certification_score_id tidak ditemukan. Gunakan hasil export dari sistem.",
-        );
-      const scoreMap = new Map(scores.map((score) => [score.id, score]));
-      const items: ImportItem[] = [];
-      const errors: string[] = [];
-      for (let rowNumber = 2; rowNumber <= sheet.rowCount; rowNumber += 1) {
-        const row = sheet.getRow(rowNumber);
-        const id = cellText(row.getCell(idColumn).value);
-        if (!id) continue;
-        const score = scoreMap.get(id);
-        if (!score) {
-          errors.push(`Baris ${rowNumber}: ID nilai tidak ditemukan.`);
-          continue;
-        }
-        const overrides: Record<string, number> = {};
-        const additionalScore: Record<string, number> = {};
-        for (const [column, name] of headers) {
-          const raw = cellText(row.getCell(column).value);
-          if (!raw) continue;
-          if (name.startsWith("section:")) {
-            const sectionId = name.split(":")[1];
-            const value = Number(raw);
-            if (!Number.isFinite(value) || value < 0 || value > 100)
-              errors.push(`Baris ${rowNumber}: nilai section harus 0–100.`);
-            else overrides[sectionId] = value;
-          }
-          if (name.startsWith("additional:")) {
-            const scoreName = name.slice("additional:".length);
-            const value = Number(raw);
-            if (!definitions.some((def) => def.scoreName === scoreName))
-              errors.push(
-                `Baris ${rowNumber}: definisi ${scoreName} tidak dikenal.`,
-              );
-            else if (!Number.isFinite(value) || value < 0 || value > 100)
-              errors.push(
-                `Baris ${rowNumber}: nilai ${scoreName} harus 0–100.`,
-              );
-            else additionalScore[scoreName] = value;
-          }
-        }
-        items.push({ row: rowNumber, score, overrides, additionalScore });
-      }
-      if (errors.length) throw new Error(errors.slice(0, 6).join("\n"));
-      if (!items.length) throw new Error("Tidak ada baris yang dapat diimpor.");
-      if (
-        !window.confirm(
-          `Terapkan perubahan pada ${items.length} data submission?`,
-        )
-      )
-        return;
-      const results = await Promise.allSettled(
-        items.map((item) =>
-          certificationService.updateScore(
-            item.score.id,
-            {
-              additional_score: item.additionalScore,
-              exam_score_override: Object.keys(item.overrides).length
-                ? item.overrides
-                : null,
-            },
-            token,
-          ),
-        ),
-      );
-      const failed = results.filter(
-        (result) => result.status === "rejected",
-      ).length;
-      await loadData(submissionInput.trim());
-      if (failed)
-        setError(
-          `${items.length - failed} data diperbarui, ${failed} data gagal.`,
-        );
-      else setSuccess(`${items.length} data berhasil diperbarui dari Excel.`);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "File Excel gagal diimpor.",
-      );
-    } finally {
-      setExcelLoading(false);
-    }
-  };
+
 
   const sendEmail = async (score: CertificationScore) => {
     try {
       setMailingId(score.id);
       setError("");
       const result = await certificationService.blastEmail(
-        { exam_submission_id: score.examSubmissionId },
+        { examSubmissionId: score.examSubmissionId },
         token,
       );
       setSuccess(`Sertifikat berhasil dikirim ke ${result.to}.`);
@@ -479,7 +374,7 @@ export default function CertificationPage() {
     for (const examSubmissionId of submissionIds) {
       try {
         await certificationService.blastEmail(
-          { exam_submission_id: examSubmissionId },
+          { examSubmissionId: examSubmissionId },
           token,
         );
         sent += 1;
@@ -498,13 +393,6 @@ export default function CertificationPage() {
 
   return (
     <div className="space-y-5">
-      <input
-        ref={importRef}
-        type="file"
-        accept=".xlsx"
-        onChange={(event) => void importExcel(event)}
-        className="hidden"
-      />
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div className="flex gap-3">
           <div className="rounded-xl bg-blue-50 p-2 text-blue-600">
@@ -534,8 +422,8 @@ export default function CertificationPage() {
           </button>
           <button
             disabled={excelLoading}
-            onClick={() => importRef.current?.click()}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm disabled:opacity-50"
+            onClick={() => setIsImportModalOpen(true)}
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
           >
             <Upload size={16} />
             Import Excel
@@ -574,11 +462,11 @@ export default function CertificationPage() {
         className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_1fr_auto] md:items-end"
       >
         <label className="text-xs font-bold text-slate-700">
-          Filter berdasarkan ID Pengumpulan
+          Filter berdasarkan ID Ujian
           <input
             value={submissionInput}
             onChange={(event) => setSubmissionInput(event.target.value)}
-            placeholder="Enter exam submission UUID..."
+            placeholder="Enter exam UUID..."
             className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal outline-none placeholder:text-slate-300 focus:border-blue-400"
           />
         </label>
@@ -713,6 +601,12 @@ export default function CertificationPage() {
           </div>
         )}
       </div>
+      <ImportScoreModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        exams={exams}
+        onComplete={() => loadData(submissionInput.trim())}
+      />
     </div>
   );
 }

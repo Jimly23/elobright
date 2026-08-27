@@ -201,13 +201,17 @@ export default function QuestionPage() {
   const type = currentQuestion.questionType?.toLowerCase();
 
   if (type === 'mcq') {
-    DisplayComponent = McqQuestionDisplay as any;
-  } else if (type === 'listening_mcq') {
-    DisplayComponent = ListeningQuestionDisplay as any;
+    if (sectionTitleLower.includes('listen')) {
+      DisplayComponent = ListeningQuestionDisplay as any;
+    } else {
+      DisplayComponent = McqQuestionDisplay as any;
+    }
   } else if (type === 'essay' || type === 'writing') {
     DisplayComponent = EssayQuestionDisplay as any;
-  } else if (type === 'audio_upload' || type === 'speaking') {
+  } else if (type === 'audio' || type === 'audio_upload' || type === 'speaking') {
     DisplayComponent = AudioUploadQuestionDisplay as any;
+  } else if (type === 'listening_mcq') {
+    DisplayComponent = ListeningQuestionDisplay as any;
   } else if (type === 'likert') {
     DisplayComponent = LikertQuestionDisplay as any;
   } else {

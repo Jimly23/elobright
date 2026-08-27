@@ -1,11 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
-import Hls from "hls.js";
-import { useAudioTelemetry } from "@/src/hooks/useAudioTelemetry";
-import { audioTelemetryService } from "@/src/api/telemetry";
+import React from "react";
 
-interface AudioElementProps {
+export interface AudioElementProps {
   src: string;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   handlers: {
@@ -18,20 +15,11 @@ interface AudioElementProps {
   };
 }
 
-export const DirectAudioElement = ({
+export const AudioElement = ({
   src,
   audioRef,
   handlers,
 }: AudioElementProps) => {
-  const { getFinalPayload } = useAudioTelemetry(src);
-
-  // For research: Log payload when audio ends
-  const onEndedWithTelemetry = () => {
-    const telePayload = getFinalPayload();
-    audioTelemetryService.store(telePayload);
-    handlers.onEnded();
-  };
-
   return (
     <audio
       ref={audioRef}
@@ -39,55 +27,6 @@ export const DirectAudioElement = ({
       className="hidden"
       preload="metadata"
       {...handlers}
-      onEnded={onEndedWithTelemetry}
-    />
-  );
-};
-
-export const HLSAudioElement = ({
-  src,
-  audioRef,
-  handlers,
-}: AudioElementProps) => {
-  const { getFinalPayload } = useAudioTelemetry(src);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    let hls: Hls | null = null;
-
-    if (Hls.isSupported()) {
-      hls = new Hls();
-      hls.loadSource(src);
-      hls.attachMedia(audio);
-      hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) handlers.onError();
-      });
-    } else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
-      audio.src = src;
-    } else {
-      handlers.onError();
-    }
-
-    return () => {
-      if (hls) hls.destroy();
-    };
-  }, [src, audioRef, handlers]);
-
-  const onEndedWithTelemetry = () => {
-    const telePayload = getFinalPayload();
-    audioTelemetryService.store(telePayload);
-    handlers.onEnded();
-  };
-
-  return (
-    <audio
-      ref={audioRef}
-      className="hidden"
-      preload="metadata"
-      {...handlers}
-      onEnded={onEndedWithTelemetry}
     />
   );
 };

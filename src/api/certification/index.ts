@@ -119,8 +119,8 @@ export const certificationService = {
 
   // === Certification Scores ===
 
-  getAllScores: async (token?: string, examSubmissionId?: string): Promise<CertificationScore[]> => {
-    const params = examSubmissionId ? `?exam_submission_id=${examSubmissionId}` : '';
+  getAllScores: async (token?: string, examId?: string): Promise<CertificationScore[]> => {
+    const params = examId ? `?examId=${examId}` : '';
     const response = await api.get(`/certification-scores${params}`, getConfig(token));
     return response.data;
   },
@@ -128,8 +128,8 @@ export const certificationService = {
   updateScore: async (
     id: string,
     data: {
-      additional_score?: Record<string, number> | null;
-      exam_score_override?: Record<string, number> | null;
+      additionalScore?: Record<string, number> | null;
+      examScoreOverride?: Record<string, number> | null;
     },
     token?: string
   ): Promise<{ message: string; score: CertificationScore }> => {
@@ -138,7 +138,7 @@ export const certificationService = {
   },
 
   blastEmail: async (
-    data: { exam_submission_id: string },
+    data: { examSubmissionId: string },
     token?: string
   ): Promise<BlastEmailResponse> => {
     const response = await api.post('/certification-scores/blast-email', data, getConfig(token));

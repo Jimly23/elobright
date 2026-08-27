@@ -76,7 +76,7 @@ export default function SectionOnboardingPage() {
   };
 
   const baseInstructions = currentSection?.instructions
-    ? [currentSection.instructions]
+    ? currentSection.instructions.split('\n').filter((line: string) => line.trim() !== '')
     : getCustomInstructions();
   const listeningAudioNotice = "Audio konteks dan audio pertanyaan hanya dapat diputar satu kali.";
   const instructions = t.includes('listen') && !baseInstructions.includes(listeningAudioNotice)

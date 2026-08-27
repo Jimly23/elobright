@@ -5,8 +5,7 @@ import { Play, Pause, Volume2, AlertCircle, Lock } from "lucide-react";
 import { exam } from "@/src/api/exam";
 import { useAudioPlayback } from "@/src/hooks/useAudioPlayback";
 import {
-  DirectAudioElement,
-  HLSAudioElement,
+  AudioElement,
 } from "@/src/components/Exams/AudioElements";
 import QuestionFeaturedResources from "./QuestionFeaturedResources";
 import ExamCard from '@/src/components/Exams/ExamCard';
@@ -72,11 +71,7 @@ const AudioPlayer = ({
     <div
       className={`flex items-center gap-6 p-6 rounded-3xl border transition-colors ${state.error ? "bg-red-50 border-red-100" : "bg-blue-50/50 border-blue-100"}`}
     >
-      {isHLS ? (
-        <HLSAudioElement src={src} audioRef={audioRef} handlers={handlers} />
-      ) : (
-        <DirectAudioElement src={src} audioRef={audioRef} handlers={handlers} />
-      )}
+      <AudioElement src={src} audioRef={audioRef} handlers={handlers} />
       <button
         onClick={togglePlay}
         disabled={isDisabled}
@@ -250,19 +245,11 @@ export default function ListeningQuestionDisplay({
               <div
                 className={`mb-10 flex items-center gap-4 p-4 rounded-2xl border shadow-sm w-fit transition-colors shrink-0 ${rightAudio.state.error ? "bg-red-50 border-red-100" : rightAudio.state.hasPlayed ? "bg-slate-50 border-slate-200" : "bg-white border-slate-100"}`}
               >
-                {rightSrc.endsWith(".m3u8") ? (
-                  <HLSAudioElement
-                    src={rightSrc}
-                    audioRef={rightAudio.audioRef}
-                    handlers={rightAudio.handlers}
-                  />
-                ) : (
-                  <DirectAudioElement
-                    src={rightSrc}
-                    audioRef={rightAudio.audioRef}
-                    handlers={rightAudio.handlers}
-                  />
-                )}
+                <AudioElement
+                  src={rightSrc}
+                  audioRef={rightAudio.audioRef}
+                  handlers={rightAudio.handlers}
+                />
                 <button
                   onClick={rightAudio.togglePlay}
                   disabled={rightAudio.state.error || rightAudio.state.hasPlayed}

@@ -51,6 +51,8 @@ export default function WritingSectionPage() {
         const session = await exam.startExam({
           userId,
           examId: ESSAY_PRACTICE_ID,
+          group_number: "-",
+          study_program: "-",
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta',
         }, token);
         if (session?.id) {

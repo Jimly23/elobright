@@ -43,6 +43,8 @@ export default function Page({ onStart }: { onStart: () => void }) {
       const res = await exam.startExam({
         userId: userId,
         examId: TOEFL_ID,
+        group_number: "-",
+        study_program: "-",
         timezone: 'Asia/Jakarta'
       }, token);
 
