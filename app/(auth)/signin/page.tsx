@@ -15,7 +15,7 @@ type LoginError = {
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/exams/f9a81bb6-3bcb-11f1-8449-8121fa317a64/introduction';
+  const callbackUrl = searchParams.get('callbackUrl') || '/exams/8bcb5815-143b-489d-852c-aaa9134a7cd3/introduction';
   const [formData, setFormData] = useState({
     email: '',
     password: '',

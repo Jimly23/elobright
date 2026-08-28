@@ -432,7 +432,7 @@ export default function ExamIntroductionPage() {
                     type="text"
                     value={groupNumber}
                     onChange={(e) => setGroupNumber(e.target.value)}
-                    placeholder="Contoh: A1"
+                    placeholder="Contoh: 3"
                     required
                     className="w-full px-4 py-3 text-sm md:text-base text-slate-700 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400"
                   />

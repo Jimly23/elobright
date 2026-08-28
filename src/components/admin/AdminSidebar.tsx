@@ -16,6 +16,7 @@ const AdminSidebar = ({ isOpen = false, onClose }: AdminSidebarProps) => {
 
   const links = [
     { name: 'Kelola Ujian', href: '/admin/exams', icon: FileText },
+    { name: 'Kelola Pengguna', href: '/admin/users', icon: Users },
   ];
 
   const certificationLinks = [

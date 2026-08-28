@@ -105,6 +105,11 @@ export default function CountdownPopup() {
         setShouldBlock(false);
         document.body.style.overflow = previousOverflow;
         window.clearInterval(timer);
+
+        const userRole = loggedInUser?.role;
+        if (userRole === "student" || userRole === "students" || userRole === "user") {
+          router.push("/exams/8bcb5815-143b-489d-852c-aaa9134a7cd3/introduction");
+        }
       }
     }, 1_000);
 
