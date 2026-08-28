@@ -1,7 +1,8 @@
 "use client";
 
 import { CheckCircle2, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 interface ExamCompletedDialogProps {
   title?: string;
@@ -14,6 +15,18 @@ export default function ExamCompletedDialog({
   message = "Anda telah selesai mengerjakan ujian ini dan tidak dapat mengulangnya. Jika belum mendapatkan sertifikat, silakan cek email secara berkala atau hubungi panitia.",
   homeUrl = "/"
 }: ExamCompletedDialogProps) {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("userId");
+    Cookies.remove("token");
+    Cookies.remove("userData");
+    Cookies.remove("userId");
+    router.push("/signin");
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-[fadeIn_0.3s_ease-out]">
       <div className="bg-white rounded-[24px] shadow-2xl max-w-md w-full overflow-hidden animate-[scaleUp_0.3s_ease-out]">
@@ -34,12 +47,10 @@ export default function ExamCompletedDialog({
             {message}
           </p>
 
-          <Link href={homeUrl} className="block w-full">
-            <button className="w-full py-4 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-2xl shadow-xl shadow-teal-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-              Kembali ke Beranda
-              <ArrowRight size={18} />
-            </button>
-          </Link>
+          <button onClick={handleLogout} className="w-full py-4 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-2xl shadow-xl shadow-teal-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+            Kembali
+            <ArrowRight size={18} />
+          </button>
         </div>
       </div>
 
