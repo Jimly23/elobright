@@ -166,7 +166,7 @@ export default function CountdownPopup() {
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-600 sm:text-base">
             Ujian sertifikasi bahasa Inggris akan dibuka pada tanggal{" "}
-            <strong className="text-slate-900">29 Agustus 2026 pukul 00.00 WIB</strong>.
+            <strong className="text-slate-900">29 Agustus 2026 pukul 09.00 WIB</strong>.
           </p>
 
           <div className="my-7 grid grid-cols-4 gap-2 sm:gap-3" aria-label="Waktu menuju pembukaan ujian">

@@ -37,7 +37,16 @@ export default function SignUpPage() {
       });
       router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      const status = err.response?.status;
+      const errorMessage = (err.response?.data?.message || '').toLowerCase();
+      
+      if (status === 409 || errorMessage.includes('already in use') || errorMessage.includes('duplicate')) {
+        setError('Email tersebut telah digunakan. Silakan gunakan email lainnya.');
+      } else if (status === 429 || errorMessage.includes('rate limit') || errorMessage.includes('too many')) {
+        setError('Terlalu banyak percobaan pendaftaran. Silakan coba beberapa saat lagi.');
+      } else {
+        setError(err.response?.data?.message || 'Pendaftaran gagal. Coba pakai email lainnya atau periksa kembali data Anda.');
+      }
     } finally {
       setLoading(false);
     }

@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, MailCheck } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 import { exam } from "@/src/api/exam";
 import Button from '@/src/components/ui/Button';
 import ExamCard from '@/src/components/Exams/ExamCard';
@@ -17,8 +19,19 @@ const getCookie = (name: string) => {
 };
 
 export default function ExamFinishPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const finishAttempt = useRef(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("userId");
+    Cookies.remove("token");
+    Cookies.remove("userData");
+    Cookies.remove("userId");
+    router.push("/signin");
+  };
 
   useEffect(() => {
     if (finishAttempt.current) return;
@@ -103,14 +116,12 @@ export default function ExamFinishPage() {
             <MailCheck size={32} />
           </div>
           <p className="text-slate-600 font-medium leading-relaxed mb-10 px-4">
-            Selamat telah menyelesaikan sertifikasi bahasa inggris, jawaban Anda akan direview dan sertifikat akan dikirim melalui email Anda. Silakan cek email secara berkala.
+            Selamat telah menyelesaikan sertifikasi bahasa inggris, jawaban Anda akan direview dan sertifikat akan dikirim melalui email anda yang akan di informasikan lebih lanjut oleh Panitia.
           </p>
 
-          <Link href="/" className="block w-full">
-            <Button variant="primary" size="lg" className="w-full shadow-xl shadow-blue-200">
-              Kembali ke Halaman Utama
-            </Button>
-          </Link>
+          <Button onClick={handleLogout} variant="primary" size="lg" className="w-full shadow-xl shadow-blue-200">
+            Selesai
+          </Button>
         </div>
       </ExamCard>
     </div>
