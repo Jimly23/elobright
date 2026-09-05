@@ -136,6 +136,9 @@ export default function CertificationPage() {
   const [editError, setEditError] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const topTableScrollRef = useRef<HTMLDivElement>(null);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const topTableScrollContentRef = useRef<HTMLDivElement>(null);
 
   const normalize = (rows: CertificationScore[]) =>
     rows.map((score) => {
@@ -230,6 +233,37 @@ export default function CertificationPage() {
     );
     return [...map.entries()].map(([id, name]) => ({ id, name }));
   }, [rows]);
+
+  useEffect(() => {
+    const topScroller = topTableScrollRef.current;
+    const tableScroller = tableScrollRef.current;
+    const topScrollerContent = topTableScrollContentRef.current;
+    if (!topScroller || !tableScroller || !topScrollerContent) return;
+
+    const syncTableScroll = () => {
+      tableScroller.scrollLeft = topScroller.scrollLeft;
+    };
+    const syncTopScroll = () => {
+      topScroller.scrollLeft = tableScroller.scrollLeft;
+    };
+    const updateScrollbarWidth = () => {
+      topScrollerContent.style.width = `${tableScroller.scrollWidth}px`;
+    };
+
+    updateScrollbarWidth();
+    topScroller.addEventListener("scroll", syncTableScroll);
+    tableScroller.addEventListener("scroll", syncTopScroll);
+    window.addEventListener("resize", updateScrollbarWidth);
+    const resizeObserver = new ResizeObserver(updateScrollbarWidth);
+    resizeObserver.observe(tableScroller);
+
+    return () => {
+      topScroller.removeEventListener("scroll", syncTableScroll);
+      tableScroller.removeEventListener("scroll", syncTopScroll);
+      window.removeEventListener("resize", updateScrollbarWidth);
+      resizeObserver.disconnect();
+    };
+  }, [definitions, rows, sectionColumns]);
   const effectiveScore = (score: CertificationScore, sectionId: string) => {
     const override = overridesOf(score).find(
       (item) => item.sectionId === sectionId,
@@ -538,7 +572,22 @@ export default function CertificationPage() {
             Tidak ada data submission.
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div
+              ref={topTableScrollRef}
+              aria-label="Scrollbar tabel nilai"
+              className="mb-2 h-4 overflow-x-auto overflow-y-hidden rounded-lg bg-slate-50 [scrollbar-color:#94a3b8_transparent]"
+            >
+              <div
+                ref={topTableScrollContentRef}
+                aria-hidden="true"
+                className="h-px"
+              />
+            </div>
+            <div
+              ref={tableScrollRef}
+              className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
             <table className="w-full min-w-max text-left text-xs">
               <thead className="border-b bg-slate-50 text-slate-700">
                 <tr>
@@ -643,8 +692,9 @@ export default function CertificationPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+              </table>
+            </div>
+          </>
         )}
       </div>
       {editingScore && (
