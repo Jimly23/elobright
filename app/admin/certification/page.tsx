@@ -17,6 +17,7 @@ import {
   FileDown,
   Loader2,
   Mail,
+  Pencil,
   Search,
   Upload,
 } from "lucide-react";
@@ -24,7 +25,9 @@ import {
   certificationService,
   CertificationAdditionalScore,
   CertificationScore,
+  CertificationScoreUpdatePayload,
 } from "@/src/api/certification";
+import { EditCertificationScoreModal } from "@/src/components/admin/EditCertificationScoreModal";
 import { ImportScoreModal } from "@/src/components/admin/ImportScoreModal";
 
 type ApiError = { response?: { data?: { error?: string; message?: string } } };
@@ -128,6 +131,9 @@ export default function CertificationPage() {
   const [excelLoading, setExcelLoading] = useState(false);
   const [mailingId, setMailingId] = useState<string | null>(null);
   const [bulkMailing, setBulkMailing] = useState(false);
+  const [editingScore, setEditingScore] = useState<CertificationScore | null>(null);
+  const [savingScoreId, setSavingScoreId] = useState<string | null>(null);
+  const [editError, setEditError] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -170,19 +176,21 @@ export default function CertificationPage() {
     });
 
   const loadData = useCallback(
-    async (submissionId = "") => {
+    async (submissionId = "", options?: { preserveSuccess?: boolean }) => {
       try {
         setLoading(true);
         setError("");
-        setSuccess("");
+        if (!options?.preserveSuccess) setSuccess("");
         const [rows, defs] = await Promise.all([
           certificationService.getAllScores(token, submissionId || undefined),
           certificationService.getAllAdditionalScores(token),
         ]);
         setScores(normalize(Array.isArray(rows) ? rows : []));
         setDefinitions(Array.isArray(defs) ? defs : []);
+        return true;
       } catch (err) {
         setError(getError(err, "Data nilai sertifikasi gagal dimuat."));
+        return false;
       } finally {
         setLoading(false);
       }
@@ -389,6 +397,38 @@ export default function CertificationPage() {
     }
   };
 
+  const openEditScore = (score: CertificationScore) => {
+    setEditError("");
+    setError("");
+    setSuccess("");
+    setEditingScore(score);
+  };
+
+  const saveEditedScore = async (payload: CertificationScoreUpdatePayload) => {
+    if (!editingScore) return;
+
+    try {
+      setSavingScoreId(editingScore.id);
+      setEditError("");
+      setError("");
+      setSuccess("");
+      await certificationService.updateScore(editingScore.id, payload, token);
+      setEditingScore(null);
+      const refreshed = await loadData(submissionInput.trim(), {
+        preserveSuccess: true,
+      });
+      if (refreshed) {
+        setSuccess("Nilai sertifikasi berhasil diperbarui.");
+      }
+    } catch (err) {
+      const message = getError(err, "Nilai sertifikasi gagal diperbarui.");
+      setEditError(message);
+      setError(message);
+    } finally {
+      setSavingScoreId(null);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
@@ -550,6 +590,14 @@ export default function CertificationPage() {
                             <Mail size={13} />
                           )}
                         </button>
+                        <button
+                          onClick={() => openEditScore(score)}
+                          disabled={savingScoreId === score.id}
+                          title="Edit nilai"
+                          className="text-emerald-600 disabled:opacity-50"
+                        >
+                          <Pencil size={13} />
+                        </button>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-slate-600">
@@ -599,6 +647,21 @@ export default function CertificationPage() {
           </div>
         )}
       </div>
+      {editingScore && (
+        <EditCertificationScoreModal
+          isOpen
+          score={editingScore}
+          definitions={definitions}
+          isSaving={savingScoreId === editingScore.id}
+          error={editError}
+          onClose={() => {
+            if (savingScoreId) return;
+            setEditingScore(null);
+            setEditError("");
+          }}
+          onSave={(payload) => void saveEditedScore(payload)}
+        />
+      )}
       <ImportScoreModal
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}

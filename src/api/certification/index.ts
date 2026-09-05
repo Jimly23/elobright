@@ -77,6 +77,11 @@ export interface BlastEmailResponse {
   downloadUrl: string;
 }
 
+export interface CertificationScoreUpdatePayload {
+  additionalScore?: Record<string, number | null>;
+  examScoreOverride?: Record<string, number | null> | null;
+}
+
 // --- Service ---
 
 export const certificationService = {
@@ -127,10 +132,7 @@ export const certificationService = {
 
   updateScore: async (
     id: string,
-    data: {
-      additionalScore?: Record<string, number> | null;
-      examScoreOverride?: Record<string, number> | null;
-    },
+    data: CertificationScoreUpdatePayload,
     token?: string
   ): Promise<{ message: string; score: CertificationScore }> => {
     const response = await api.patch(`/certification-scores/${id}`, data, getConfig(token));
