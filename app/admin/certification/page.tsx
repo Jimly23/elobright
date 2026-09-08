@@ -11,6 +11,7 @@ import {
 import Cookies from "js-cookie";
 import {
   AlertTriangle,
+  Archive,
   Award,
   CheckCircle2,
   Download,
@@ -29,6 +30,7 @@ import {
 } from "@/src/api/certification";
 import { EditCertificationScoreModal } from "@/src/components/admin/EditCertificationScoreModal";
 import { ImportScoreModal } from "@/src/components/admin/ImportScoreModal";
+import { MassDownloadModal } from "@/src/components/admin/MassDownloadModal";
 
 type ApiError = { response?: { data?: { error?: string; message?: string } } };
 type ImportItem = {
@@ -121,6 +123,7 @@ const normalizeStudent = (score: CertificationScore) => {
 export default function CertificationPage() {
   const token = Cookies.get("token");
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isMassDownloadOpen, setIsMassDownloadOpen] = useState(false);
   const [scores, setScores] = useState<CertificationScore[]>([]);
   const [definitions, setDefinitions] = useState<
     CertificationAdditionalScore[]
@@ -493,6 +496,14 @@ export default function CertificationPage() {
             Kirim Sertifikat Massal
           </button>
           <button
+            disabled={loading || !exams.length}
+            onClick={() => setIsMassDownloadOpen(true)}
+            className="flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-bold text-violet-700 shadow-sm hover:bg-violet-100 disabled:opacity-50"
+          >
+            <Archive size={16} />
+            Export PDF Massal
+          </button>
+          <button
             disabled={excelLoading}
             onClick={() => setIsImportModalOpen(true)}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
@@ -717,6 +728,11 @@ export default function CertificationPage() {
         onClose={() => setIsImportModalOpen(false)}
         exams={exams}
         onComplete={() => loadData(submissionInput.trim())}
+      />
+      <MassDownloadModal
+        isOpen={isMassDownloadOpen}
+        onClose={() => setIsMassDownloadOpen(false)}
+        exams={exams}
       />
     </div>
   );
