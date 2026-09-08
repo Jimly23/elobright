@@ -21,6 +21,7 @@ import {
   Pencil,
   Search,
   Upload,
+  UserPlus,
 } from "lucide-react";
 import {
   certificationService,
@@ -31,6 +32,7 @@ import {
 import { EditCertificationScoreModal } from "@/src/components/admin/EditCertificationScoreModal";
 import { ImportScoreModal } from "@/src/components/admin/ImportScoreModal";
 import { MassDownloadModal } from "@/src/components/admin/MassDownloadModal";
+import { ManualScoreModal } from "@/src/components/admin/ManualScoreModal";
 
 type ApiError = { response?: { data?: { error?: string; message?: string } } };
 type ImportItem = {
@@ -124,6 +126,7 @@ export default function CertificationPage() {
   const token = Cookies.get("token");
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isMassDownloadOpen, setIsMassDownloadOpen] = useState(false);
+  const [isManualScoreOpen, setIsManualScoreOpen] = useState(false);
   const [scores, setScores] = useState<CertificationScore[]>([]);
   const [definitions, setDefinitions] = useState<
     CertificationAdditionalScore[]
@@ -484,6 +487,14 @@ export default function CertificationPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <button
+            disabled={loading || !exams.length}
+            onClick={() => setIsManualScoreOpen(true)}
+            className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-700 shadow-sm hover:bg-emerald-100 disabled:opacity-50"
+          >
+            <UserPlus size={16} />
+            Entri Manual
+          </button>
+          <button
             disabled={bulkMailing || loading || !rows.length}
             onClick={() => void sendBulkEmail()}
             className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 shadow-sm hover:bg-blue-100 disabled:opacity-50"
@@ -733,6 +744,13 @@ export default function CertificationPage() {
         isOpen={isMassDownloadOpen}
         onClose={() => setIsMassDownloadOpen(false)}
         exams={exams}
+      />
+      <ManualScoreModal
+        isOpen={isManualScoreOpen}
+        onClose={() => setIsManualScoreOpen(false)}
+        exams={exams}
+        definitions={definitions}
+        onComplete={() => loadData(submissionInput.trim())}
       />
     </div>
   );

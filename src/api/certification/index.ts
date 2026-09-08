@@ -82,6 +82,18 @@ export interface CertificationScoreUpdatePayload {
   examScoreOverride?: Record<string, number | null> | null;
 }
 
+export interface ManualScorePayload {
+  fullName: string;
+  email: string;
+  studentId: string;
+  examId: string;
+  phoneNumber?: string;
+  degreeProgram?: string;
+  groupNumber?: string;
+  examScoreOverride?: Record<string, number> | null;
+  additionalScore?: Record<string, number> | null;
+}
+
 // --- Service ---
 
 export const certificationService = {
@@ -136,6 +148,14 @@ export const certificationService = {
     token?: string
   ): Promise<{ message: string; score: CertificationScore }> => {
     const response = await api.patch(`/certification-scores/${id}`, data, getConfig(token));
+    return response.data;
+  },
+
+  createManualScore: async (
+    data: ManualScorePayload,
+    token?: string
+  ): Promise<{ message: string; score: CertificationScore }> => {
+    const response = await api.post('/certification-scores/manual', data, getConfig(token));
     return response.data;
   },
 
