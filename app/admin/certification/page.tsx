@@ -131,7 +131,7 @@ export default function CertificationPage() {
   const [definitions, setDefinitions] = useState<
     CertificationAdditionalScore[]
   >([]);
-  const [submissionInput, setSubmissionInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [examFilter, setExamFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [excelLoading, setExcelLoading] = useState(false);
@@ -185,13 +185,13 @@ export default function CertificationPage() {
     });
 
   const loadData = useCallback(
-    async (submissionId = "", options?: { preserveSuccess?: boolean }) => {
+    async (options?: { preserveSuccess?: boolean }) => {
       try {
         setLoading(true);
         setError("");
         if (!options?.preserveSuccess) setSuccess("");
         const [rows, defs] = await Promise.all([
-          certificationService.getAllScores(token, submissionId || undefined),
+          certificationService.getAllScores(token),
           certificationService.getAllAdditionalScores(token),
         ]);
         setScores(normalize(Array.isArray(rows) ? rows : []));
@@ -225,11 +225,17 @@ export default function CertificationPage() {
     }
   }, [examFilter, exams]);
 
-  const rows = useMemo(
-    () =>
-      scores.filter((score) => !examFilter || getExam(score).id === examFilter),
-    [examFilter, scores],
-  );
+  const rows = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return scores.filter((score) => {
+      const matchExam = !examFilter || getExam(score).id === examFilter;
+      if (!matchExam) return false;
+      if (!query) return true;
+      const name = (score.user?.fullName ?? "").toLowerCase();
+      const nim = (score.student?.studentId ?? "").toLowerCase();
+      return name.includes(query) || nim.includes(query);
+    });
+  }, [examFilter, scores, searchQuery]);
   const sectionColumns = useMemo(() => {
     const map = new Map<string, string>();
     rows.forEach((score) =>
@@ -454,7 +460,7 @@ export default function CertificationPage() {
       setSuccess("");
       await certificationService.updateScore(editingScore.id, payload, token);
       setEditingScore(null);
-      const refreshed = await loadData(submissionInput.trim(), {
+      const refreshed = await loadData({
         preserveSuccess: true,
       });
       if (refreshed) {
@@ -548,21 +554,20 @@ export default function CertificationPage() {
           {success}
         </div>
       )}
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          void loadData(submissionInput.trim());
-        }}
-        className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_1fr_auto] md:items-end"
+      <div
+        className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_1fr] md:items-end"
       >
         <label className="text-xs font-bold text-slate-700">
-          Filter berdasarkan ID Ujian
-          <input
-            value={submissionInput}
-            onChange={(event) => setSubmissionInput(event.target.value)}
-            placeholder="Enter exam UUID..."
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal outline-none placeholder:text-slate-300 focus:border-blue-400"
-          />
+          Cari berdasarkan Nama atau NIM
+          <div className="relative mt-2">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Ketik nama atau NIM..."
+              className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm font-normal outline-none placeholder:text-slate-300 focus:border-blue-400"
+            />
+          </div>
         </label>
         <label className="text-xs font-bold text-slate-700">
           Filter berdasarkan Ujian
@@ -578,11 +583,7 @@ export default function CertificationPage() {
             ))}
           </select>
         </label>
-        <button className="flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-5 py-3 text-sm font-bold text-white hover:bg-blue-600">
-          <Search size={16} />
-          Filter
-        </button>
-      </form>
+      </div>
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center gap-2 p-16 text-sm text-slate-500">
@@ -738,7 +739,7 @@ export default function CertificationPage() {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         exams={exams}
-        onComplete={() => loadData(submissionInput.trim())}
+        onComplete={() => loadData()}
       />
       <MassDownloadModal
         isOpen={isMassDownloadOpen}
@@ -750,7 +751,7 @@ export default function CertificationPage() {
         onClose={() => setIsManualScoreOpen(false)}
         exams={exams}
         definitions={definitions}
-        onComplete={() => loadData(submissionInput.trim())}
+        onComplete={() => loadData()}
       />
     </div>
   );
